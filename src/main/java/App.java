@@ -20,10 +20,8 @@ public class App
         container.add(Routing.class);
         container.add(AppController.class);
 
-        container.get(Routing.class).get("/hello", container.get(AppController.class).helloWorldAction);
+        container.get(Routing.class).get("/hello/{name}/{job}", container.get(AppController.class).helloWorldAction);
 
         return new App(container);
     }
-
-
 }

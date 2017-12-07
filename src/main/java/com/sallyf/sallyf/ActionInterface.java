@@ -1,8 +1,8 @@
 package com.sallyf.sallyf;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 @FunctionalInterface
-public interface ActionInterface extends Function<HTTPSession, Response>
+public interface ActionInterface extends BiFunction<HTTPSession, Route, Response>
 {
 }
