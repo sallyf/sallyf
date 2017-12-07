@@ -1,7 +1,5 @@
 package com.sallyf.sallyf;
 
-import Controller.AppController;
-
 public class Kernel
 {
     private Container container;
