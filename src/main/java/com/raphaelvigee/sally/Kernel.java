@@ -1,7 +1,5 @@
 package com.raphaelvigee.sally;
 
-import Controller.AppController;
-
 public class Kernel
 {
     private Container container;
