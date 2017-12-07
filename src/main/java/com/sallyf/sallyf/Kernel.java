@@ -1,5 +1,7 @@
 package com.sallyf.sallyf;
 
+import Yuconz.Controller.AppController;
+
 public class Kernel
 {
     private Container container;
@@ -11,7 +13,12 @@ public class Kernel
 
     public static Kernel newInstance()
     {
-        return new Kernel(new Container());
+        Container container = new Container();
+
+        container.add(YServer.class);
+        container.add(Routing.class);
+
+        return new Kernel(container);
     }
 
     public Container getContainer()

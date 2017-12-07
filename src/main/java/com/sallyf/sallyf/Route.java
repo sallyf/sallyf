@@ -1,7 +1,5 @@
 package com.sallyf.sallyf;
 
-import fi.iki.elonen.NanoHTTPD;
-
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
