@@ -2,6 +2,8 @@ package com.raphaelvigee.sally;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Routing extends ContainerAware
 {
@@ -45,8 +47,14 @@ public class Routing extends ContainerAware
     public Route match(HTTPSession session)
     {
         for (Route route : routes) {
-            if (Objects.equals(route.getPath(), session.getUri())) {
-                return route;
+            if (session.getMethod().toString().equals(route.getMethod().toString())) {
+                Pattern r = Pattern.compile(route.getPath().pattern);
+
+                Matcher m = r.matcher(session.getUri());
+
+                if (m.matches()) {
+                    return route;
+                }
             }
         }
 

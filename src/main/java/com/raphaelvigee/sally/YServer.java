@@ -34,7 +34,7 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
             return newFixedLengthResponse("404");
         }
 
-        return newFixedLengthResponse(match.getHandler().apply(session).content);
+        return newFixedLengthResponse(match.getHandler().apply(session, match).content);
     }
 
     @Override

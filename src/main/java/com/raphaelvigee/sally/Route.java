@@ -1,20 +1,55 @@
 package com.raphaelvigee.sally;
 
+import fi.iki.elonen.NanoHTTPD;
+
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 enum Method
 {
-    GET("get"), POST("post"), PUT("put"), PATCH("patch"), DELETE("delete");
+    GET, POST, PUT, PATCH, DELETE
+}
 
-    private String s;
+class Path
+{
+    String declaration;
 
-    Method(String s)
+    String pattern;
+
+    HashMap<Integer, String> parameters = new HashMap<>();
+
+    public Path(String declaration)
     {
-        this.s = s;
+        this.declaration = declaration;
+        computePattern();
     }
 
-    @Override
-    public String toString()
+    public void computePattern()
     {
-        return s;
+        String parameterName = "(\\{[a-zA-Z0-9-_.]*\\})*";
+        String parameterValue = "([^/]*)";
+
+        Pattern r = Pattern.compile(parameterName);
+
+        Matcher m = r.matcher(declaration);
+
+        StringBuffer sb = new StringBuffer("^");
+        int i = 1;
+        while (m.find()) {
+            String declaration = m.group(1);
+            if (declaration != null) {
+                String name = declaration.substring(1, declaration.length() - 1);
+
+                parameters.put(i, name);
+                m.appendReplacement(sb, Matcher.quoteReplacement(parameterValue));
+                i++;
+            }
+        }
+        m.appendTail(sb);
+        sb.append("$");
+
+        pattern = sb.toString();
     }
 }
 
@@ -22,14 +57,14 @@ public class Route
 {
     private Method method;
 
-    private String path;
+    private Path path;
 
     private ActionInterface handler;
 
-    public Route(Method method, String path, ActionInterface handler)
+    public Route(Method method, String pathDeclaration, ActionInterface handler)
     {
         this.method = method;
-        this.path = path;
+        this.path = new Path(pathDeclaration);
         this.handler = handler;
     }
 
@@ -38,19 +73,9 @@ public class Route
         return method;
     }
 
-    public void setMethod(Method method)
-    {
-        this.method = method;
-    }
-
-    public String getPath()
+    public Path getPath()
     {
         return path;
-    }
-
-    public void setPath(String path)
-    {
-        this.path = path;
     }
 
     public ActionInterface getHandler()
@@ -58,8 +83,20 @@ public class Route
         return handler;
     }
 
-    public void setHandler(ActionInterface handler)
+    public RouteParameters getParameters(HTTPSession session)
     {
-        this.handler = handler;
+        Pattern r = Pattern.compile(path.pattern);
+
+        Matcher m = r.matcher(session.getUri());
+
+        RouteParameters parameterValues = new RouteParameters();
+
+        if (m.matches()) {
+            path.parameters.forEach((index, name) -> {
+                parameterValues.put(name, m.group(index));
+            });
+        }
+
+        return parameterValues;
     }
 }
