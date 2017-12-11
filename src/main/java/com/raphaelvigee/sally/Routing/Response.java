@@ -21,4 +21,19 @@ public class Response
         this.status = status;
         this.mimeType = mimeType;
     }
+
+    public String getContent()
+    {
+        return content;
+    }
+
+    public Status getStatus()
+    {
+        return status;
+    }
+
+    public String getMimeType()
+    {
+        return mimeType;
+    }
 }

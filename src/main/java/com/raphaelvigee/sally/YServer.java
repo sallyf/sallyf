@@ -34,7 +34,7 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        System.out.println("["+dateFormat.format(date)+"] "+session.getMethod()+" "+session.getUri());
+        System.out.println("["+dateFormat.format(date)+"] "+session.getMethod()+" \""+session.getUri()+"\"");
 
         com.raphaelvigee.sally.Routing.Response response;
 
@@ -45,7 +45,7 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
             return newFixedLengthResponse(Status.INTERNAL_ERROR, "text/plain", "Internal Error");
         }
 
-        return newFixedLengthResponse(response.status, response.mimeType, response.content);
+        return newFixedLengthResponse(response.getStatus(), response.getMimeType(), response.getContent());
     }
 
     @Override
