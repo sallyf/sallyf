@@ -1,12 +1,10 @@
 package com.sallyf.sallyf;
 
-import Yuconz.Controller.AppController;
-
 public class Kernel
 {
     private Container container;
 
-    public Kernel(Container container)
+    Kernel(Container container)
     {
         this.container = container;
     }
