@@ -1,7 +1,11 @@
 package com.raphaelvigee.sally;
 
+import com.raphaelvigee.sally.Exception.RouteDuplicateException;
+import com.raphaelvigee.sally.Routing.*;
 import fi.iki.elonen.NanoHTTPD;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -9,11 +13,11 @@ import static org.junit.Assert.assertNull;
 public class RoutingTest
 {
     @Test
-    public void testRegexComputation()
+    public void regexComputationTest()
     {
-        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h, r) -> null);
+        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
 
-        assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().pattern);
+        assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().getPattern());
 
         HTTPSession session = new HTTPSession();
         session.setMethod(NanoHTTPD.Method.GET);
@@ -28,12 +32,12 @@ public class RoutingTest
     }
 
     @Test
-    public void testRouteMatcher()
+    public void routeMatcherTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h, r) -> null);
-        Route route2 = new Route(Method.GET, "/qwertyuiop", (h, r) -> null);
-        Route route3 = new Route(Method.POST, "/qwertyuiop", (h, r) -> null);
-        Route route4 = new Route(Method.GET, "/", (h, r) -> null);
+        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
+        Route route2 = new Route(Method.GET, "/qwertyuiop", (c, h, r) -> null);
+        Route route3 = new Route(Method.POST, "/qwertyuiop", (c, h, r) -> null);
+        Route route4 = new Route(Method.GET, "/", (c, h, r) -> null);
 
         Routing routing = new Routing();
         routing.addRoute(route1);
@@ -64,5 +68,43 @@ public class RoutingTest
         Route match3 = routing.match(session3);
 
         assertNull(match3);
+    }
+
+    @Test(expected = RouteDuplicateException.class)
+    public void routeDuplicateExceptionTest() throws Exception
+    {
+        Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
+        Route route2 = new Route(Method.GET, "/abc", (c, h, r) -> null);
+
+        Routing routing = new Routing();
+        routing.addRoute(route1);
+        routing.addRoute(route2);
+    }
+
+    @Test
+    public void routeDuplicateTest() throws Exception
+    {
+        Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
+        Route route2 = new Route(Method.POST, "/abc", (c, h, r) -> null);
+
+        Routing routing = new Routing();
+        routing.addRoute(route1);
+        routing.addRoute(route2);
+    }
+
+    @Test
+    public void addControllerTest() throws Exception
+    {
+        Routing routing = new Routing();
+
+        routing.addController(TestController.class);
+
+        ArrayList<Route> routes = routing.getRoutes();
+
+        assertEquals(1, routes.size());
+
+        Response response = routes.get(0).getHandler().apply(null, null, null);
+
+        assertEquals("hello", response.getContent());
     }
 }

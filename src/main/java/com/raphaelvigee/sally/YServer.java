@@ -1,8 +1,13 @@
 package com.raphaelvigee.sally;
 
+import com.raphaelvigee.sally.Container.Container;
+import com.raphaelvigee.sally.Container.ContainerAwareInterface;
+import com.raphaelvigee.sally.Routing.*;
 import fi.iki.elonen.NanoHTTPD;
 
-import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class YServer extends NanoHTTPD implements ContainerAwareInterface
 {
@@ -11,30 +16,36 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
     public YServer()
     {
         super(4367);
-
-        try {
-            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Listening on http://" + getHostname() + ":" + getListeningPort());
     }
 
     @Override
     public Response serve(IHTTPSession s)
     {
-        com.raphaelvigee.sally.HTTPSession session = com.raphaelvigee.sally.HTTPSession.create(s);
+        com.raphaelvigee.sally.Routing.HTTPSession session = com.raphaelvigee.sally.Routing.HTTPSession.create(s);
 
         Routing routing = container.get(Routing.class);
 
         Route match = routing.match(session);
 
         if (match == null) {
-            return newFixedLengthResponse("404");
+            return newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Not found");
         }
 
-        return newFixedLengthResponse(match.getHandler().apply(session, match).content);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+
+        System.out.println("["+dateFormat.format(date)+"] "+session.getMethod()+" \""+session.getUri()+"\"");
+
+        com.raphaelvigee.sally.Routing.Response response;
+
+        try {
+            response = match.getHandler().apply(container, session, match);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return newFixedLengthResponse(Status.INTERNAL_ERROR, "text/plain", "Internal Error");
+        }
+
+        return newFixedLengthResponse(response.getStatus(), response.getMimeType(), response.getContent());
     }
 
     @Override

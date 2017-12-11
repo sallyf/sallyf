@@ -1,4 +1,4 @@
-package com.raphaelvigee.sally;
+package com.raphaelvigee.sally.Container;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ public class Container
         services = new HashMap<>();
     }
 
-    public <T extends ContainerAwareInterface> void add(Class<T> type)
+    public <T extends ContainerAwareInterface> T add(Class<T> type)
     {
         String name = type.toString();
 
@@ -21,12 +21,14 @@ public class Container
             instance = type.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-            return;
+            return null;
         }
 
         instance.setContainer(this);
 
         services.put(name, instance);
+
+        return instance;
     }
 
     public <T extends ContainerAwareInterface> T get(Class<T> type)

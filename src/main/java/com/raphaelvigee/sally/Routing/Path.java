@@ -1,15 +1,10 @@
-package com.raphaelvigee.sally;
+package com.raphaelvigee.sally.Routing;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-enum Method
-{
-    GET, POST, PUT, PATCH, DELETE
-}
-
-class Path
+public class Path
 {
     String declaration;
 
@@ -23,7 +18,7 @@ class Path
         computePattern();
     }
 
-    public void computePattern()
+    private void computePattern()
     {
         String parameterName = "(\\{[a-zA-Z0-9-_.]*\\})*";
         String parameterValue = "([^/]*)";
@@ -49,52 +44,19 @@ class Path
 
         pattern = sb.toString();
     }
-}
 
-public class Route
-{
-    private Method method;
-
-    private Path path;
-
-    private ActionInterface handler;
-
-    public Route(Method method, String pathDeclaration, ActionInterface handler)
+    public String getDeclaration()
     {
-        this.method = method;
-        this.path = new Path(pathDeclaration);
-        this.handler = handler;
+        return declaration;
     }
 
-    public Method getMethod()
+    public String getPattern()
     {
-        return method;
+        return pattern;
     }
 
-    public Path getPath()
+    public HashMap<Integer, String> getParameters()
     {
-        return path;
-    }
-
-    public ActionInterface getHandler()
-    {
-        return handler;
-    }
-
-    public RouteParameters getParameters(HTTPSession session)
-    {
-        Pattern r = Pattern.compile(path.pattern);
-
-        Matcher m = r.matcher(session.getUri());
-
-        RouteParameters parameterValues = new RouteParameters();
-
-        if (m.matches()) {
-            path.parameters.forEach((index, name) -> {
-                parameterValues.put(name, m.group(index));
-            });
-        }
-
-        return parameterValues;
+        return parameters;
     }
 }
