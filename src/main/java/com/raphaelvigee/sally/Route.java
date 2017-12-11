@@ -23,7 +23,7 @@ class Path
         computePattern();
     }
 
-    public void computePattern()
+    private void computePattern()
     {
         String parameterName = "(\\{[a-zA-Z0-9-_.]*\\})*";
         String parameterValue = "([^/]*)";
@@ -96,5 +96,11 @@ public class Route
         }
 
         return parameterValues;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format("%s %s", getMethod(), getPath().declaration);
     }
 }

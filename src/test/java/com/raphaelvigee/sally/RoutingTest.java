@@ -1,5 +1,6 @@
 package com.raphaelvigee.sally;
 
+import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import fi.iki.elonen.NanoHTTPD;
 import org.junit.Test;
 
@@ -11,7 +12,7 @@ public class RoutingTest
     @Test
     public void testRegexComputation()
     {
-        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h, r) -> null);
+        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
 
         assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().pattern);
 
@@ -28,12 +29,12 @@ public class RoutingTest
     }
 
     @Test
-    public void testRouteMatcher()
+    public void testRouteMatcher() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h, r) -> null);
-        Route route2 = new Route(Method.GET, "/qwertyuiop", (h, r) -> null);
-        Route route3 = new Route(Method.POST, "/qwertyuiop", (h, r) -> null);
-        Route route4 = new Route(Method.GET, "/", (h, r) -> null);
+        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
+        Route route2 = new Route(Method.GET, "/qwertyuiop", (c, h, r) -> null);
+        Route route3 = new Route(Method.POST, "/qwertyuiop", (c, h, r) -> null);
+        Route route4 = new Route(Method.GET, "/", (c, h, r) -> null);
 
         Routing routing = new Routing();
         routing.addRoute(route1);
@@ -64,5 +65,27 @@ public class RoutingTest
         Route match3 = routing.match(session3);
 
         assertNull(match3);
+    }
+
+    @Test(expected = RouteDuplicateException.class)
+    public void routeDuplicateExceptionTest() throws Exception
+    {
+        Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
+        Route route2 = new Route(Method.GET, "/abc", (c, h, r) -> null);
+
+        Routing routing = new Routing();
+        routing.addRoute(route1);
+        routing.addRoute(route2);
+    }
+
+    @Test
+    public void routeDuplicateTest() throws Exception
+    {
+        Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
+        Route route2 = new Route(Method.POST, "/abc", (c, h, r) -> null);
+
+        Routing routing = new Routing();
+        routing.addRoute(route1);
+        routing.addRoute(route2);
     }
 }
