@@ -1,6 +1,8 @@
 package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Annotation.Route;
+import com.raphaelvigee.sally.Routing.Response;
+import com.raphaelvigee.sally.Routing.Routing;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -67,7 +69,7 @@ public class RoutingControllerTest
 
         routing.addController(Controller3.class);
 
-        ArrayList<com.raphaelvigee.sally.Route> routes = routing.getRoutes();
+        ArrayList<com.raphaelvigee.sally.Routing.Route> routes = routing.getRoutes();
 
         assertEquals(1, routes.size());
 

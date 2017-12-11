@@ -1,4 +1,4 @@
-package com.raphaelvigee.sally;
+package com.raphaelvigee.sally.Container;
 
 
 public interface ContainerAwareInterface

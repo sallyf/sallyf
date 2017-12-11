@@ -1,6 +1,6 @@
 package com.raphaelvigee.sally.Annotation;
 
-import com.raphaelvigee.sally.Method;
+import com.raphaelvigee.sally.Routing.Method;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

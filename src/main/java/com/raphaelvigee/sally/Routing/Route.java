@@ -1,4 +1,4 @@
-package com.raphaelvigee.sally;
+package com.raphaelvigee.sally.Routing;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;

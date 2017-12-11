@@ -1,6 +1,7 @@
 package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
+import com.raphaelvigee.sally.Routing.*;
 import fi.iki.elonen.NanoHTTPD;
 import org.junit.Test;
 
