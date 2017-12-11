@@ -1,12 +1,18 @@
 package com.sallyf.sallyf;
 
-import Yuconz.Controller.AppController;
+import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Routing.Route;
+import com.sallyf.sallyf.Routing.Routing;
+import fi.iki.elonen.NanoHTTPD;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class Kernel
 {
     private Container container;
 
-    public Kernel(Container container)
+    Kernel(Container container)
     {
         this.container = container;
     }
@@ -24,5 +30,27 @@ public class Kernel
     public Container getContainer()
     {
         return container;
+    }
+
+    public void start()
+    {
+        YServer server = container.get(YServer.class);
+        Routing routing = container.get(Routing.class);
+        try {
+            server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ArrayList<Route> routes = routing.getRoutes();
+
+        System.out.println(routes.size()+" routes registered:");
+        for (Route route : routes) {
+            System.out.println(route.toString());
+        }
+        System.out.println();
+
+        System.out.println("Listening on http://" + server.getHostname() + ":" + server.getListeningPort());
+        System.out.println();
     }
 }
