@@ -1,7 +1,10 @@
 package com.raphaelvigee.sally;
 
+import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
+import com.raphaelvigee.sally.Exception.UnhandledParameterException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,11 +12,54 @@ import java.util.regex.Pattern;
 public class Routing extends ContainerAware
 {
     private ArrayList<Route> routes = new ArrayList<>();
+
     private ArrayList<String> routeSignatures = new ArrayList<>();
+
+    public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
+    {
+        java.lang.reflect.Method[] methods = controllerClass.getMethods();
+
+        for (java.lang.reflect.Method method : methods) {
+            if (method.isAnnotationPresent(com.raphaelvigee.sally.Annotation.Route.class)) {
+                if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
+                    System.err.println("Method `" + method.getName() + "` is not static, ignoring");
+                    continue;
+                }
+
+                com.raphaelvigee.sally.Annotation.Route route = method.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
+
+                final Class<?>[] parameterTypes = method.getParameterTypes();
+
+                addAction(route.method(), route.path(), (container, session, routeDefinition) -> {
+                    Object[] parameters = new Object[parameterTypes.length];
+                    for (Class<?> parameterType : parameterTypes) {
+                        Object p;
+                        if (parameterType == Container.class) {
+                            p = container;
+                        } else if (parameterType == HTTPSession.class) {
+                            p = session;
+                        } else if (parameterType == Route.class) {
+                            p = routeDefinition;
+                        } else {
+                            throw new UnhandledParameterException(parameterType);
+                        }
+                        parameters[parameters.length] = p;
+                    }
+
+                    try {
+                        return (Response) method.invoke(null, parameters);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                });
+            }
+        }
+    }
 
     public void addRoute(Route route) throws RouteDuplicateException
     {
-        if(routeSignatures.contains(route.toString())) {
+        if (routeSignatures.contains(route.toString())) {
             throw new RouteDuplicateException(route);
         }
 
@@ -49,6 +95,11 @@ public class Routing extends ContainerAware
     public void delete(String path, ActionInterface handler) throws RouteDuplicateException
     {
         addAction(Method.DELETE, path, handler);
+    }
+
+    public ArrayList<Route> getRoutes()
+    {
+        return routes;
     }
 
     public Route match(HTTPSession session)
