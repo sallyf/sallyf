@@ -4,11 +4,6 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-enum Method
-{
-    GET, POST, PUT, PATCH, DELETE
-}
-
 class Path
 {
     String declaration;
