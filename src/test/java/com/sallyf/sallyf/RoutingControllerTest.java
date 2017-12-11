@@ -1,6 +1,8 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Annotation.Route;
+import com.sallyf.sallyf.Routing.Response;
+import com.sallyf.sallyf.Routing.Routing;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -67,7 +69,7 @@ public class RoutingControllerTest
 
         routing.addController(Controller3.class);
 
-        ArrayList<com.sallyf.sallyf.Route> routes = routing.getRoutes();
+        ArrayList<com.sallyf.sallyf.Routing.Route> routes = routing.getRoutes();
 
         assertEquals(1, routes.size());
 

@@ -1,5 +1,8 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Routing.*;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.text.DateFormat;
@@ -18,7 +21,7 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
     @Override
     public Response serve(IHTTPSession s)
     {
-        com.sallyf.sallyf.HTTPSession session = com.sallyf.sallyf.HTTPSession.create(s);
+        com.sallyf.sallyf.Routing.HTTPSession session = com.sallyf.sallyf.Routing.HTTPSession.create(s);
 
         Routing routing = container.get(Routing.class);
 
@@ -33,7 +36,7 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
 
         System.out.println("["+dateFormat.format(date)+"] "+session.getMethod()+" "+session.getUri());
 
-        com.sallyf.sallyf.Response response;
+        com.sallyf.sallyf.Routing.Response response;
 
         try {
             response = match.getHandler().apply(container, session, match);

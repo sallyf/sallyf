@@ -1,4 +1,4 @@
-package com.sallyf.sallyf;
+package com.sallyf.sallyf.Routing;
 
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 
