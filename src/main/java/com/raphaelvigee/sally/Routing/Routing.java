@@ -29,11 +29,11 @@ public class Routing extends ContainerAware
                     continue;
                 }
 
-                com.raphaelvigee.sally.Annotation.Route route = method.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
+                com.raphaelvigee.sally.Annotation.Route routeAnnotation = method.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
-                addAction(route.method(), route.path(), (container, session, routeDefinition) -> {
+                addAction(routeAnnotation.method(), routeAnnotation.path(), (container, session, routeDefinition) -> {
                     Object[] parameters = new Object[parameterTypes.length];
                     for (Class<?> parameterType : parameterTypes) {
                         Object p;
