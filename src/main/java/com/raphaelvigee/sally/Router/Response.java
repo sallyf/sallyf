@@ -1,4 +1,6 @@
-package com.raphaelvigee.sally.Routing;
+package com.raphaelvigee.sally.Router;
+
+import com.raphaelvigee.sally.Server.Status;
 
 public class Response
 {

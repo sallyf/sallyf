@@ -1,4 +1,4 @@
-package com.raphaelvigee.sally.Routing;
+package com.raphaelvigee.sally.Router;
 
 import com.raphaelvigee.sally.BaseController;
 import com.raphaelvigee.sally.Container.Container;
@@ -6,13 +6,15 @@ import com.raphaelvigee.sally.Container.ContainerAware;
 import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
+import com.raphaelvigee.sally.Server.HTTPSession;
+import com.raphaelvigee.sally.Server.Method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Routing extends ContainerAware
+public class Router extends ContainerAware
 {
     private ArrayList<Route> routes = new ArrayList<>();
 

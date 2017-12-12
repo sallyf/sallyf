@@ -1,4 +1,4 @@
-package com.raphaelvigee.sally.Routing;
+package com.raphaelvigee.sally.Router;
 
 import java.util.HashMap;
 

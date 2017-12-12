@@ -1,7 +1,7 @@
 package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Annotation.Route;
-import com.raphaelvigee.sally.Routing.Response;
+import com.raphaelvigee.sally.Router.Response;
 
 @Route(path = "/prefixed")
 public class TestController extends BaseController

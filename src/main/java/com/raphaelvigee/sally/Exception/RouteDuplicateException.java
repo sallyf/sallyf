@@ -1,6 +1,6 @@
 package com.raphaelvigee.sally.Exception;
 
-import com.raphaelvigee.sally.Routing.Route;
+import com.raphaelvigee.sally.Router.Route;
 
 public class RouteDuplicateException extends FrameworkException
 {

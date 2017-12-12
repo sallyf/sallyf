@@ -1,6 +1,8 @@
-package com.raphaelvigee.sally.Routing;
+package com.raphaelvigee.sally.Router;
 
-import java.util.HashMap;
+import com.raphaelvigee.sally.Server.HTTPSession;
+import com.raphaelvigee.sally.Server.Method;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
