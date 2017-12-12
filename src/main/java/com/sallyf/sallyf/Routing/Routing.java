@@ -20,6 +20,10 @@ public class Routing extends ContainerAware
 
     public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
     {
+        com.sallyf.sallyf.Annotation.Route controllerClassAnnotation = controllerClass.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
+
+        String pathPrefix = controllerClassAnnotation == null ? "" : controllerClassAnnotation.path();
+
         java.lang.reflect.Method[] methods = controllerClass.getMethods();
 
         for (java.lang.reflect.Method method : methods) {
@@ -33,7 +37,7 @@ public class Routing extends ContainerAware
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
-                addAction(routeAnnotation.method(), routeAnnotation.path(), (container, session, routeDefinition) -> {
+                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (container, session, routeDefinition) -> {
                     Object[] parameters = new Object[parameterTypes.length];
                     int i = 0;
                     for (Class<?> parameterType : parameterTypes) {
