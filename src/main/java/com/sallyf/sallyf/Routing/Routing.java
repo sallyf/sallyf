@@ -35,6 +35,7 @@ public class Routing extends ContainerAware
 
                 addAction(routeAnnotation.method(), routeAnnotation.path(), (container, session, routeDefinition) -> {
                     Object[] parameters = new Object[parameterTypes.length];
+                    int i = 0;
                     for (Class<?> parameterType : parameterTypes) {
                         Object p;
                         if (parameterType == Container.class) {
@@ -46,7 +47,7 @@ public class Routing extends ContainerAware
                         } else {
                             throw new UnhandledParameterException(parameterType);
                         }
-                        parameters[parameters.length] = p;
+                        parameters[i++] = p;
                     }
 
                     try {
@@ -73,31 +74,6 @@ public class Routing extends ContainerAware
     public void addAction(Method method, String path, ActionInterface handler) throws RouteDuplicateException
     {
         addRoute(new Route(method, path, handler));
-    }
-
-    public void get(String path, ActionInterface handler) throws RouteDuplicateException
-    {
-        addAction(Method.GET, path, handler);
-    }
-
-    public void post(String path, ActionInterface handler) throws RouteDuplicateException
-    {
-        addAction(Method.POST, path, handler);
-    }
-
-    public void put(String path, ActionInterface handler) throws RouteDuplicateException
-    {
-        addAction(Method.PUT, path, handler);
-    }
-
-    public void patch(String path, ActionInterface handler) throws RouteDuplicateException
-    {
-        addAction(Method.PATCH, path, handler);
-    }
-
-    public void delete(String path, ActionInterface handler) throws RouteDuplicateException
-    {
-        addAction(Method.DELETE, path, handler);
     }
 
     public ArrayList<Route> getRoutes()
