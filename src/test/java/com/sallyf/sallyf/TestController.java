@@ -1,7 +1,7 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Annotation.Route;
-import com.sallyf.sallyf.Routing.Response;
+import com.sallyf.sallyf.Router.Response;
 
 @Route(path = "/prefixed")
 public class TestController extends BaseController

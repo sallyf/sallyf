@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.Routing;
+package com.sallyf.sallyf.Server;
 
 public enum Method
 {

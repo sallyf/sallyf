@@ -1,7 +1,9 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
-import com.sallyf.sallyf.Routing.*;
+import com.sallyf.sallyf.Router.*;
+import com.sallyf.sallyf.Server.HTTPSession;
+import com.sallyf.sallyf.Server.Method;
 import fi.iki.elonen.NanoHTTPD;
 import org.junit.Test;
 
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class RoutingTest
+public class RouterTest
 {
     @Test
     public void regexComputationTest()
@@ -39,17 +41,17 @@ public class RoutingTest
         Route route3 = new Route(Method.POST, "/qwertyuiop", (c, h, r) -> null);
         Route route4 = new Route(Method.GET, "/", (c, h, r) -> null);
 
-        Routing routing = new Routing();
-        routing.addRoute(route1);
-        routing.addRoute(route2);
-        routing.addRoute(route3);
-        routing.addRoute(route4);
+        Router router = new Router();
+        router.addRoute(route1);
+        router.addRoute(route2);
+        router.addRoute(route3);
+        router.addRoute(route4);
 
         HTTPSession session1 = new HTTPSession();
         session1.setMethod(NanoHTTPD.Method.POST);
         session1.setUri("/qwertyuiop");
 
-        Route match1 = routing.match(session1);
+        Route match1 = router.match(session1);
 
         assertEquals(route3, match1);
 
@@ -57,7 +59,7 @@ public class RoutingTest
         session2.setMethod(NanoHTTPD.Method.GET);
         session2.setUri("/hello/YOLO/hé/dat_var");
 
-        Route match2 = routing.match(session2);
+        Route match2 = router.match(session2);
 
         assertEquals(route1, match2);
 
@@ -65,7 +67,7 @@ public class RoutingTest
         session3.setMethod(NanoHTTPD.Method.GET);
         session3.setUri("/nop");
 
-        Route match3 = routing.match(session3);
+        Route match3 = router.match(session3);
 
         assertNull(match3);
     }
@@ -76,9 +78,9 @@ public class RoutingTest
         Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
         Route route2 = new Route(Method.GET, "/abc", (c, h, r) -> null);
 
-        Routing routing = new Routing();
-        routing.addRoute(route1);
-        routing.addRoute(route2);
+        Router router = new Router();
+        router.addRoute(route1);
+        router.addRoute(route2);
     }
 
     @Test
@@ -87,19 +89,19 @@ public class RoutingTest
         Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
         Route route2 = new Route(Method.POST, "/abc", (c, h, r) -> null);
 
-        Routing routing = new Routing();
-        routing.addRoute(route1);
-        routing.addRoute(route2);
+        Router router = new Router();
+        router.addRoute(route1);
+        router.addRoute(route2);
     }
 
     @Test
     public void addControllerTest() throws Exception
     {
-        Routing routing = new Routing();
+        Router router = new Router();
 
-        routing.addController(TestController.class);
+        router.addController(TestController.class);
 
-        ArrayList<Route> routes = routing.getRoutes();
+        ArrayList<Route> routes = router.getRoutes();
 
         assertEquals(1, routes.size());
 

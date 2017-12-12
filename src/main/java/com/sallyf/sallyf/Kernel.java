@@ -1,8 +1,9 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Routing.Route;
-import com.sallyf.sallyf.Routing.Routing;
+import com.sallyf.sallyf.Router.Route;
+import com.sallyf.sallyf.Router.Router;
+import com.sallyf.sallyf.Server.Server;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.io.IOException;
@@ -21,8 +22,8 @@ public class Kernel
     {
         Container container = new Container();
 
-        container.add(YServer.class);
-        container.add(Routing.class);
+        container.add(Server.class);
+        container.add(Router.class);
 
         return new Kernel(container);
     }
@@ -34,15 +35,15 @@ public class Kernel
 
     public void start()
     {
-        YServer server = container.get(YServer.class);
-        Routing routing = container.get(Routing.class);
+        Server server = container.get(Server.class);
+        Router router = container.get(Router.class);
         try {
             server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        ArrayList<Route> routes = routing.getRoutes();
+        ArrayList<Route> routes = router.getRoutes();
 
         System.out.println(routes.size()+" routes registered:");
         for (Route route : routes) {

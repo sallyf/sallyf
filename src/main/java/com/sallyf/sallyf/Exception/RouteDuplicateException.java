@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Exception;
 
-import com.sallyf.sallyf.Routing.Route;
+import com.sallyf.sallyf.Router.Route;
 
 public class RouteDuplicateException extends FrameworkException
 {

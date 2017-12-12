@@ -1,4 +1,6 @@
-package com.sallyf.sallyf.Routing;
+package com.sallyf.sallyf.Router;
+
+import com.sallyf.sallyf.Server.Status;
 
 public class Response
 {
