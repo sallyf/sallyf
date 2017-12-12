@@ -106,5 +106,6 @@ public class RoutingTest
         Response response = routes.get(0).getHandler().apply(null, null, null);
 
         assertEquals("hello", response.getContent());
+        assertEquals("/prefixed/hello", routes.get(0).getPath().getDeclaration());
     }
 }
