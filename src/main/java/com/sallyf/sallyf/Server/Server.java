@@ -52,8 +52,9 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
             eventDispatcher.dispatch(Events.PRE_MATCH, new HTTPSessionEvent(session));
 
             Route match = router.match(session);
+            session.setRoute(match);
 
-            eventDispatcher.dispatch(Events.POST_MATCH, new RouteMatchEvent(session, match));
+            eventDispatcher.dispatch(Events.POST_MATCH, new RouteMatchEvent(session));
 
             if (match == null) {
                 return newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Not found");
@@ -61,7 +62,7 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
 
             com.sallyf.sallyf.Router.Response response;
 
-            response = match.getHandler().apply(container, session, match);
+            response = match.getHandler().apply(session);
 
             eventDispatcher.dispatch(Events.PRE_SEND_RESPONSE, new ResponseEvent(session, response));
 

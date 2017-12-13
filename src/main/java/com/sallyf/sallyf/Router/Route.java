@@ -1,10 +1,6 @@
 package com.sallyf.sallyf.Router;
 
-import com.sallyf.sallyf.Server.HTTPSession;
 import com.sallyf.sallyf.Server.Method;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Route
 {
@@ -12,9 +8,9 @@ public class Route
 
     private Path path;
 
-    private ActionInterface handler;
+    private ActionWrapperInterface handler;
 
-    public Route(Method method, String pathDeclaration, ActionInterface handler)
+    public Route(Method method, String pathDeclaration, ActionWrapperInterface handler)
     {
         this.method = method;
         this.path = new Path(pathDeclaration);
@@ -31,7 +27,7 @@ public class Route
         return path;
     }
 
-    public ActionInterface getHandler()
+    public ActionWrapperInterface getHandler()
     {
         return handler;
     }
@@ -46,7 +42,7 @@ public class Route
         this.path = path;
     }
 
-    public void setHandler(ActionInterface handler)
+    public void setHandler(ActionWrapperInterface handler)
     {
         this.handler = handler;
     }

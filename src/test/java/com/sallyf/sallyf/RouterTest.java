@@ -22,7 +22,7 @@ public class RouterTest
     {
         Router router = new Router();
 
-        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
+        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h) -> null);
 
         assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().getPattern());
 
@@ -41,10 +41,10 @@ public class RouterTest
     @Test
     public void routeMatcherTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
-        Route route2 = new Route(Method.GET, "/qwertyuiop", (c, h, r) -> null);
-        Route route3 = new Route(Method.POST, "/qwertyuiop", (c, h, r) -> null);
-        Route route4 = new Route(Method.GET, "/", (c, h, r) -> null);
+        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h) -> null);
+        Route route2 = new Route(Method.GET, "/qwertyuiop", (h) -> null);
+        Route route3 = new Route(Method.POST, "/qwertyuiop", (h) -> null);
+        Route route4 = new Route(Method.GET, "/", (h) -> null);
 
         Router router = new Router();
         router.addRoute(route1);
@@ -80,8 +80,8 @@ public class RouterTest
     @Test(expected = RouteDuplicateException.class)
     public void routeDuplicateExceptionTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
-        Route route2 = new Route(Method.GET, "/abc", (c, h, r) -> null);
+        Route route1 = new Route(Method.GET, "/abc", (h) -> null);
+        Route route2 = new Route(Method.GET, "/abc", (h) -> null);
 
         Router router = new Router();
         router.addRoute(route1);
@@ -91,8 +91,8 @@ public class RouterTest
     @Test
     public void routeDuplicateTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/abc", (c, h, r) -> null);
-        Route route2 = new Route(Method.POST, "/abc", (c, h, r) -> null);
+        Route route1 = new Route(Method.GET, "/abc", (h) -> null);
+        Route route2 = new Route(Method.POST, "/abc", (h) -> null);
 
         Router router = new Router();
         router.addRoute(route1);
@@ -110,7 +110,7 @@ public class RouterTest
 
         assertEquals(1, routes.size());
 
-        Response response = routes.get(0).getHandler().apply(null, null, null);
+        Response response = routes.get(0).getHandler().apply(null);
 
         assertEquals("hello", response.getContent());
         assertEquals("/prefixed/hello", routes.get(0).getPath().getDeclaration());
