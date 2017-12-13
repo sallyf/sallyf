@@ -9,6 +9,11 @@ public class EventDispatcher extends ContainerAware
 {
     private HashMap<EventType, ArrayList<EventHandlerInterface>> events = new HashMap<>();
 
+    public HashMap<EventType, ArrayList<EventHandlerInterface>> getEvents()
+    {
+        return events;
+    }
+
     public <E extends EventInterface> void register(EventType<E> eventType, EventHandlerInterface<E> eventHandler)
     {
         if (events.containsKey(eventType)) {
