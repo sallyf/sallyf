@@ -1,5 +1,6 @@
 package com.raphaelvigee.sally;
 
+import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Router.Response;
 import com.raphaelvigee.sally.Router.Route;
@@ -102,7 +103,10 @@ public class RouterTest
     @Test
     public void addControllerTest() throws Exception
     {
+        Kernel app = Kernel.newInstance();
+
         Router router = new Router();
+        router.setContainer(app.getContainer());
 
         router.addController(TestController.class);
 
