@@ -7,33 +7,33 @@ import java.util.HashMap;
 
 public class EventDispatcher extends ContainerAware
 {
-    private HashMap<String, ArrayList<EventHandlerInterface>> events = new HashMap<>();
+    private HashMap<EventType, ArrayList<EventHandlerInterface>> events = new HashMap<>();
 
-    public <E extends EventInterface> void register(String name, EventHandlerInterface<E> eventHandler)
+    public <E extends EventInterface> void register(EventType<E> eventType, EventHandlerInterface<E> eventHandler)
     {
-        if (events.containsKey(name)) {
-            events.get(name).add(eventHandler);
+        if (events.containsKey(eventType)) {
+            events.get(eventType).add(eventHandler);
         } else {
             ArrayList<EventHandlerInterface> handlers = new ArrayList<>();
             handlers.add(eventHandler);
-            events.put(name, handlers);
+            events.put(eventType, handlers);
         }
     }
 
-    public void dispatch(String name, EventInterface event)
+    public <E extends EventInterface> void dispatch(EventType<E> eventType, E event)
     {
-        ArrayList<EventHandlerInterface> handlers = events.get(name);
+        ArrayList<EventHandlerInterface> handlers = events.get(eventType);
 
         if (handlers != null) {
-            for (EventHandlerInterface handler : handlers) {
+            for (EventHandlerInterface<E> handler : handlers) {
                 handler.dispatch(event);
             }
         }
     }
 
-    public void dispatch(String name)
+    public void dispatch(EventType eventType)
     {
-        ArrayList<EventHandlerInterface> handlers = events.get(name);
+        ArrayList<EventHandlerInterface> handlers = events.get(eventType);
 
         if (handlers != null) {
             for (EventHandlerInterface handler : handlers) {
