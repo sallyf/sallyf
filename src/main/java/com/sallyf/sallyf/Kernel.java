@@ -1,6 +1,7 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Server;
@@ -24,6 +25,7 @@ public class Kernel
 
         container.add(Server.class);
         container.add(Router.class);
+        container.add(EventDispatcher.class);
 
         return new Kernel(container);
     }
