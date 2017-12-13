@@ -1,7 +1,10 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
-import com.sallyf.sallyf.Router.*;
+import com.sallyf.sallyf.Router.Response;
+import com.sallyf.sallyf.Router.Route;
+import com.sallyf.sallyf.Router.RouteParameters;
+import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.HTTPSession;
 import com.sallyf.sallyf.Server.Method;
 import fi.iki.elonen.NanoHTTPD;
@@ -17,6 +20,8 @@ public class RouterTest
     @Test
     public void regexComputationTest()
     {
+        Router router = new Router();
+
         Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
 
         assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().getPattern());
@@ -30,7 +35,7 @@ public class RouterTest
         expectedParameters.put("bar", "hé");
         expectedParameters.put("dat_test", "dat_var");
 
-        assertEquals(expectedParameters, route.getParameters(session));
+        assertEquals(expectedParameters, router.getRouteParameters(route, session));
     }
 
     @Test

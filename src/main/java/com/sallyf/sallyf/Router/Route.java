@@ -51,23 +51,6 @@ public class Route
         this.handler = handler;
     }
 
-    public RouteParameters getParameters(HTTPSession session)
-    {
-        Pattern r = Pattern.compile(path.pattern);
-
-        Matcher m = r.matcher(session.getUri());
-
-        RouteParameters parameterValues = new RouteParameters();
-
-        if (m.matches()) {
-            path.parameters.forEach((index, name) -> {
-                parameterValues.put(name, m.group(index));
-            });
-        }
-
-        return parameterValues;
-    }
-
     @Override
     public String toString()
     {
