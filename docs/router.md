@@ -20,9 +20,8 @@ And `MyController.java`:
 public class MyController extends BaseController
 {
     @Route(path = "/hello/{name}")
-    public static Response helloAction(Container container, HTTPSession session, Framework.Router.Route route)
+    public static Response helloAction(RouteParameters parameters)
     {
-        RouteParameters parameters = route.getParameters(session);
         String name = parameters.get("name");
 
         return new Response("Hello, " + name + "!");
