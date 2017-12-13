@@ -1,5 +1,6 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.Route;
@@ -102,7 +103,10 @@ public class RouterTest
     @Test
     public void addControllerTest() throws Exception
     {
+        Kernel app = Kernel.newInstance();
+
         Router router = new Router();
+        router.setContainer(app.getContainer());
 
         router.addController(TestController.class);
 
