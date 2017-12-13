@@ -38,4 +38,19 @@ public class Response
     {
         return mimeType;
     }
+
+    public void setContent(String content)
+    {
+        this.content = content;
+    }
+
+    public void setStatus(Status status)
+    {
+        this.status = status;
+    }
+
+    public void setMimeType(String mimeType)
+    {
+        this.mimeType = mimeType;
+    }
 }

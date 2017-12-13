@@ -1,6 +1,7 @@
 package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Container.Container;
+import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Router.Route;
 import com.raphaelvigee.sally.Router.Router;
 import com.raphaelvigee.sally.Server.Server;
@@ -24,6 +25,7 @@ public class Kernel
 
         container.add(Server.class);
         container.add(Router.class);
+        container.add(EventDispatcher.class);
 
         return new Kernel(container);
     }

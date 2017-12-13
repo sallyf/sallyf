@@ -36,6 +36,21 @@ public class Route
         return handler;
     }
 
+    public void setMethod(Method method)
+    {
+        this.method = method;
+    }
+
+    public void setPath(Path path)
+    {
+        this.path = path;
+    }
+
+    public void setHandler(ActionInterface handler)
+    {
+        this.handler = handler;
+    }
+
     public RouteParameters getParameters(HTTPSession session)
     {
         Pattern r = Pattern.compile(path.pattern);
