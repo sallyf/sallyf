@@ -1,7 +1,10 @@
 package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
-import com.raphaelvigee.sally.Router.*;
+import com.raphaelvigee.sally.Router.Response;
+import com.raphaelvigee.sally.Router.Route;
+import com.raphaelvigee.sally.Router.RouteParameters;
+import com.raphaelvigee.sally.Router.Router;
 import com.raphaelvigee.sally.Server.HTTPSession;
 import com.raphaelvigee.sally.Server.Method;
 import fi.iki.elonen.NanoHTTPD;
@@ -17,6 +20,8 @@ public class RouterTest
     @Test
     public void regexComputationTest()
     {
+        Router router = new Router();
+
         Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (c, h, r) -> null);
 
         assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().getPattern());
@@ -30,7 +35,7 @@ public class RouterTest
         expectedParameters.put("bar", "hé");
         expectedParameters.put("dat_test", "dat_var");
 
-        assertEquals(expectedParameters, route.getParameters(session));
+        assertEquals(expectedParameters, router.getRouteParameters(route, session));
     }
 
     @Test

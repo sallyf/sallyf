@@ -22,9 +22,9 @@ public class Router extends ContainerAware
 
     public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
     {
-        com.raphaelvigee.sally.Annotation.Route controllerClassAnnotation = controllerClass.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
+        com.raphaelvigee.sally.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
 
-        String pathPrefix = controllerClassAnnotation == null ? "" : controllerClassAnnotation.path();
+        String pathPrefix = controllerAnnotation == null ? "" : controllerAnnotation.path();
 
         java.lang.reflect.Method[] methods = controllerClass.getMethods();
 
@@ -39,25 +39,9 @@ public class Router extends ContainerAware
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
-                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (container, session, routeDefinition) -> {
-                    Object[] parameters = new Object[parameterTypes.length];
-                    int i = 0;
-                    for (Class<?> parameterType : parameterTypes) {
-                        Object p;
-                        if (parameterType == Container.class) {
-                            p = container;
-                        } else if (parameterType == HTTPSession.class) {
-                            p = session;
-                        } else if (parameterType == Route.class) {
-                            p = routeDefinition;
-                        } else {
-                            throw new UnhandledParameterException(parameterType);
-                        }
-                        parameters[i++] = p;
-                    }
-
+                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (container, session, route) -> {
                     try {
-                        return (Response) method.invoke(null, parameters);
+                        return (Response) method.invoke(null, getActionParameters(parameterTypes, container, session, route));
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                         return null;
@@ -65,6 +49,31 @@ public class Router extends ContainerAware
                 });
             }
         }
+    }
+
+    public Object[] getActionParameters(Class<?>[] parameterTypes, Container container, HTTPSession session, Route route) throws UnhandledParameterException
+    {
+        Object[] parameters = new Object[parameterTypes.length];
+        int i = 0;
+        for (Class<?> parameterType : parameterTypes) {
+            Object p;
+
+            if (parameterType == Container.class) {
+                p = container;
+            } else if (parameterType == HTTPSession.class) {
+                p = session;
+            } else if (parameterType == Route.class) {
+                p = route;
+            } else if (parameterType == RouteParameters.class) {
+                p = getRouteParameters(route, session);
+            } else {
+                throw new UnhandledParameterException(parameterType);
+            }
+
+            parameters[i++] = p;
+        }
+
+        return parameters;
     }
 
     public void addRoute(Route route) throws RouteDuplicateException
@@ -102,5 +111,22 @@ public class Router extends ContainerAware
         }
 
         return null;
+    }
+
+    public RouteParameters getRouteParameters(Route route, HTTPSession session)
+    {
+        Pattern r = Pattern.compile(route.getPath().getPattern());
+
+        Matcher m = r.matcher(session.getUri());
+
+        RouteParameters parameterValues = new RouteParameters();
+
+        if (m.matches()) {
+            route.getPath().parameters.forEach((index, name) -> {
+                parameterValues.put(name, m.group(index));
+            });
+        }
+
+        return parameterValues;
     }
 }
