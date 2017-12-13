@@ -1,7 +1,8 @@
-package com.sallyf.sallyf.Routing;
+package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
+import com.sallyf.sallyf.Server.HTTPSession;
 
 public interface ActionInterface
 {

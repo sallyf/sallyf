@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.Routing;
+package com.sallyf.sallyf.Router;
 
 import java.util.HashMap;
 import java.util.regex.Matcher;
