@@ -1,19 +1,19 @@
-package com.raphaelvigee.sally;
+package com.raphaelvigee.sally.Server;
 
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAwareInterface;
-import com.raphaelvigee.sally.Routing.*;
+import com.raphaelvigee.sally.Router.*;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class YServer extends NanoHTTPD implements ContainerAwareInterface
+public class Server extends NanoHTTPD implements ContainerAwareInterface
 {
     private Container container;
 
-    public YServer()
+    public Server()
     {
         super(4367);
     }
@@ -21,11 +21,11 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
     @Override
     public Response serve(IHTTPSession s)
     {
-        com.raphaelvigee.sally.Routing.HTTPSession session = com.raphaelvigee.sally.Routing.HTTPSession.create(s);
+        com.raphaelvigee.sally.Server.HTTPSession session = com.raphaelvigee.sally.Server.HTTPSession.create(s);
 
-        Routing routing = container.get(Routing.class);
+        Router router = container.get(Router.class);
 
-        Route match = routing.match(session);
+        Route match = router.match(session);
 
         if (match == null) {
             return newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Not found");
@@ -36,7 +36,7 @@ public class YServer extends NanoHTTPD implements ContainerAwareInterface
 
         System.out.println("["+dateFormat.format(date)+"] "+session.getMethod()+" \""+session.getUri()+"\"");
 
-        com.raphaelvigee.sally.Routing.Response response;
+        com.raphaelvigee.sally.Router.Response response;
 
         try {
             response = match.getHandler().apply(container, session, match);
