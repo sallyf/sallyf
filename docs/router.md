@@ -31,3 +31,9 @@ public class MyController extends BaseController
 
 Here the controller declares one route matching `/hello/{name}`, `name` being a URL parameter.
 All routes should return a `Response`.
+
+In an action , several instances can be injected:
+
+- the `Container`
+- the `HTTPSession`
+- the `RoutePatameters`

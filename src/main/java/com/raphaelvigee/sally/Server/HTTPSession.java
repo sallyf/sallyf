@@ -1,5 +1,6 @@
 package com.raphaelvigee.sally.Server;
 
+import com.raphaelvigee.sally.Router.Route;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.util.Map;
@@ -17,6 +18,8 @@ public class HTTPSession
     private NanoHTTPD.CookieHandler cookies;
 
     private String queryParameterString;
+
+    private Route route;
 
     public static HTTPSession create(NanoHTTPD.IHTTPSession session)
     {
@@ -89,5 +92,15 @@ public class HTTPSession
     public void setQueryParameterString(String queryParameterString)
     {
         this.queryParameterString = queryParameterString;
+    }
+
+    public Route getRoute()
+    {
+        return route;
+    }
+
+    public void setRoute(Route route)
+    {
+        this.route = route;
     }
 }

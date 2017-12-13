@@ -3,9 +3,11 @@ package com.raphaelvigee.sally.Router;
 import com.raphaelvigee.sally.BaseController;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
+import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
+import com.raphaelvigee.sally.Router.Event.PreInvokeActionEvent;
 import com.raphaelvigee.sally.Server.HTTPSession;
 import com.raphaelvigee.sally.Server.Method;
 
@@ -22,6 +24,8 @@ public class Router extends ContainerAware
 
     public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
     {
+        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+
         com.raphaelvigee.sally.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
 
         String pathPrefix = controllerAnnotation == null ? "" : controllerAnnotation.path();
@@ -39,19 +43,29 @@ public class Router extends ContainerAware
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
-                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (container, session, route) -> {
-                    try {
-                        return (Response) method.invoke(null, getActionParameters(parameterTypes, container, session, route));
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
+                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (session) -> {
+                    Object[] parameters = getActionParameters(parameterTypes, session);
+
+                    ActionInvokerInterface actionInvoker = () -> {
+                        try {
+                            return (Response) method.invoke(null, parameters);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    };
+
+                    PreInvokeActionEvent preInvokeActionEvent = new PreInvokeActionEvent(session, parameters, actionInvoker);
+
+                    eventDispatcher.dispatch(Events.PRE_INVOKE_ACTION, preInvokeActionEvent);
+
+                    return preInvokeActionEvent.getActionInvoker().invoke();
                 });
             }
         }
     }
 
-    public Object[] getActionParameters(Class<?>[] parameterTypes, Container container, HTTPSession session, Route route) throws UnhandledParameterException
+    public Object[] getActionParameters(Class<?>[] parameterTypes, HTTPSession session) throws UnhandledParameterException
     {
         Object[] parameters = new Object[parameterTypes.length];
         int i = 0;
@@ -59,13 +73,11 @@ public class Router extends ContainerAware
             Object p;
 
             if (parameterType == Container.class) {
-                p = container;
+                p = getContainer();
             } else if (parameterType == HTTPSession.class) {
                 p = session;
-            } else if (parameterType == Route.class) {
-                p = route;
             } else if (parameterType == RouteParameters.class) {
-                p = getRouteParameters(route, session);
+                p = getRouteParameters(session.getRoute(), session);
             } else {
                 throw new UnhandledParameterException(parameterType);
             }
@@ -86,7 +98,7 @@ public class Router extends ContainerAware
         routeSignatures.add(route.toString());
     }
 
-    public void addAction(Method method, String path, ActionInterface handler) throws RouteDuplicateException
+    public void addAction(Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
     {
         addRoute(new Route(method, path, handler));
     }
