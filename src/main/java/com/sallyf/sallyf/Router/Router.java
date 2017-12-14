@@ -3,11 +3,12 @@ package com.sallyf.sallyf.Router;
 import com.sallyf.sallyf.BaseController;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAware;
+import com.sallyf.sallyf.Event.ActionFilterEvent;
+import com.sallyf.sallyf.Event.RouteParametersEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
-import com.sallyf.sallyf.Event.ActionFilterEvent;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Server.HTTPSession;
 import com.sallyf.sallyf.Server.Method;
@@ -20,6 +21,8 @@ import java.util.regex.Pattern;
 public class Router extends ContainerAware
 {
     private ArrayList<Route> routes = new ArrayList<>();
+
+    private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
 
     private ArrayList<String> routeSignatures = new ArrayList<>();
 
@@ -136,10 +139,34 @@ public class Router extends ContainerAware
 
         if (m.matches()) {
             route.getPath().parameters.forEach((index, name) -> {
-                parameterValues.put(name, m.group(index));
+                parameterValues.put(name, resolveRouteParameter(m, index, name, session));
             });
         }
 
+        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+
+        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(session, parameterValues));
+
         return parameterValues;
+    }
+
+    public Object resolveRouteParameter(Matcher m, Integer index, String name, HTTPSession session)
+    {
+        String value = m.group(index);
+        Object resolvedValue = value;
+
+        for (RouteParameterResolverInterface resolver : routeParameterResolvers) {
+            if (resolver.supports(name, value, session)) {
+                resolvedValue = resolver.resolve(name, value, session);
+                break;
+            }
+        }
+
+        return resolvedValue;
+    }
+
+    public void addRouteParameterResolver(RouteParameterResolverInterface resolver)
+    {
+        routeParameterResolvers.add(resolver);
     }
 }

@@ -2,13 +2,13 @@ package com.sallyf.sallyf.Server;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Event.HTTPSessionEvent;
+import com.sallyf.sallyf.Event.ResponseEvent;
+import com.sallyf.sallyf.Event.RouteMatchEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
-import com.sallyf.sallyf.Event.HTTPSessionEvent;
-import com.sallyf.sallyf.Event.ResponseEvent;
-import com.sallyf.sallyf.Event.RouteMatchEvent;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.io.IOException;
@@ -43,10 +43,21 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
     @Override
     public Response serve(IHTTPSession s)
     {
+        com.sallyf.sallyf.Server.HTTPSession session = com.sallyf.sallyf.Server.HTTPSession.create(s);
+
+        com.sallyf.sallyf.Router.Response response = serve(session);
+
+        if (null == response) {
+            return newFixedLengthResponse(Response.Status.OK, "text/plain", null);
+        }
+
+        return newFixedLengthResponse(response.getStatus(), response.getMimeType(), response.getContent());
+    }
+
+    public com.sallyf.sallyf.Router.Response serve(com.sallyf.sallyf.Server.HTTPSession session)
+    {
         try {
             EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
-
-            com.sallyf.sallyf.Server.HTTPSession session = com.sallyf.sallyf.Server.HTTPSession.create(s);
 
             Router router = container.get(Router.class);
 
@@ -58,17 +69,17 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
             eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(session));
 
             if (route == null) {
-                return newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Not found");
+                return new com.sallyf.sallyf.Router.Response("Not found", Status.NOT_FOUND, "text/plain");
             }
 
             com.sallyf.sallyf.Router.Response response = route.getHandler().apply(session);
 
             eventDispatcher.dispatch(KernelEvents.PRE_SEND_RESPONSE, new ResponseEvent(session, response));
 
-            return newFixedLengthResponse(response.getStatus(), response.getMimeType(), response.getContent());
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
-            return newFixedLengthResponse(Status.INTERNAL_ERROR, "text/plain", "Internal Error");
+            return new com.sallyf.sallyf.Router.Response("Internal Error", Status.INTERNAL_ERROR, "text/plain");
         }
     }
 

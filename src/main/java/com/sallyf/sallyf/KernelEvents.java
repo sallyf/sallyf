@@ -1,9 +1,6 @@
 package com.sallyf.sallyf;
 
-import com.sallyf.sallyf.Event.ActionFilterEvent;
-import com.sallyf.sallyf.Event.HTTPSessionEvent;
-import com.sallyf.sallyf.Event.ResponseEvent;
-import com.sallyf.sallyf.Event.RouteMatchEvent;
+import com.sallyf.sallyf.Event.*;
 import com.sallyf.sallyf.EventDispatcher.EventType;
 
 public class KernelEvents
@@ -15,4 +12,6 @@ public class KernelEvents
     public static final EventType<ResponseEvent> PRE_SEND_RESPONSE = new EventType<>("kernel.pre_send_response");
 
     public static final EventType<ActionFilterEvent> ACTION_FILTER = new EventType<>("kernel.pre_invoke_action");
+
+    public static final EventType<RouteParametersEvent> ROUTE_PARAMETERS = new EventType<>("kernel.route_parameters");
 }
