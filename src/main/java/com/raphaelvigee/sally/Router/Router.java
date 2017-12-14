@@ -3,11 +3,12 @@ package com.raphaelvigee.sally.Router;
 import com.raphaelvigee.sally.BaseController;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
+import com.raphaelvigee.sally.Event.ActionFilterEvent;
+import com.raphaelvigee.sally.Event.RouteParametersEvent;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
-import com.raphaelvigee.sally.Event.ActionFilterEvent;
 import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Server.HTTPSession;
 import com.raphaelvigee.sally.Server.Method;
@@ -20,6 +21,8 @@ import java.util.regex.Pattern;
 public class Router extends ContainerAware
 {
     private ArrayList<Route> routes = new ArrayList<>();
+
+    private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
 
     private ArrayList<String> routeSignatures = new ArrayList<>();
 
@@ -136,10 +139,34 @@ public class Router extends ContainerAware
 
         if (m.matches()) {
             route.getPath().parameters.forEach((index, name) -> {
-                parameterValues.put(name, m.group(index));
+                parameterValues.put(name, resolveRouteParameter(m, index, name, session));
             });
         }
 
+        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+
+        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(session, parameterValues));
+
         return parameterValues;
+    }
+
+    public Object resolveRouteParameter(Matcher m, Integer index, String name, HTTPSession session)
+    {
+        String value = m.group(index);
+        Object resolvedValue = value;
+
+        for (RouteParameterResolverInterface resolver : routeParameterResolvers) {
+            if (resolver.supports(name, value, session)) {
+                resolvedValue = resolver.resolve(name, value, session);
+                break;
+            }
+        }
+
+        return resolvedValue;
+    }
+
+    public void addRouteParameterResolver(RouteParameterResolverInterface resolver)
+    {
+        routeParameterResolvers.add(resolver);
     }
 }
