@@ -7,7 +7,7 @@ import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
-import com.sallyf.sallyf.Router.Event.PreInvokeActionEvent;
+import com.sallyf.sallyf.Router.Event.ActionFilterEvent;
 import com.sallyf.sallyf.Server.HTTPSession;
 import com.sallyf.sallyf.Server.Method;
 
@@ -43,23 +43,23 @@ public class Router extends ContainerAware
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
+                final ActionInvokerInterface actionInvoker = (parameters) -> {
+                    try {
+                        return (Response) method.invoke(null, parameters);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                };
+
                 addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (session) -> {
                     Object[] parameters = getActionParameters(parameterTypes, session);
 
-                    ActionInvokerInterface actionInvoker = () -> {
-                        try {
-                            return (Response) method.invoke(null, parameters);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    };
+                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(session, parameters, actionInvoker);
 
-                    PreInvokeActionEvent preInvokeActionEvent = new PreInvokeActionEvent(session, parameters, actionInvoker);
+                    eventDispatcher.dispatch(Events.ACTION_FILTER, actionFilterEvent);
 
-                    eventDispatcher.dispatch(Events.PRE_INVOKE_ACTION, preInvokeActionEvent);
-
-                    return preInvokeActionEvent.getActionInvoker().invoke();
+                    return actionFilterEvent.getActionInvoker().invoke(actionFilterEvent.getParameters());
                 });
             }
         }
