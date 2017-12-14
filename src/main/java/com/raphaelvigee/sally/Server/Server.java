@@ -51,18 +51,16 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
 
             eventDispatcher.dispatch(Events.PRE_MATCH, new HTTPSessionEvent(session));
 
-            Route match = router.match(session);
-            session.setRoute(match);
+            Route route = router.match(session);
+            session.setRoute(route);
 
             eventDispatcher.dispatch(Events.POST_MATCH, new RouteMatchEvent(session));
 
-            if (match == null) {
+            if (route == null) {
                 return newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Not found");
             }
 
-            com.raphaelvigee.sally.Router.Response response;
-
-            response = match.getHandler().apply(session);
+            com.raphaelvigee.sally.Router.Response response = route.getHandler().apply(session);
 
             eventDispatcher.dispatch(Events.PRE_SEND_RESPONSE, new ResponseEvent(session, response));
 
