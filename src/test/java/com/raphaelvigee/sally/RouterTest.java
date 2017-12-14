@@ -33,7 +33,9 @@ public class RouterTest
     @Test
     public void regexComputationTest()
     {
-        Router router = new Router();
+        Kernel app = Kernel.newInstance();
+
+        Router router = app.getContainer().get(Router.class);
 
         Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h) -> null);
 
