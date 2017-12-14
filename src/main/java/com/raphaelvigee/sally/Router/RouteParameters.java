@@ -2,11 +2,11 @@ package com.raphaelvigee.sally.Router;
 
 import java.util.HashMap;
 
-public class RouteParameters extends HashMap<String, String>
+public class RouteParameters extends HashMap<String, Object>
 {
-    public String get(String o, String fallback)
+    public <R> R get(String o, R fallback)
     {
-        String s = super.get(o);
+        R s = (R) super.get(o);
 
         if (s == null) {
             return fallback;

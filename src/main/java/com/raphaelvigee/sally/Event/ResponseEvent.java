@@ -1,4 +1,4 @@
-package com.raphaelvigee.sally.Server.Event;
+package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
 import com.raphaelvigee.sally.Router.Response;

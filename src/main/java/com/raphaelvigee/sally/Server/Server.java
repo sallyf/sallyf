@@ -2,12 +2,13 @@ package com.raphaelvigee.sally.Server;
 
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAwareInterface;
+import com.raphaelvigee.sally.Event.HTTPSessionEvent;
+import com.raphaelvigee.sally.Event.ResponseEvent;
+import com.raphaelvigee.sally.Event.RouteMatchEvent;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
+import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Router.Route;
 import com.raphaelvigee.sally.Router.Router;
-import com.raphaelvigee.sally.Server.Event.HTTPSessionEvent;
-import com.raphaelvigee.sally.Server.Event.ResponseEvent;
-import com.raphaelvigee.sally.Server.Event.RouteMatchEvent;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
     @Override
     public void start(int timeout, boolean daemon) throws IOException
     {
-        container.get(EventDispatcher.class).register(Events.PRE_SEND_RESPONSE, responseEvent -> {
+        container.get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, responseEvent -> {
             com.raphaelvigee.sally.Server.HTTPSession session = responseEvent.session;
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -42,34 +43,43 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
     @Override
     public Response serve(IHTTPSession s)
     {
+        com.raphaelvigee.sally.Server.HTTPSession session = com.raphaelvigee.sally.Server.HTTPSession.create(s);
+
+        com.raphaelvigee.sally.Router.Response response = serve(session);
+
+        if (null == response) {
+            return newFixedLengthResponse(Response.Status.OK, "text/plain", null);
+        }
+
+        return newFixedLengthResponse(response.getStatus(), response.getMimeType(), response.getContent());
+    }
+
+    public com.raphaelvigee.sally.Router.Response serve(com.raphaelvigee.sally.Server.HTTPSession session)
+    {
         try {
             EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
 
-            com.raphaelvigee.sally.Server.HTTPSession session = com.raphaelvigee.sally.Server.HTTPSession.create(s);
-
             Router router = container.get(Router.class);
 
-            eventDispatcher.dispatch(Events.PRE_MATCH, new HTTPSessionEvent(session));
+            eventDispatcher.dispatch(KernelEvents.PRE_MATCH_ROUTE, new HTTPSessionEvent(session));
 
-            Route match = router.match(session);
-            session.setRoute(match);
+            Route route = router.match(session);
+            session.setRoute(route);
 
-            eventDispatcher.dispatch(Events.POST_MATCH, new RouteMatchEvent(session));
+            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(session));
 
-            if (match == null) {
-                return newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Not found");
+            if (route == null) {
+                return new com.raphaelvigee.sally.Router.Response("Not found", Status.NOT_FOUND, "text/plain");
             }
 
-            com.raphaelvigee.sally.Router.Response response;
+            com.raphaelvigee.sally.Router.Response response = route.getHandler().apply(session);
 
-            response = match.getHandler().apply(session);
+            eventDispatcher.dispatch(KernelEvents.PRE_SEND_RESPONSE, new ResponseEvent(session, response));
 
-            eventDispatcher.dispatch(Events.PRE_SEND_RESPONSE, new ResponseEvent(session, response));
-
-            return newFixedLengthResponse(response.getStatus(), response.getMimeType(), response.getContent());
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
-            return newFixedLengthResponse(Status.INTERNAL_ERROR, "text/plain", "Internal Error");
+            return new com.raphaelvigee.sally.Router.Response("Internal Error", Status.INTERNAL_ERROR, "text/plain");
         }
     }
 
