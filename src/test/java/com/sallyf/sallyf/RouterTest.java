@@ -1,27 +1,41 @@
 package com.sallyf.sallyf;
 
-import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
-import com.sallyf.sallyf.Router.Response;
-import com.sallyf.sallyf.Router.Route;
-import com.sallyf.sallyf.Router.RouteParameters;
-import com.sallyf.sallyf.Router.Router;
+import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.HTTPSession;
 import com.sallyf.sallyf.Server.Method;
 import fi.iki.elonen.NanoHTTPD;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+class CapitalizerResolver implements RouteParameterResolverInterface<String>
+{
+    @Override
+    public boolean supports(String name, String value, HTTPSession session)
+    {
+        return Objects.equals(name, "name");
+    }
+
+    @Override
+    public String resolve(String name, String value, HTTPSession session)
+    {
+        return value.toUpperCase();
+    }
+}
 
 public class RouterTest
 {
     @Test
     public void regexComputationTest()
     {
-        Router router = new Router();
+        Kernel app = Kernel.newInstance();
+
+        Router router = app.getContainer().get(Router.class);
 
         Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (h) -> null);
 
@@ -105,8 +119,7 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
-        Router router = new Router();
-        router.setContainer(app.getContainer());
+        Router router = app.getContainer().add(Router.class);
 
         router.addController(TestController.class);
 
@@ -118,5 +131,27 @@ public class RouterTest
 
         assertEquals("hello", response.getContent());
         assertEquals("/prefixed/hello", routes.get(0).getPath().getDeclaration());
+    }
+
+    @Test
+    public void routeParameterResolverTest() throws Exception
+    {
+        Kernel app = Kernel.newInstance();
+
+        Router router = app.getContainer().get(Router.class);
+
+        router.addRouteParameterResolver(new CapitalizerResolver());
+
+        Route route = new Route(Method.GET, "/{name}", (h) -> null);
+        router.addRoute(route);
+
+        HTTPSession session = new HTTPSession();
+        session.setRoute(route);
+        session.setUri("/lowercase");
+        session.setMethod(NanoHTTPD.Method.GET);
+
+        RouteParameters routeParameters = router.getRouteParameters(route, session);
+
+        assertEquals("LOWERCASE", routeParameters.get("name"));
     }
 }
