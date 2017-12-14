@@ -28,7 +28,7 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
     @Override
     public void start(int timeout, boolean daemon) throws IOException
     {
-        container.get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, responseEvent -> {
+        getContainer().get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, responseEvent -> {
             com.raphaelvigee.sally.Server.HTTPSession session = responseEvent.session;
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -57,9 +57,9 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
     public com.raphaelvigee.sally.Router.Response serve(com.raphaelvigee.sally.Server.HTTPSession session)
     {
         try {
-            EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
+            EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
-            Router router = container.get(Router.class);
+            Router router = getContainer().get(Router.class);
 
             eventDispatcher.dispatch(KernelEvents.PRE_MATCH_ROUTE, new HTTPSessionEvent(session));
 
@@ -89,10 +89,14 @@ public class Server extends NanoHTTPD implements ContainerAwareInterface
         return super.getHostname() == null ? "localhost" : super.getHostname();
     }
 
-    @Override
     public void setContainer(Container container)
     {
         this.container = container;
+    }
+
+    public Container getContainer()
+    {
+        return container;
     }
 }
 
