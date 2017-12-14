@@ -7,7 +7,8 @@ import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
-import com.sallyf.sallyf.Router.Event.ActionFilterEvent;
+import com.sallyf.sallyf.Event.ActionFilterEvent;
+import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Server.HTTPSession;
 import com.sallyf.sallyf.Server.Method;
 
@@ -57,7 +58,7 @@ public class Router extends ContainerAware
 
                     ActionFilterEvent actionFilterEvent = new ActionFilterEvent(session, parameters, actionInvoker);
 
-                    eventDispatcher.dispatch(Events.ACTION_FILTER, actionFilterEvent);
+                    eventDispatcher.dispatch(KernelEvents.ACTION_FILTER, actionFilterEvent);
 
                     return actionFilterEvent.getActionInvoker().invoke(actionFilterEvent.getParameters());
                 });

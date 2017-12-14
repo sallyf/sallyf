@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.Server.Event;
+package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
 import com.sallyf.sallyf.Router.Response;
