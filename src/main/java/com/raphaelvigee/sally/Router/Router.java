@@ -7,7 +7,8 @@ import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
-import com.raphaelvigee.sally.Router.Event.ActionFilterEvent;
+import com.raphaelvigee.sally.Event.ActionFilterEvent;
+import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Server.HTTPSession;
 import com.raphaelvigee.sally.Server.Method;
 
@@ -57,7 +58,7 @@ public class Router extends ContainerAware
 
                     ActionFilterEvent actionFilterEvent = new ActionFilterEvent(session, parameters, actionInvoker);
 
-                    eventDispatcher.dispatch(Events.ACTION_FILTER, actionFilterEvent);
+                    eventDispatcher.dispatch(KernelEvents.ACTION_FILTER, actionFilterEvent);
 
                     return actionFilterEvent.getActionInvoker().invoke(actionFilterEvent.getParameters());
                 });

@@ -1,4 +1,4 @@
-package com.raphaelvigee.sally.Router.Event;
+package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
 import com.raphaelvigee.sally.Router.ActionInvokerInterface;
