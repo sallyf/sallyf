@@ -100,6 +100,11 @@ public class Container
 
     public <T extends ContainerAwareInterface> T get(Class<T> type)
     {
-        return (T) services.get(type.toString());
+        return (T) get(type.toString());
+    }
+
+    public Object get(String name)
+    {
+        return services.get(name);
     }
 }
