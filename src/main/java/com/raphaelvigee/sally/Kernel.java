@@ -25,7 +25,7 @@ public class Kernel
     {
         Container container = new Container();
 
-        container.add(Server.class, false);
+        container.add(Server.class);
         container.add(Router.class);
         container.add(EventDispatcher.class);
         container.add(InMemorySessionManager.class);

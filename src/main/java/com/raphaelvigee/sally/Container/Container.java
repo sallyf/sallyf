@@ -2,6 +2,8 @@ package com.raphaelvigee.sally.Container;
 
 import com.raphaelvigee.sally.Exception.ServiceInstanciationException;
 
+import javax.lang.model.type.ExecutableType;
+import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -21,26 +23,8 @@ public class Container
         return add(type, new Object[]{this});
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> type, boolean injectContainer) throws ServiceInstanciationException
-    {
-        if (!injectContainer) {
-            return add(type, new Object[]{});
-        }
-
-        return add(type, new Object[]{this});
-    }
-
     public <T extends ContainerAwareInterface> T add(Class<T> className, Class<T> type) throws ServiceInstanciationException
     {
-        return add(className, type, new Object[]{this});
-    }
-
-    public <T extends ContainerAwareInterface> T add(Class<T> className, Class<T> type, boolean injectContainer) throws ServiceInstanciationException
-    {
-        if (!injectContainer) {
-            return add(className, type, new Object[]{});
-        }
-
         return add(className, type, new Object[]{this});
     }
 
@@ -59,6 +43,7 @@ public class Container
         T instance;
 
         boolean parametersContainsContainer = false;
+        boolean instantiatedWithContainer = false;
 
         Class[] parameterTypes = new Class[parameters.length];
         int i = 0;
@@ -72,11 +57,17 @@ public class Container
 
         try {
             instance = type.getConstructor(parameterTypes).newInstance(parameters);
+            instantiatedWithContainer = parametersContainsContainer;
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new ServiceInstanciationException(e);
+            try {
+                instance = type.getConstructor().newInstance();
+            } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e2) {
+                e.addSuppressed(e2);
+                throw new ServiceInstanciationException(e);
+            }
         }
 
-        if (!parametersContainsContainer) {
+        if (!instantiatedWithContainer) {
             try {
                 Method setContainer = type.getMethod("setContainer", Container.class);
                 try {
@@ -85,7 +76,7 @@ public class Container
                     throw new ServiceInstanciationException(e);
                 }
             } catch (NoSuchMethodException e) {
-                throw new ServiceInstanciationException("Unable to inject Container");
+                throw new ServiceInstanciationException("Unable to inject Container, you need to implement a `setContainer` method.");
             }
         }
 

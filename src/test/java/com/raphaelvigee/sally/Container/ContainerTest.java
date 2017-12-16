@@ -31,7 +31,7 @@ public class ContainerTest
         Class c = ExampleServiceImplements.class;
 
         Container container = new Container();
-        container.add(c, false);
+        container.add(c);
 
         assertNotNull(container.get(c));
     }
@@ -53,7 +53,7 @@ public class ContainerTest
         Class c = MyAlias.class;
 
         Container container = new Container();
-        container.add(c, ExampleServiceImplements.class, false);
+        container.add(c, ExampleServiceImplements.class);
 
         assertNotNull(container.get(c));
     }
