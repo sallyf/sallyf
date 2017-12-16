@@ -18,27 +18,27 @@ public class Container
         services = new HashMap<>();
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> type) throws ServiceInstanciationException
+    public <T extends ContainerAwareInterface> T add(Class<T> serviceClass) throws ServiceInstanciationException
     {
-        return add(type, new Object[]{this});
+        return add(serviceClass, new Object[]{this});
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> className, Class<T> type) throws ServiceInstanciationException
+    public <T extends ContainerAwareInterface> T add(Class<T> serviceNameClass, Class<T> serviceClass) throws ServiceInstanciationException
     {
-        return add(className, type, new Object[]{this});
+        return add(serviceNameClass, serviceClass, new Object[]{this});
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> type, Object[] parameters) throws ServiceInstanciationException
+    public <T extends ContainerAwareInterface> T add(Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
     {
-        return add(type.toString(), type, parameters);
+        return add(serviceClass.toString(), serviceClass, parameters);
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> className, Class<T> type, Object[] parameters) throws ServiceInstanciationException
+    public <T extends ContainerAwareInterface> T add(Class<T> serviceNameClass, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
     {
-        return add(className.toString(), type, parameters);
+        return add(serviceNameClass.toString(), serviceClass, parameters);
     }
 
-    public <T extends ContainerAwareInterface> T add(String name, Class<T> type, Object[] parameters) throws ServiceInstanciationException
+    public <T extends ContainerAwareInterface> T add(String name, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
     {
         T instance;
 
@@ -56,11 +56,11 @@ public class Container
         }
 
         try {
-            instance = type.getConstructor(parameterTypes).newInstance(parameters);
+            instance = serviceClass.getConstructor(parameterTypes).newInstance(parameters);
             instantiatedWithContainer = parametersContainsContainer;
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             try {
-                instance = type.getConstructor().newInstance();
+                instance = serviceClass.getConstructor().newInstance();
             } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e2) {
                 e.addSuppressed(e2);
                 throw new ServiceInstanciationException(e);
@@ -69,7 +69,7 @@ public class Container
 
         if (!instantiatedWithContainer) {
             try {
-                Method setContainer = type.getMethod("setContainer", Container.class);
+                Method setContainer = serviceClass.getMethod("setContainer", Container.class);
                 try {
                     setContainer.invoke(instance, this);
                 } catch (IllegalAccessException | InvocationTargetException e) {
