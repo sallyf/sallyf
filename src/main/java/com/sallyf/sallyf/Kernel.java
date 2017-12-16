@@ -5,6 +5,7 @@ import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Server;
+import com.sallyf.sallyf.Session.Handler.InMemorySessionManager;
 import fi.iki.elonen.NanoHTTPD;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class Kernel
         container.add(Server.class);
         container.add(Router.class);
         container.add(EventDispatcher.class);
+        container.add(InMemorySessionManager.class);
 
         return new Kernel(container);
     }
