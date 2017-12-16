@@ -2,6 +2,7 @@ package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
+import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Server;
@@ -20,11 +21,11 @@ public class Kernel
         this.container = container;
     }
 
-    public static Kernel newInstance()
+    public static Kernel newInstance() throws FrameworkException
     {
         Container container = new Container();
 
-        container.add(Server.class);
+        container.add(Server.class, false);
         container.add(Router.class);
         container.add(EventDispatcher.class);
         container.add(InMemorySessionManager.class);

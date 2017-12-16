@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.Session.Handler;
 
+import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAware;
 import com.sallyf.sallyf.Server.Cookie;
 import com.sallyf.sallyf.Server.Request;
@@ -12,6 +13,11 @@ import java.util.HashMap;
 public class InMemorySessionManager extends ContainerAware implements SessionManagerInterface<InMemorySession>
 {
     private HashMap<String, InMemorySession> sessions = new HashMap<>();
+
+    public InMemorySessionManager(Container container)
+    {
+        super(container);
+    }
 
     public String getIdCookieName()
     {

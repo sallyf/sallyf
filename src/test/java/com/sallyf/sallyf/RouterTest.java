@@ -1,5 +1,7 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.Request;
@@ -31,7 +33,7 @@ class CapitalizerResolver implements RouteParameterResolverInterface<String>
 public class RouterTest
 {
     @Test
-    public void regexComputationTest()
+    public void regexComputationTest() throws FrameworkException
     {
         Kernel app = Kernel.newInstance();
 
@@ -61,7 +63,9 @@ public class RouterTest
         Route route3 = new Route(Method.POST, "/qwertyuiop", (h) -> null);
         Route route4 = new Route(Method.GET, "/", (h) -> null);
 
-        Router router = new Router();
+        Container container = new Container();
+
+        Router router = new Router(container);
         router.addRoute(route1);
         router.addRoute(route2);
         router.addRoute(route3);
@@ -98,7 +102,9 @@ public class RouterTest
         Route route1 = new Route(Method.GET, "/abc", (h) -> null);
         Route route2 = new Route(Method.GET, "/abc", (h) -> null);
 
-        Router router = new Router();
+        Container container = new Container();
+
+        Router router = new Router(container);
         router.addRoute(route1);
         router.addRoute(route2);
     }
@@ -109,7 +115,9 @@ public class RouterTest
         Route route1 = new Route(Method.GET, "/abc", (h) -> null);
         Route route2 = new Route(Method.POST, "/abc", (h) -> null);
 
-        Router router = new Router();
+        Container container = new Container();
+
+        Router router = new Router(container);
         router.addRoute(route1);
         router.addRoute(route2);
     }
