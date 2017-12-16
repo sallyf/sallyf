@@ -20,6 +20,11 @@ import java.util.regex.Pattern;
 
 public class Router extends ContainerAware
 {
+    public Router(Container container)
+    {
+        super(container);
+    }
+
     private ArrayList<Route> routes = new ArrayList<>();
 
     private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();

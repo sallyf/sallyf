@@ -1,5 +1,6 @@
 package com.raphaelvigee.sally.Session.Handler;
 
+import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
 import com.raphaelvigee.sally.Server.Cookie;
 import com.raphaelvigee.sally.Server.Request;
@@ -12,6 +13,11 @@ import java.util.HashMap;
 public class InMemorySessionManager extends ContainerAware implements SessionManagerInterface<InMemorySession>
 {
     private HashMap<String, InMemorySession> sessions = new HashMap<>();
+
+    public InMemorySessionManager(Container container)
+    {
+        super(container);
+    }
 
     public String getIdCookieName()
     {
