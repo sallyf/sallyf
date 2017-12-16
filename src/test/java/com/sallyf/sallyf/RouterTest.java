@@ -53,6 +53,8 @@ public class RouterTest
         expectedParameters.put("dat_test", "dat_var");
 
         assertEquals(expectedParameters, router.getRouteParameters(route, request));
+
+        app.stop();
     }
 
     @Test
@@ -139,6 +141,8 @@ public class RouterTest
 
         assertEquals("hello", response.getContent());
         assertEquals("/prefixed/hello", routes.get(0).getPath().getDeclaration());
+
+        app.stop();
     }
 
     @Test

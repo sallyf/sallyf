@@ -50,7 +50,7 @@ public class Kernel
 
         ArrayList<Route> routes = router.getRoutes();
 
-        System.out.println(routes.size()+" routes registered:");
+        System.out.println(routes.size() + " routes registered:");
         for (Route route : routes) {
             System.out.println(route.toString());
         }
@@ -58,5 +58,12 @@ public class Kernel
 
         System.out.println("Listening on http://" + server.getHostname() + ":" + server.getListeningPort());
         System.out.println();
+    }
+
+    public void stop()
+    {
+        Server server = container.get(Server.class);
+
+        server.stop();
     }
 }
