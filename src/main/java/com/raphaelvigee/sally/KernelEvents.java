@@ -5,7 +5,7 @@ import com.raphaelvigee.sally.EventDispatcher.EventType;
 
 public class KernelEvents
 {
-    public static final EventType<HTTPSessionEvent> PRE_MATCH_ROUTE = new EventType<>("kernel.pre_match_route");
+    public static final EventType<RequestEvent> PRE_MATCH_ROUTE = new EventType<>("kernel.pre_match_route");
 
     public static final EventType<RouteMatchEvent> POST_MATCH_ROUTE = new EventType<>("kernel.post_match_route");
 

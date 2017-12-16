@@ -1,10 +1,10 @@
 package com.raphaelvigee.sally.Router;
 
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
-import com.raphaelvigee.sally.Server.HTTPSession;
+import com.raphaelvigee.sally.Server.Request;
 
 @FunctionalInterface
 public interface ActionWrapperInterface
 {
-    Response apply(HTTPSession s) throws UnhandledParameterException;
+    Response apply(Request r) throws UnhandledParameterException;
 }

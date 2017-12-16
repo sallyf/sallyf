@@ -2,32 +2,32 @@ package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
 import com.raphaelvigee.sally.Router.ActionInvokerInterface;
-import com.raphaelvigee.sally.Server.HTTPSession;
+import com.raphaelvigee.sally.Server.Request;
 
 public class ActionFilterEvent implements EventInterface
 {
-    private HTTPSession session;
+    private Request request;
 
     private Object[] parameters;
 
     private ActionInvokerInterface actionInvoker;
 
-    public ActionFilterEvent(HTTPSession session, Object[] parameters, ActionInvokerInterface actionInvoker)
+    public ActionFilterEvent(Request request, Object[] parameters, ActionInvokerInterface actionInvoker)
     {
 
-        this.session = session;
+        this.request = request;
         this.parameters = parameters;
         this.actionInvoker = actionInvoker;
     }
 
-    public HTTPSession getSession()
+    public Request getRequest()
     {
-        return session;
+        return request;
     }
 
-    public void setSession(HTTPSession session)
+    public void setRequest(Request request)
     {
-        this.session = session;
+        this.request = request;
     }
 
     public Object[] getParameters()

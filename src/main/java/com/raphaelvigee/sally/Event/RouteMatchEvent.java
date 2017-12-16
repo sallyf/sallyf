@@ -1,14 +1,14 @@
 package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
-import com.raphaelvigee.sally.Server.HTTPSession;
+import com.raphaelvigee.sally.Server.Request;
 
 public class RouteMatchEvent implements EventInterface
 {
-    public HTTPSession session;
+    public Request request;
 
-    public RouteMatchEvent(HTTPSession session)
+    public RouteMatchEvent(Request request)
     {
-        this.session = session;
+        this.request = request;
     }
 }
