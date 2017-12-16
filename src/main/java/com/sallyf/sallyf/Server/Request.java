@@ -5,7 +5,7 @@ import fi.iki.elonen.NanoHTTPD;
 
 import java.util.Map;
 
-public class HTTPSession
+public class Request
 {
     private String uri;
 
@@ -21,17 +21,17 @@ public class HTTPSession
 
     private Route route;
 
-    public static HTTPSession create(NanoHTTPD.IHTTPSession session)
+    public static Request create(NanoHTTPD.IHTTPSession session)
     {
-        HTTPSession s = new HTTPSession();
-        s.setCookies(session.getCookies());
-        s.setHeaders(session.getHeaders());
-        s.setMethod(session.getMethod());
-        s.setParms(session.getParms());
-        s.setUri(session.getUri());
-        s.setQueryParameterString(session.getQueryParameterString());
+        Request r = new Request();
+        r.setCookies(session.getCookies());
+        r.setHeaders(session.getHeaders());
+        r.setMethod(session.getMethod());
+        r.setParms(session.getParms());
+        r.setUri(session.getUri());
+        r.setQueryParameterString(session.getQueryParameterString());
 
-        return s;
+        return r;
     }
 
     public String getUri()

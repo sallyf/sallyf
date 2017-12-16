@@ -10,7 +10,7 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.KernelEvents;
-import com.sallyf.sallyf.Server.HTTPSession;
+import com.sallyf.sallyf.Server.Request;
 import com.sallyf.sallyf.Server.Method;
 
 import java.lang.reflect.InvocationTargetException;
@@ -56,10 +56,10 @@ public class Router extends ContainerAware
                     }
                 };
 
-                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (session) -> {
-                    Object[] parameters = getActionParameters(parameterTypes, session);
+                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (request) -> {
+                    Object[] parameters = getActionParameters(parameterTypes, request);
 
-                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(session, parameters, actionInvoker);
+                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(request, parameters, actionInvoker);
 
                     eventDispatcher.dispatch(KernelEvents.ACTION_FILTER, actionFilterEvent);
 
@@ -69,7 +69,7 @@ public class Router extends ContainerAware
         }
     }
 
-    public Object[] getActionParameters(Class<?>[] parameterTypes, HTTPSession session) throws UnhandledParameterException
+    public Object[] getActionParameters(Class<?>[] parameterTypes, Request request) throws UnhandledParameterException
     {
         Object[] parameters = new Object[parameterTypes.length];
         int i = 0;
@@ -78,10 +78,10 @@ public class Router extends ContainerAware
 
             if (parameterType == Container.class) {
                 p = getContainer();
-            } else if (parameterType == HTTPSession.class) {
-                p = session;
+            } else if (parameterType == Request.class) {
+                p = request;
             } else if (parameterType == RouteParameters.class) {
-                p = getRouteParameters(session.getRoute(), session);
+                p = getRouteParameters(request.getRoute(), request);
             } else {
                 throw new UnhandledParameterException(parameterType);
             }
@@ -112,13 +112,13 @@ public class Router extends ContainerAware
         return routes;
     }
 
-    public Route match(HTTPSession session)
+    public Route match(Request request)
     {
         for (Route route : routes) {
-            if (session.getMethod().toString().equals(route.getMethod().toString())) {
+            if (request.getMethod().toString().equals(route.getMethod().toString())) {
                 Pattern r = Pattern.compile(route.getPath().pattern);
 
-                Matcher m = r.matcher(session.getUri());
+                Matcher m = r.matcher(request.getUri());
 
                 if (m.matches()) {
                     return route;
@@ -129,35 +129,35 @@ public class Router extends ContainerAware
         return null;
     }
 
-    public RouteParameters getRouteParameters(Route route, HTTPSession session)
+    public RouteParameters getRouteParameters(Route route, Request request)
     {
         Pattern r = Pattern.compile(route.getPath().getPattern());
 
-        Matcher m = r.matcher(session.getUri());
+        Matcher m = r.matcher(request.getUri());
 
         RouteParameters parameterValues = new RouteParameters();
 
         if (m.matches()) {
             route.getPath().parameters.forEach((index, name) -> {
-                parameterValues.put(name, resolveRouteParameter(m, index, name, session));
+                parameterValues.put(name, resolveRouteParameter(m, index, name, request));
             });
         }
 
         EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
-        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(session, parameterValues));
+        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(request, parameterValues));
 
         return parameterValues;
     }
 
-    public Object resolveRouteParameter(Matcher m, Integer index, String name, HTTPSession session)
+    public Object resolveRouteParameter(Matcher m, Integer index, String name, Request request)
     {
         String value = m.group(index);
         Object resolvedValue = value;
 
         for (RouteParameterResolverInterface resolver : routeParameterResolvers) {
-            if (resolver.supports(name, value, session)) {
-                resolvedValue = resolver.resolve(name, value, session);
+            if (resolver.supports(name, value, request)) {
+                resolvedValue = resolver.resolve(name, value, request);
                 break;
             }
         }

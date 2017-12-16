@@ -1,14 +1,14 @@
 package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
-import com.sallyf.sallyf.Server.HTTPSession;
+import com.sallyf.sallyf.Server.Request;
 
 public class RouteMatchEvent implements EventInterface
 {
-    public HTTPSession session;
+    public Request request;
 
-    public RouteMatchEvent(HTTPSession session)
+    public RouteMatchEvent(Request request)
     {
-        this.session = session;
+        this.request = request;
     }
 }

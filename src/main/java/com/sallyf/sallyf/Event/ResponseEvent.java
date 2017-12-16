@@ -2,17 +2,17 @@ package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
 import com.sallyf.sallyf.Router.Response;
-import com.sallyf.sallyf.Server.HTTPSession;
+import com.sallyf.sallyf.Server.Request;
 
 public class ResponseEvent implements EventInterface
 {
-    public HTTPSession session;
+    public Request request;
 
     public Response response;
 
-    public ResponseEvent(HTTPSession session, Response response)
+    public ResponseEvent(Request request, Response response)
     {
-        this.session = session;
+        this.request = request;
         this.response = response;
     }
 }

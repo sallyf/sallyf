@@ -2,32 +2,32 @@ package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
 import com.sallyf.sallyf.Router.ActionInvokerInterface;
-import com.sallyf.sallyf.Server.HTTPSession;
+import com.sallyf.sallyf.Server.Request;
 
 public class ActionFilterEvent implements EventInterface
 {
-    private HTTPSession session;
+    private Request request;
 
     private Object[] parameters;
 
     private ActionInvokerInterface actionInvoker;
 
-    public ActionFilterEvent(HTTPSession session, Object[] parameters, ActionInvokerInterface actionInvoker)
+    public ActionFilterEvent(Request request, Object[] parameters, ActionInvokerInterface actionInvoker)
     {
 
-        this.session = session;
+        this.request = request;
         this.parameters = parameters;
         this.actionInvoker = actionInvoker;
     }
 
-    public HTTPSession getSession()
+    public Request getRequest()
     {
-        return session;
+        return request;
     }
 
-    public void setSession(HTTPSession session)
+    public void setRequest(Request request)
     {
-        this.session = session;
+        this.request = request;
     }
 
     public Object[] getParameters()

@@ -1,10 +1,10 @@
 package com.sallyf.sallyf.Router;
 
-import com.sallyf.sallyf.Server.HTTPSession;
+import com.sallyf.sallyf.Server.Request;
 
 public interface RouteParameterResolverInterface<R>
 {
-    boolean supports(String name, String value, HTTPSession session);
+    boolean supports(String name, String value, Request request);
 
-    R resolve(String name, String value, HTTPSession session);
+    R resolve(String name, String value, Request request);
 }
