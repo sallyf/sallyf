@@ -1,10 +1,10 @@
 package com.raphaelvigee.sally.Router;
 
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
-import com.raphaelvigee.sally.Server.Request;
+import org.eclipse.jetty.server.Request;
 
 @FunctionalInterface
 public interface ActionWrapperInterface
 {
-    Response apply(Request r) throws UnhandledParameterException;
+    Response apply(Request request, Route route) throws UnhandledParameterException;
 }

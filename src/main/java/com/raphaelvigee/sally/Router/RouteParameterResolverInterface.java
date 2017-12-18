@@ -1,10 +1,10 @@
 package com.raphaelvigee.sally.Router;
 
-import com.raphaelvigee.sally.Server.Request;
+import org.eclipse.jetty.server.Request;
 
 public interface RouteParameterResolverInterface<R>
 {
-    boolean supports(String name, String value, Request request);
+    boolean supports(String name, String value, Request request, Route route);
 
-    R resolve(String name, String value, Request request);
+    R resolve(String name, String value, Request request, Route route);
 }

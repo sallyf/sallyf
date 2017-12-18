@@ -1,18 +1,22 @@
 package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
+import com.raphaelvigee.sally.Router.Route;
 import com.raphaelvigee.sally.Router.RouteParameters;
-import com.raphaelvigee.sally.Server.Request;
+import org.eclipse.jetty.server.Request;
 
 public class RouteParametersEvent implements EventInterface
 {
-    public Request request;
+    private Request request;
 
-    public RouteParameters parameterValues;
+    private Route route;
 
-    public RouteParametersEvent(Request request, RouteParameters parameterValues) {
+    private RouteParameters parameterValues;
 
+    public RouteParametersEvent(Request request, Route route, RouteParameters parameterValues)
+    {
         this.request = request;
+        this.route = route;
         this.parameterValues = parameterValues;
     }
 }
