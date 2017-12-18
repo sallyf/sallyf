@@ -12,6 +12,9 @@ import com.raphaelvigee.sally.Exception.UnhandledParameterException;
 import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Server.Method;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.log.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
