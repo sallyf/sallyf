@@ -41,7 +41,6 @@ public class Kernel
         Router router = container.get(Router.class);
         try {
             server.start();
-            server.join();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -58,6 +57,12 @@ public class Kernel
 
         System.out.println("Listening on http://" + connector.getName() + ":" + connector.getLocalPort());
         System.out.println();
+
+        try {
+            server.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void stop()
