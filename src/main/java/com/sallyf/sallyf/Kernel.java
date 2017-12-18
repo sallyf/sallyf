@@ -5,11 +5,9 @@ import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
-import com.sallyf.sallyf.Server.Server;
-import com.sallyf.sallyf.Session.Handler.InMemorySessionManager;
-import fi.iki.elonen.NanoHTTPD;
+import com.sallyf.sallyf.Server.FrameworkServer;
+import org.eclipse.jetty.server.ServerConnector;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class Kernel
@@ -25,10 +23,9 @@ public class Kernel
     {
         Container container = new Container();
 
-        container.add(Server.class);
+        container.add(FrameworkServer.class);
         container.add(Router.class);
         container.add(EventDispatcher.class);
-        container.add(InMemorySessionManager.class);
 
         return new Kernel(container);
     }
@@ -40,11 +37,12 @@ public class Kernel
 
     public void start()
     {
-        Server server = container.get(Server.class);
+        FrameworkServer server = container.get(FrameworkServer.class);
         Router router = container.get(Router.class);
         try {
-            server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        } catch (IOException e) {
+            server.start();
+            server.join();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -56,14 +54,20 @@ public class Kernel
         }
         System.out.println();
 
-        System.out.println("Listening on http://" + server.getHostname() + ":" + server.getListeningPort());
+        ServerConnector connector = (ServerConnector) server.getConnectors()[0];
+
+        System.out.println("Listening on http://" + connector.getName() + ":" + connector.getLocalPort());
         System.out.println();
     }
 
     public void stop()
     {
-        Server server = container.get(Server.class);
+        FrameworkServer server = container.get(FrameworkServer.class);
 
-        server.stop();
+        try {
+            server.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,10 +1,10 @@
 package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
-import com.sallyf.sallyf.Server.Request;
+import org.eclipse.jetty.server.Request;
 
 @FunctionalInterface
 public interface ActionWrapperInterface
 {
-    Response apply(Request r) throws UnhandledParameterException;
+    Response apply(Request request, Route route) throws UnhandledParameterException;
 }

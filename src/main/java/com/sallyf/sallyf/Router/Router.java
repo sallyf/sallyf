@@ -10,8 +10,8 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.KernelEvents;
-import com.sallyf.sallyf.Server.Request;
 import com.sallyf.sallyf.Server.Method;
+import org.eclipse.jetty.server.Request;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -61,10 +61,10 @@ public class Router extends ContainerAware
                     }
                 };
 
-                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (request) -> {
-                    Object[] parameters = getActionParameters(parameterTypes, request);
+                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (request, route) -> {
+                    Object[] parameters = getActionParameters(parameterTypes, request, route);
 
-                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(request, parameters, actionInvoker);
+                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(request, route, parameters, actionInvoker);
 
                     eventDispatcher.dispatch(KernelEvents.ACTION_FILTER, actionFilterEvent);
 
@@ -74,7 +74,7 @@ public class Router extends ContainerAware
         }
     }
 
-    public Object[] getActionParameters(Class<?>[] parameterTypes, Request request) throws UnhandledParameterException
+    public Object[] getActionParameters(Class<?>[] parameterTypes, Request request, Route route) throws UnhandledParameterException
     {
         Object[] parameters = new Object[parameterTypes.length];
         int i = 0;
@@ -86,7 +86,7 @@ public class Router extends ContainerAware
             } else if (parameterType == Request.class) {
                 p = request;
             } else if (parameterType == RouteParameters.class) {
-                p = getRouteParameters(request.getRoute(), request);
+                p = getRouteParameters(route, request);
             } else {
                 throw new UnhandledParameterException(parameterType);
             }
@@ -120,10 +120,10 @@ public class Router extends ContainerAware
     public Route match(Request request)
     {
         for (Route route : routes) {
-            if (request.getMethod().toString().equals(route.getMethod().toString())) {
+            if (request.getMethod().equals(route.getMethod().toString())) {
                 Pattern r = Pattern.compile(route.getPath().pattern);
 
-                Matcher m = r.matcher(request.getUri());
+                Matcher m = r.matcher(request.getPathInfo());
 
                 if (m.matches()) {
                     return route;
@@ -138,31 +138,31 @@ public class Router extends ContainerAware
     {
         Pattern r = Pattern.compile(route.getPath().getPattern());
 
-        Matcher m = r.matcher(request.getUri());
+        Matcher m = r.matcher(request.getPathInfo());
 
         RouteParameters parameterValues = new RouteParameters();
 
         if (m.matches()) {
             route.getPath().parameters.forEach((index, name) -> {
-                parameterValues.put(name, resolveRouteParameter(m, index, name, request));
+                parameterValues.put(name, resolveRouteParameter(m, index, name, request, route));
             });
         }
 
         EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
-        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(request, parameterValues));
+        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(request, route, parameterValues));
 
         return parameterValues;
     }
 
-    public Object resolveRouteParameter(Matcher m, Integer index, String name, Request request)
+    public Object resolveRouteParameter(Matcher m, Integer index, String name, Request request, Route route)
     {
         String value = m.group(index);
         Object resolvedValue = value;
 
         for (RouteParameterResolverInterface resolver : routeParameterResolvers) {
-            if (resolver.supports(name, value, request)) {
-                resolvedValue = resolver.resolve(name, value, request);
+            if (resolver.supports(name, value, request, route)) {
+                resolvedValue = resolver.resolve(name, value, request, route);
                 break;
             }
         }

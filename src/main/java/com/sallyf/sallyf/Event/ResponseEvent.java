@@ -2,13 +2,13 @@ package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
 import com.sallyf.sallyf.Router.Response;
-import com.sallyf.sallyf.Server.Request;
+import org.eclipse.jetty.server.Request;
 
 public class ResponseEvent implements EventInterface
 {
-    public Request request;
+    private Request request;
 
-    public Response response;
+    private Response response;
 
     public ResponseEvent(Request request, Response response)
     {

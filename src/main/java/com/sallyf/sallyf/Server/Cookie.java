@@ -1,26 +1,9 @@
 package com.sallyf.sallyf.Server;
 
-import fi.iki.elonen.NanoHTTPD;
-
-public class Cookie extends NanoHTTPD.Cookie
+public class Cookie extends javax.servlet.http.Cookie
 {
-    private final String path;
-
-    public Cookie(String name, String value, int numDays, String path)
+    public Cookie(String name, String value)
     {
-        super(name, value, numDays);
-        this.path = path;
-    }
-
-    @Override
-    public String getHTTPHeader()
-    {
-        String header = super.getHTTPHeader();
-
-        if (path != null) {
-            header += "; path=" + path;
-        }
-
-        return header;
+        super(name, value);
     }
 }

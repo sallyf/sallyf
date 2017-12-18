@@ -1,14 +1,14 @@
 package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
-import com.sallyf.sallyf.Server.Request;
+import org.eclipse.jetty.server.Request;
 
 public class RequestEvent implements EventInterface
 {
-    public Request session;
+    public Request request;
 
-    public RequestEvent(Request session) {
-
-        this.session = session;
+    public RequestEvent(Request request)
+    {
+        this.request = request;
     }
 }
