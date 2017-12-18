@@ -2,36 +2,31 @@ package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
 import com.sallyf.sallyf.Router.ActionInvokerInterface;
-import com.sallyf.sallyf.Router.Route;
-import org.eclipse.jetty.server.Request;
+import com.sallyf.sallyf.Server.RuntimeBag;
 
 public class ActionFilterEvent implements EventInterface
 {
-    private Request request;
-
-    private Route route;
-
     private Object[] parameters;
 
     private ActionInvokerInterface actionInvoker;
 
-    public ActionFilterEvent(Request request, Route route, Object[] parameters, ActionInvokerInterface actionInvoker)
-    {
+    private RuntimeBag runtimeBag;
 
-        this.request = request;
-        this.route = route;
+    public ActionFilterEvent(RuntimeBag runtimeBag, Object[] parameters, ActionInvokerInterface actionInvoker)
+    {
+        this.runtimeBag = runtimeBag;
         this.parameters = parameters;
         this.actionInvoker = actionInvoker;
     }
 
-    public Request getRequest()
+    public RuntimeBag getRuntimeBag()
     {
-        return request;
+        return runtimeBag;
     }
 
-    public void setRequest(Request request)
+    public void setRuntimeBag(RuntimeBag runtimeBag)
     {
-        this.request = request;
+        this.runtimeBag = runtimeBag;
     }
 
     public Object[] getParameters()

@@ -11,10 +11,8 @@ import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Server.Method;
+import com.sallyf.sallyf.Server.RuntimeBag;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -64,10 +62,10 @@ public class Router extends ContainerAware
                     }
                 };
 
-                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (request, route) -> {
-                    Object[] parameters = getActionParameters(parameterTypes, request, route);
+                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (requestBag) -> {
+                    Object[] parameters = getActionParameters(parameterTypes, requestBag);
 
-                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(request, route, parameters, actionInvoker);
+                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(requestBag, parameters, actionInvoker);
 
                     eventDispatcher.dispatch(KernelEvents.ACTION_FILTER, actionFilterEvent);
 
@@ -77,7 +75,7 @@ public class Router extends ContainerAware
         }
     }
 
-    public Object[] getActionParameters(Class<?>[] parameterTypes, Request request, Route route) throws UnhandledParameterException
+    public Object[] getActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag) throws UnhandledParameterException
     {
         Object[] parameters = new Object[parameterTypes.length];
         int i = 0;
@@ -87,9 +85,9 @@ public class Router extends ContainerAware
             if (parameterType == Container.class) {
                 p = getContainer();
             } else if (parameterType == Request.class) {
-                p = request;
+                p = runtimeBag.getRequest();
             } else if (parameterType == RouteParameters.class) {
-                p = getRouteParameters(route, request);
+                p = getRouteParameters(runtimeBag);
             } else {
                 throw new UnhandledParameterException(parameterType);
             }
@@ -137,35 +135,35 @@ public class Router extends ContainerAware
         return null;
     }
 
-    public RouteParameters getRouteParameters(Route route, Request request)
+    public RouteParameters getRouteParameters(RuntimeBag runtimeBag)
     {
-        Pattern r = Pattern.compile(route.getPath().getPattern());
+        Pattern r = Pattern.compile(runtimeBag.getRoute().getPath().getPattern());
 
-        Matcher m = r.matcher(request.getPathInfo());
+        Matcher m = r.matcher(runtimeBag.getRequest().getPathInfo());
 
         RouteParameters parameterValues = new RouteParameters();
 
         if (m.matches()) {
-            route.getPath().parameters.forEach((index, name) -> {
-                parameterValues.put(name, resolveRouteParameter(m, index, name, request, route));
+            runtimeBag.getRoute().getPath().parameters.forEach((index, name) -> {
+                parameterValues.put(name, resolveRouteParameter(m, index, name, runtimeBag));
             });
         }
 
         EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
-        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(request, route, parameterValues));
+        eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(runtimeBag, parameterValues));
 
         return parameterValues;
     }
 
-    public Object resolveRouteParameter(Matcher m, Integer index, String name, Request request, Route route)
+    public Object resolveRouteParameter(Matcher m, Integer index, String name, RuntimeBag runtimeBag)
     {
         String value = m.group(index);
         Object resolvedValue = value;
 
         for (RouteParameterResolverInterface resolver : routeParameterResolvers) {
-            if (resolver.supports(name, value, request, route)) {
-                resolvedValue = resolver.resolve(name, value, request, route);
+            if (resolver.supports(name, value, runtimeBag)) {
+                resolvedValue = resolver.resolve(name, value, runtimeBag);
                 break;
             }
         }
