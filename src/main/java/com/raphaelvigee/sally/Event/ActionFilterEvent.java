@@ -2,36 +2,31 @@ package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
 import com.raphaelvigee.sally.Router.ActionInvokerInterface;
-import com.raphaelvigee.sally.Router.Route;
-import org.eclipse.jetty.server.Request;
+import com.raphaelvigee.sally.Server.RuntimeBag;
 
 public class ActionFilterEvent implements EventInterface
 {
-    private Request request;
-
-    private Route route;
-
     private Object[] parameters;
 
     private ActionInvokerInterface actionInvoker;
 
-    public ActionFilterEvent(Request request, Route route, Object[] parameters, ActionInvokerInterface actionInvoker)
-    {
+    private RuntimeBag runtimeBag;
 
-        this.request = request;
-        this.route = route;
+    public ActionFilterEvent(RuntimeBag runtimeBag, Object[] parameters, ActionInvokerInterface actionInvoker)
+    {
+        this.runtimeBag = runtimeBag;
         this.parameters = parameters;
         this.actionInvoker = actionInvoker;
     }
 
-    public Request getRequest()
+    public RuntimeBag getRuntimeBag()
     {
-        return request;
+        return runtimeBag;
     }
 
-    public void setRequest(Request request)
+    public void setRuntimeBag(RuntimeBag runtimeBag)
     {
-        this.request = request;
+        this.runtimeBag = runtimeBag;
     }
 
     public Object[] getParameters()

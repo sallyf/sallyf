@@ -5,6 +5,7 @@ import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Router.*;
 import com.raphaelvigee.sally.Server.Method;
+import com.raphaelvigee.sally.Server.RuntimeBag;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.http.MetaData;
@@ -20,13 +21,13 @@ import static org.junit.Assert.assertNull;
 class CapitalizerResolver implements RouteParameterResolverInterface<String>
 {
     @Override
-    public boolean supports(String name, String value, Request request, Route route)
+    public boolean supports(String name, String value, RuntimeBag runtimeBag)
     {
         return Objects.equals(name, "name");
     }
 
     @Override
-    public String resolve(String name, String value, Request request, Route route)
+    public String resolve(String name, String value, RuntimeBag runtimeBag)
     {
         return value.toUpperCase();
     }
@@ -41,7 +42,7 @@ public class RouterTest
 
         Router router = app.getContainer().get(Router.class);
 
-        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (r, ro) -> null);
+        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
 
         assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().getPattern());
 
@@ -54,7 +55,7 @@ public class RouterTest
         expectedParameters.put("bar", "hé");
         expectedParameters.put("dat_test", "dat_var");
 
-        assertEquals(expectedParameters, router.getRouteParameters(route, request));
+        assertEquals(expectedParameters, router.getRouteParameters(new RuntimeBag(request, route)));
 
         app.stop();
     }
@@ -62,10 +63,10 @@ public class RouterTest
     @Test
     public void routeMatcherTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (r, ro) -> null);
-        Route route2 = new Route(Method.GET, "/qwertyuiop", (r, ro) -> null);
-        Route route3 = new Route(Method.POST, "/qwertyuiop", (r, ro) -> null);
-        Route route4 = new Route(Method.GET, "/", (r, ro) -> null);
+        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
+        Route route2 = new Route(Method.GET, "/qwertyuiop", (rb) -> null);
+        Route route3 = new Route(Method.POST, "/qwertyuiop", (rb) -> null);
+        Route route4 = new Route(Method.GET, "/", (rb) -> null);
 
         Container container = new Container();
 
@@ -109,8 +110,8 @@ public class RouterTest
     @Test(expected = RouteDuplicateException.class)
     public void routeDuplicateExceptionTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/abc", (r, ro) -> null);
-        Route route2 = new Route(Method.GET, "/abc", (r, ro) -> null);
+        Route route1 = new Route(Method.GET, "/abc", (rb) -> null);
+        Route route2 = new Route(Method.GET, "/abc", (rb) -> null);
 
         Container container = new Container();
 
@@ -122,8 +123,8 @@ public class RouterTest
     @Test
     public void routeDuplicateTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/abc", (r, ro) -> null);
-        Route route2 = new Route(Method.POST, "/abc", (r, ro) -> null);
+        Route route1 = new Route(Method.GET, "/abc", (rb) -> null);
+        Route route2 = new Route(Method.POST, "/abc", (rb) -> null);
 
         Container container = new Container();
 
@@ -145,7 +146,7 @@ public class RouterTest
 
         assertEquals(1, routes.size());
 
-        Response response = routes.get(0).getHandler().apply(null, null);
+        Response response = routes.get(0).getHandler().apply(null);
 
         assertEquals("hello", response.getContent());
         assertEquals("/prefixed/hello", routes.get(0).getPath().getDeclaration());
@@ -162,14 +163,14 @@ public class RouterTest
 
         router.addRouteParameterResolver(new CapitalizerResolver());
 
-        Route route = new Route(Method.GET, "/{name}", (r, ro) -> null);
+        Route route = new Route(Method.GET, "/{name}", (rb) -> null);
         router.addRoute(route);
 
         Request request = new Request(null, null);
         request.setPathInfo("/lowercase");
         request.setMethod(Method.GET.toString());
 
-        RouteParameters routeParameters = router.getRouteParameters(route, request);
+        RouteParameters routeParameters = router.getRouteParameters(new RuntimeBag(request, route));
 
         assertEquals("LOWERCASE", routeParameters.get("name"));
     }
