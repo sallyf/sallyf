@@ -1,8 +1,6 @@
 package com.sallyf.sallyf.Server;
 
-import fi.iki.elonen.NanoHTTPD;
-
-public enum Status implements NanoHTTPD.Response.IStatus
+public enum Status
 {
     SWITCH_PROTOCOL(101, "Switching Protocols"),
     OK(200, "OK"),
@@ -21,7 +19,7 @@ public enum Status implements NanoHTTPD.Response.IStatus
     REQUEST_TIMEOUT(408, "Request Timeout"),
     CONFLICT(409, "Conflict"),
     RANGE_NOT_SATISFIABLE(416, "Requested Range Not Satisfiable"),
-    INTERNAL_ERROR(500, "Internal Server Error"),
+    INTERNAL_ERROR(500, "Internal FrameworkServer Error"),
     NOT_IMPLEMENTED(501, "Not Implemented"),
     UNSUPPORTED_HTTP_VERSION(505, "HTTP Version Not Supported");
 

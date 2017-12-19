@@ -1,10 +1,14 @@
 package com.sallyf.sallyf.Container;
 
-abstract public class ContainerAware implements ContainerAwareInterface
+public class ExampleServiceImplements implements ContainerAwareInterface
 {
     private Container container;
 
-    public ContainerAware(Container container)
+    public ExampleServiceImplements()
+    {
+    }
+
+    public void setContainer(Container container)
     {
         this.container = container;
     }
