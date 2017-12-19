@@ -4,7 +4,6 @@ import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAwareInterface;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.KernelEvents;
-import com.raphaelvigee.sally.Router.Router;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionIdManager;
@@ -57,6 +56,13 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
     public Container getContainer()
     {
         return container;
+    }
+
+    public String getRootURL()
+    {
+        // @TODO: Unfake
+
+        return "http://localhost:4367";
     }
 }
 
