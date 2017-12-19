@@ -15,7 +15,7 @@ public class URLGeneratorTest extends BaseFrameworkTest
     {
         URLGenerator urlGenerator = app.getContainer().get(URLGenerator.class);
 
-        String url = urlGenerator.path("TestController.hello4");
+        String url = urlGenerator.path("test_hello_named");
 
         assertEquals("/prefixed/hello", url);
     }
@@ -28,7 +28,7 @@ public class URLGeneratorTest extends BaseFrameworkTest
         HashMap<String, String> parameters = new HashMap<>();
         parameters.put("name", "YOLO");
 
-        String url = urlGenerator.path("TestController.hello5", parameters);
+        String url = urlGenerator.path("test_hello5", parameters);
 
         assertEquals("/prefixed/hello/YOLO", url);
     }
@@ -38,6 +38,6 @@ public class URLGeneratorTest extends BaseFrameworkTest
     {
         URLGenerator urlGenerator = app.getContainer().get(URLGenerator.class);
 
-        urlGenerator.path("TestController.hello5", new HashMap<>());
+        urlGenerator.path("test_hello5", new HashMap<>());
     }
 }

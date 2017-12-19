@@ -142,17 +142,13 @@ public class RouterTest
 
         router.addController(TestController.class);
 
+        app.start();
+
         HashMap<String, Route> routes = router.getRoutes();
 
         assertEquals(2, routes.size());
 
-        Route route = null;
-        for (Route r : routes.values()) {
-            if (r.getPath().getDeclaration().equals("/prefixed/hello")) {
-                route = r;
-                break;
-            }
-        }
+        Route route = routes.get("test_hello_named");
 
         Response response = route.getHandler().apply(null);
 
