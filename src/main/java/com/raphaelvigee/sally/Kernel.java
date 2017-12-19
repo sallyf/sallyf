@@ -6,7 +6,6 @@ import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Router.Route;
 import com.raphaelvigee.sally.Router.Router;
 import com.raphaelvigee.sally.Server.FrameworkServer;
-import org.eclipse.jetty.server.ServerConnector;
 
 import java.util.ArrayList;
 
@@ -54,9 +53,7 @@ public class Kernel
         }
         System.out.println();
 
-        ServerConnector connector = (ServerConnector) server.getConnectors()[0];
-
-        System.out.println("Listening on http://" + connector.getName() + ":" + connector.getLocalPort());
+        System.out.println("Listening on " + server.getRootURL());
         System.out.println();
     }
 
