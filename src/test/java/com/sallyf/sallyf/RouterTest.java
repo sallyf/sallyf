@@ -146,10 +146,18 @@ public class RouterTest
 
         assertEquals(2, routes.size());
 
-        Response response = routes.get(0).getHandler().apply(null);
+        Route route = null;
+        for (Route r: routes) {
+            if(r.getPath().getDeclaration().equals("/prefixed/hello")) {
+                route = r;
+                break;
+            }
+        }
+
+        Response response = route.getHandler().apply(null);
 
         assertEquals("hello", response.getContent());
-        assertEquals("/prefixed/hello", routes.get(0).getPath().getDeclaration());
+        assertEquals("/prefixed/hello", route.getPath().getDeclaration());
 
         app.stop();
     }
