@@ -144,7 +144,7 @@ public class RouterTest
 
         ArrayList<Route> routes = router.getRoutes();
 
-        assertEquals(1, routes.size());
+        assertEquals(2, routes.size());
 
         Response response = routes.get(0).getHandler().apply(null);
 
