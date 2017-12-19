@@ -12,7 +12,7 @@ import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
@@ -71,10 +71,10 @@ public class RouterTest
         Container container = new Container();
 
         Router router = new Router(container);
-        router.addRoute(route1);
-        router.addRoute(route2);
-        router.addRoute(route3);
-        router.addRoute(route4);
+        router.addRoute("route_1", route1);
+        router.addRoute("route_2", route2);
+        router.addRoute("route_3", route3);
+        router.addRoute("route_4", route4);
 
         Request request1 = new Request(null, null);
         MetaData.Request httpFields1 = new MetaData.Request(new HttpFields());
@@ -116,8 +116,8 @@ public class RouterTest
         Container container = new Container();
 
         Router router = new Router(container);
-        router.addRoute(route1);
-        router.addRoute(route2);
+        router.addRoute("route_1", route1);
+        router.addRoute("route_2", route2);
     }
 
     @Test
@@ -129,8 +129,8 @@ public class RouterTest
         Container container = new Container();
 
         Router router = new Router(container);
-        router.addRoute(route1);
-        router.addRoute(route2);
+        router.addRoute("route_1", route1);
+        router.addRoute("route_2", route2);
     }
 
     @Test
@@ -142,17 +142,13 @@ public class RouterTest
 
         router.addController(TestController.class);
 
-        ArrayList<Route> routes = router.getRoutes();
+        app.start();
+
+        HashMap<String, Route> routes = router.getRoutes();
 
         assertEquals(2, routes.size());
 
-        Route route = null;
-        for (Route r: routes) {
-            if(r.getPath().getDeclaration().equals("/prefixed/hello")) {
-                route = r;
-                break;
-            }
-        }
+        Route route = routes.get("test_hello_named");
 
         Response response = route.getHandler().apply(null);
 
@@ -172,7 +168,7 @@ public class RouterTest
         router.addRouteParameterResolver(new CapitalizerResolver());
 
         Route route = new Route(Method.GET, "/{name}", (rb) -> null);
-        router.addRoute(route);
+        router.addRoute("route_1", route);
 
         Request request = new Request(null, null);
         request.setPathInfo("/lowercase");
