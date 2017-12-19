@@ -32,4 +32,12 @@ public class URLGeneratorTest extends BaseFrameworkTest
 
         assertEquals("/prefixed/hello/YOLO", url);
     }
+
+    @Test(expected = UnableToGenerateURLException.class)
+    public void testWithParameterException() throws UnableToGenerateURLException
+    {
+        URLGenerator urlGenerator = app.getContainer().get(URLGenerator.class);
+
+        urlGenerator.path("TestController.hello5", new HashMap<>());
+    }
 }
