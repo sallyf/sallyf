@@ -10,11 +10,21 @@ public class Route
 
     private ActionWrapperInterface handler;
 
+    private String name;
+
     public Route(Method method, String pathDeclaration, ActionWrapperInterface handler)
     {
         this.method = method;
         this.path = new Path(pathDeclaration);
         this.handler = handler;
+    }
+
+    public Route(String name, Method method, String pathDeclaration, ActionWrapperInterface handler)
+    {
+        this.method = method;
+        this.path = new Path(pathDeclaration);
+        this.handler = handler;
+        this.name = name;
     }
 
     public Method getMethod()
@@ -45,6 +55,16 @@ public class Route
     public void setHandler(ActionWrapperInterface handler)
     {
         this.handler = handler;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
     }
 
     @Override

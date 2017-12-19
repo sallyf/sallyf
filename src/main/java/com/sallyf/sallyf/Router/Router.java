@@ -16,6 +16,7 @@ import org.eclipse.jetty.server.Request;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,7 @@ public class Router extends ContainerAware
         super(container);
     }
 
-    private ArrayList<Route> routes = new ArrayList<>();
+    private HashMap<String, Route> routes = new HashMap<>();
 
     private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
 
@@ -62,7 +63,9 @@ public class Router extends ContainerAware
                     }
                 };
 
-                addAction(routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (requestBag) -> {
+                String actionName = controllerClass.getSimpleName() + "." + method.getName();
+
+                addAction(actionName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (requestBag) -> {
                     Object[] parameters = getActionParameters(parameterTypes, requestBag);
 
                     ActionFilterEvent actionFilterEvent = new ActionFilterEvent(requestBag, parameters, actionInvoker);
@@ -98,29 +101,31 @@ public class Router extends ContainerAware
         return parameters;
     }
 
-    public void addRoute(Route route) throws RouteDuplicateException
+    public void addRoute(String name, Route route) throws RouteDuplicateException
     {
         if (routeSignatures.contains(route.toString())) {
             throw new RouteDuplicateException(route);
         }
 
-        routes.add(route);
-        routeSignatures.add(route.toString());
+        route.setName(name);
+
+        routes.put(name, route);
+        routeSignatures.add(route.getMethod() + " " + route.getPath().getPattern());
     }
 
-    public void addAction(Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
+    public void addAction(String name, Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
     {
-        addRoute(new Route(method, path, handler));
+        addRoute(name, new Route(name, method, path, handler));
     }
 
-    public ArrayList<Route> getRoutes()
+    public HashMap<String, Route> getRoutes()
     {
         return routes;
     }
 
     public Route match(Request request)
     {
-        for (Route route : routes) {
+        for (Route route : routes.values()) {
             if (request.getMethod().equals(route.getMethod().toString())) {
                 Pattern r = Pattern.compile(route.getPath().pattern);
 

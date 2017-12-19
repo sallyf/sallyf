@@ -30,7 +30,7 @@ public class TestController extends BaseController
     }
 
     @Route(path = "/hello/{name}")
-    public static Response hello4(RouteParameters parameters)
+    public static Response hello5(RouteParameters parameters)
     {
         return new Response("hello, "+parameters.get("name"));
     }
