@@ -8,7 +8,6 @@ import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Router.URLGenerator;
 import com.sallyf.sallyf.Server.FrameworkServer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Kernel
@@ -52,7 +51,7 @@ public class Kernel
 
         System.out.println(routes.size() + " routes registered:");
         for (Route route : routes.values()) {
-            System.out.println(route.toString());
+            System.out.println(route.getName() + " -> " + route.toString());
         }
         System.out.println();
 

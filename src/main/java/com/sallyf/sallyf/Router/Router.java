@@ -41,6 +41,11 @@ public class Router extends ContainerAware
 
         String pathPrefix = controllerAnnotation == null ? "" : controllerAnnotation.path();
 
+        String actionNamePrefix = controllerClass.getSimpleName() + ".";
+        if (controllerAnnotation != null && !controllerAnnotation.name().isEmpty()) {
+            actionNamePrefix = controllerAnnotation.name();
+        }
+
         java.lang.reflect.Method[] methods = controllerClass.getMethods();
 
         for (java.lang.reflect.Method method : methods) {
@@ -63,9 +68,14 @@ public class Router extends ContainerAware
                     }
                 };
 
-                String actionName = controllerClass.getSimpleName() + "." + method.getName();
+                String actionName = method.getName();
+                if (!routeAnnotation.name().isEmpty()) {
+                    actionName = routeAnnotation.name();
+                }
 
-                addAction(actionName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
+                String fullName = actionNamePrefix + actionName;
+
+                addAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
                     Object[] parameters = getActionParameters(parameterTypes, runtimeBag);
 
                     ActionFilterEvent actionFilterEvent = new ActionFilterEvent(runtimeBag, parameters, actionInvoker);

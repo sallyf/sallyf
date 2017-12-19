@@ -4,7 +4,7 @@ import com.sallyf.sallyf.Annotation.Route;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.RouteParameters;
 
-@Route(path = "/prefixed")
+@Route(path = "/prefixed", name = "test_")
 public class TestController extends BaseController
 {
     public static Response hello1()
@@ -23,7 +23,7 @@ public class TestController extends BaseController
         return new Response("hello");
     }
 
-    @Route(path = "/hello")
+    @Route(path = "/hello", name = "hello_named")
     public static Response hello4()
     {
         return new Response("hello");
