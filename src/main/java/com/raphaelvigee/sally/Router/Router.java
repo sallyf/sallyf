@@ -103,14 +103,15 @@ public class Router extends ContainerAware
 
     public void addRoute(String name, Route route) throws RouteDuplicateException
     {
-        if (routeSignatures.contains(route.toString())) {
+        String signature = route.getMethod() + " " + route.getPath().getPattern();
+        if (routeSignatures.contains(signature)) {
             throw new RouteDuplicateException(route);
         }
 
         route.setName(name);
 
         routes.put(name, route);
-        routeSignatures.add(route.getMethod() + " " + route.getPath().getPattern());
+        routeSignatures.add(signature);
     }
 
     public void addAction(String name, Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
