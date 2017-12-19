@@ -14,4 +14,6 @@ public @interface Route
     String path();
 
     Method method() default Method.GET;
+
+    String name() default "";
 }
