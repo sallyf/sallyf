@@ -65,10 +65,10 @@ public class Router extends ContainerAware
 
                 String actionName = controllerClass.getSimpleName() + "." + method.getName();
 
-                addAction(actionName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (requestBag) -> {
-                    Object[] parameters = getActionParameters(parameterTypes, requestBag);
+                addAction(actionName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
+                    Object[] parameters = getActionParameters(parameterTypes, runtimeBag);
 
-                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(requestBag, parameters, actionInvoker);
+                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(runtimeBag, parameters, actionInvoker);
 
                     eventDispatcher.dispatch(KernelEvents.ACTION_FILTER, actionFilterEvent);
 
