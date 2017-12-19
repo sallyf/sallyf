@@ -6,7 +6,6 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.FrameworkServer;
-import org.eclipse.jetty.server.ServerConnector;
 
 import java.util.ArrayList;
 
@@ -54,9 +53,7 @@ public class Kernel
         }
         System.out.println();
 
-        ServerConnector connector = (ServerConnector) server.getConnectors()[0];
-
-        System.out.println("Listening on http://" + connector.getName() + ":" + connector.getLocalPort());
+        System.out.println("Listening on " + server.getRootURL());
         System.out.println();
     }
 
