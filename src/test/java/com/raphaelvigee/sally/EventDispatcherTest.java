@@ -1,5 +1,6 @@
 package com.raphaelvigee.sally;
 
+import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.EventDispatcher.EventHandlerInterface;
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
@@ -25,7 +26,8 @@ public class EventDispatcherTest
     @Test
     public void registerTest()
     {
-        EventDispatcher eventDispatcher = new EventDispatcher();
+        Container container = new Container();
+        EventDispatcher eventDispatcher = new EventDispatcher(container);
 
         EventType<TestEvent> testEventType = new EventType<>("test.test_event");
 
@@ -43,7 +45,8 @@ public class EventDispatcherTest
     {
         System.setOut(new PrintStream(outContent));
 
-        EventDispatcher eventDispatcher = new EventDispatcher();
+        Container container = new Container();
+        EventDispatcher eventDispatcher = new EventDispatcher(container);
 
         EventType<TestEvent> testEventType = new EventType<>("test.test_event");
 

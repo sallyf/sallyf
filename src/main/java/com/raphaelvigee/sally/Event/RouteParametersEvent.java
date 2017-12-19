@@ -2,17 +2,17 @@ package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
 import com.raphaelvigee.sally.Router.RouteParameters;
-import com.raphaelvigee.sally.Server.Request;
+import com.raphaelvigee.sally.Server.RuntimeBag;
 
 public class RouteParametersEvent implements EventInterface
 {
-    public Request request;
+    private RouteParameters parameterValues;
 
-    public RouteParameters parameterValues;
+    private RuntimeBag runtimeBag;
 
-    public RouteParametersEvent(Request request, RouteParameters parameterValues) {
-
-        this.request = request;
+    public RouteParametersEvent(RuntimeBag runtimeBag, RouteParameters parameterValues)
+    {
+        this.runtimeBag = runtimeBag;
         this.parameterValues = parameterValues;
     }
 }
