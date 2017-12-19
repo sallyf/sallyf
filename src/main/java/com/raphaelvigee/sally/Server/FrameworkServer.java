@@ -6,12 +6,16 @@ import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.KernelEvents;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.session.DefaultSessionIdManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 
 public class FrameworkServer extends Server implements ContainerAwareInterface
@@ -60,9 +64,21 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
 
     public String getRootURL()
     {
-        // @TODO: Unfake
+        ServerConnector connector = (ServerConnector) getConnectors()[0];
 
-        return "http://localhost:4367";
+        String hostname = connector.getName();
+
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            hostname = addr.getHostName();
+        } catch (UnknownHostException ignored) {
+        }
+
+        if (hostname.isEmpty()) {
+            hostname = "localhost";
+        }
+
+        return "http://" + hostname + ":" + connector.getLocalPort();
     }
 }
 
