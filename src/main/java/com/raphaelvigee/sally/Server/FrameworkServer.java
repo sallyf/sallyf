@@ -3,6 +3,7 @@ package com.raphaelvigee.sally.Server;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAwareInterface;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
+import com.raphaelvigee.sally.EventDispatcher.EventType;
 import com.raphaelvigee.sally.KernelEvents;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -50,7 +51,7 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
     {
         super.doStart();
 
-        getContainer().get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, responseEvent -> {
+        getContainer().get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, (eventType, responseEvent) -> {
             Request request = responseEvent.getRequest();
 
             LOG.info(request.getMethod() + " \"" + request.getPathInfo() + "\"");
