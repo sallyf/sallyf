@@ -29,14 +29,15 @@ public class RequestTest extends BaseFrameworkTest
 
         EventDispatcher eventDispatcher = app.getContainer().get(EventDispatcher.class);
 
-        Field[] fields = KernelEvents.class.getDeclaredFields();
-        EventType[] registeredEvents = new EventType[fields.length];
-        int i = 0;
-        for (Field field : fields) {
-            registeredEvents[i++] = (EventType) field.get(null);
-        }
+        EventType[] monitoredEvents = {
+                KernelEvents.PRE_SEND_RESPONSE,
+                KernelEvents.ACTION_FILTER,
+                KernelEvents.POST_MATCH_ROUTE,
+                KernelEvents.PRE_MATCH_ROUTE,
+                KernelEvents.ROUTE_PARAMETERS
+        };
 
-        eventDispatcher.register(registeredEvents, (eventType, eventInterface) -> {
+        eventDispatcher.register(monitoredEvents, (eventType, eventInterface) -> {
             dispatchedEvents.add(eventType);
         });
     }
