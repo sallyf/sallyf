@@ -50,16 +50,16 @@ public class EventDispatcherTest
 
         EventType<TestEvent> testEventType = new EventType<>("test.test_event");
 
-        eventDispatcher.register(testEventType, testEvent -> {
+        eventDispatcher.register(testEventType, (eventType, testEvent) -> {
             System.out.print("#1#");
         });
 
-        eventDispatcher.register(testEventType, testEvent -> {
+        eventDispatcher.register(testEventType, (eventType, testEvent) -> {
             System.out.print("#2#");
         });
 
-        eventDispatcher.register(testEventType, testEvent -> {});
-        eventDispatcher.register(testEventType, testEvent -> {});
+        eventDispatcher.register(testEventType, (eventType, testEvent) -> {});
+        eventDispatcher.register(testEventType, (eventType, testEvent) -> {});
 
         eventDispatcher.dispatch(testEventType);
 
