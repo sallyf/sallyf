@@ -98,4 +98,14 @@ public class Container
     {
         return services.get(name);
     }
+
+    public <T extends ContainerAwareInterface> boolean has(Class<T> type)
+    {
+        return has(type.toString());
+    }
+
+    public boolean has(String name)
+    {
+        return services.containsKey(name);
+    }
 }
