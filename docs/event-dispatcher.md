@@ -9,14 +9,14 @@ We will assume that `eventDispatcher` is an instance of `EventDispatcher`.
 To ensure a sane codebase, here is the required way of declaring an EventType:
 
 ```java
-EventType<EVENT_TYPE_OBJECT> EVENT = new EventType<>("UNIQUE_EVENT_NAME")
+EventType<EVENT_OBJECT> EVENT = new EventType<>("UNIQUE_EVENT_NAME")
 ```
 
 The event registration:
 
 ```java
 eventDispatcher.register(EVENT, (eventType, eventObject) -> {
-    // eventObject is an instance of `EVENT_TYPE_OBJECT`
+    // eventObject is an instance of `EVENT_OBJECT_TYPE`
     
     // Custom logic
 });
@@ -25,7 +25,7 @@ eventDispatcher.register(EVENT, (eventType, eventObject) -> {
 The event dispatch:
 
 ```java
-eventDispatcher.dispatch(EVENT, new EVENT_TYPE_OBJECT(...));
+eventDispatcher.dispatch(EVENT, new EVENT_OBJECT(...));
 ```
 
-Your `EVENT_TYPE_OBJECT` can be fully customized.
+Your `EVENT_OBJECT` can be fully customized.
