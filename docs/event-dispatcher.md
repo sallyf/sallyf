@@ -16,7 +16,7 @@ The event registration:
 
 ```java
 eventDispatcher.register(EVENT, (eventType, eventObject) -> {
-    // eventObject is an instance of `EVENT_OBJECT_TYPE`
+    // eventObject is an instance of `EVENT_OBJECT`
     
     // Custom logic
 });
