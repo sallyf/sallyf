@@ -20,6 +20,13 @@ public class EventDispatcher extends ContainerAware
         super(container);
     }
 
+    public <E extends EventInterface> void register(EventType<E>[] eventTypes, EventHandlerInterface<E> eventHandler)
+    {
+        for (EventType<E> eventType : eventTypes) {
+            register(eventType, eventHandler);
+        }
+    }
+
     public <E extends EventInterface> void register(EventType<E> eventType, EventHandlerInterface<E> eventHandler)
     {
         if (events.containsKey(eventType)) {
@@ -37,7 +44,7 @@ public class EventDispatcher extends ContainerAware
 
         if (handlers != null) {
             for (EventHandlerInterface<E> handler : handlers) {
-                handler.dispatch(event);
+                handler.dispatch(eventType, event);
             }
         }
     }
@@ -48,7 +55,7 @@ public class EventDispatcher extends ContainerAware
 
         if (handlers != null) {
             for (EventHandlerInterface handler : handlers) {
-                handler.dispatch(null);
+                handler.dispatch(eventType, null);
             }
         }
     }
