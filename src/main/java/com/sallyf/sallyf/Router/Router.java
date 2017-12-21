@@ -10,6 +10,10 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.KernelEvents;
+import com.sallyf.sallyf.Router.ActionParameterResolver.ContainerResolver;
+import com.sallyf.sallyf.Router.ActionParameterResolver.RequestResolver;
+import com.sallyf.sallyf.Router.ActionParameterResolver.RouteParameterResolver;
+import com.sallyf.sallyf.Router.ActionParameterResolver.ServiceResolver;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
 import org.eclipse.jetty.server.Request;
@@ -25,11 +29,18 @@ public class Router extends ContainerAware
     public Router(Container container)
     {
         super(container);
+
+        addActionParameterResolver(new ContainerResolver(container));
+        addActionParameterResolver(new RequestResolver());
+        addActionParameterResolver(new RouteParameterResolver(container));
+        addActionParameterResolver(new ServiceResolver(container));
     }
 
     private HashMap<String, Route> routes = new HashMap<>();
 
     private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
+
+    private ArrayList<ActionParameterResolverInterface> actionParameterResolvers = new ArrayList<>();
 
     private ArrayList<String> routeSignatures = new ArrayList<>();
 
@@ -76,7 +87,7 @@ public class Router extends ContainerAware
                 String fullName = actionNamePrefix + actionName;
 
                 addAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
-                    Object[] parameters = getActionParameters(parameterTypes, runtimeBag);
+                    Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     ActionFilterEvent actionFilterEvent = new ActionFilterEvent(runtimeBag, parameters, actionInvoker);
 
@@ -88,27 +99,26 @@ public class Router extends ContainerAware
         }
     }
 
-    public Object[] getActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag) throws UnhandledParameterException
+    public Object[] resolveActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag) throws UnhandledParameterException
     {
         Object[] parameters = new Object[parameterTypes.length];
         int i = 0;
         for (Class<?> parameterType : parameterTypes) {
-            Object p;
-
-            if (parameterType == Container.class) {
-                p = getContainer();
-            } else if (parameterType == Request.class) {
-                p = runtimeBag.getRequest();
-            } else if (parameterType == RouteParameters.class) {
-                p = getRouteParameters(runtimeBag);
-            } else {
-                throw new UnhandledParameterException(parameterType);
-            }
-
-            parameters[i++] = p;
+            parameters[i++] = resolveActionParameter(parameterType, runtimeBag);
         }
 
         return parameters;
+    }
+
+    public Object resolveActionParameter(Class parameterType, RuntimeBag runtimeBag) throws UnhandledParameterException
+    {
+        for (ActionParameterResolverInterface resolver : actionParameterResolvers) {
+            if (resolver.supports(parameterType, runtimeBag)) {
+                return resolver.resolve(parameterType, runtimeBag);
+            }
+        }
+
+        throw new UnhandledParameterException(parameterType);
     }
 
     public void addRoute(String name, Route route) throws RouteDuplicateException
@@ -175,20 +185,23 @@ public class Router extends ContainerAware
     public Object resolveRouteParameter(Matcher m, Integer index, String name, RuntimeBag runtimeBag)
     {
         String value = m.group(index);
-        Object resolvedValue = value;
 
         for (RouteParameterResolverInterface resolver : routeParameterResolvers) {
             if (resolver.supports(name, value, runtimeBag)) {
-                resolvedValue = resolver.resolve(name, value, runtimeBag);
-                break;
+                return resolver.resolve(name, value, runtimeBag);
             }
         }
 
-        return resolvedValue;
+        return value;
     }
 
     public void addRouteParameterResolver(RouteParameterResolverInterface resolver)
     {
         routeParameterResolvers.add(resolver);
+    }
+
+    public void addActionParameterResolver(ActionParameterResolverInterface resolver)
+    {
+        actionParameterResolvers.add(resolver);
     }
 }

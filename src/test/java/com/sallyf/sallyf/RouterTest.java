@@ -1,6 +1,7 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Router.*;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Objects;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -177,5 +179,28 @@ public class RouterTest
         RouteParameters routeParameters = router.getRouteParameters(new RuntimeBag(request, route));
 
         assertEquals("LOWERCASE", routeParameters.get("name"));
+    }
+
+    @Test
+    public void actionParameterTest() throws Exception
+    {
+        Kernel app = Kernel.newInstance();
+
+        Router router = app.getContainer().get(Router.class);
+
+        Class[] classes = {
+                Container.class,
+                EventDispatcher.class
+        };
+
+        Object[] actionParameters = router.resolveActionParameters(classes, null);
+
+        Class[] actualClasses = new Class[classes.length];
+        int i = 0;
+        for (Object actionParameter : actionParameters) {
+            actualClasses[i++] = actionParameter.getClass();
+        }
+
+        assertArrayEquals(classes, actualClasses);
     }
 }
