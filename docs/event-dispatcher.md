@@ -15,7 +15,7 @@ EventType<EVENT_TYPE_OBJECT> EVENT = new EventType<>("UNIQUE_EVENT_NAME")
 The event registration:
 
 ```java
-eventDispatcher.register(EVENT, eventObject -> {
+eventDispatcher.register(EVENT, (eventType, eventObject) -> {
     // eventObject is an instance of `EVENT_TYPE_OBJECT`
     
     // Custom logic
