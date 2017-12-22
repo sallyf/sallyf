@@ -2,7 +2,7 @@ package com.raphaelvigee.sally.Router;
 
 import com.raphaelvigee.sally.Server.Method;
 
-public class Route
+public class Route implements Cloneable
 {
     private Method method;
 
@@ -71,5 +71,9 @@ public class Route
     public String toString()
     {
         return String.format("%s %s", getMethod(), getPath().declaration);
+    }
+
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

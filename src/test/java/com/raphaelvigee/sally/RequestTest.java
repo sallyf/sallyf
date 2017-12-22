@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ public class RequestTest extends BaseFrameworkTest
 
         EventType[] monitoredEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
-                KernelEvents.ACTION_FILTER,
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.PRE_MATCH_ROUTE,
                 KernelEvents.ROUTE_PARAMETERS
@@ -51,7 +49,6 @@ public class RequestTest extends BaseFrameworkTest
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
-                KernelEvents.ACTION_FILTER,
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.PRE_MATCH_ROUTE
         };
@@ -68,7 +65,6 @@ public class RequestTest extends BaseFrameworkTest
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
-                KernelEvents.ACTION_FILTER,
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.PRE_MATCH_ROUTE,
                 KernelEvents.ROUTE_PARAMETERS

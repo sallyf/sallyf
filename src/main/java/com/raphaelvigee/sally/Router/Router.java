@@ -3,7 +3,6 @@ package com.raphaelvigee.sally.Router;
 import com.raphaelvigee.sally.BaseController;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
-import com.raphaelvigee.sally.Event.ActionFilterEvent;
 import com.raphaelvigee.sally.Event.RouteParametersEvent;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Exception.FrameworkException;
@@ -70,15 +69,6 @@ public class Router extends ContainerAware
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
-                final ActionInvokerInterface actionInvoker = (parameters) -> {
-                    try {
-                        return (Response) method.invoke(null, parameters);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                };
-
                 String actionName = method.getName();
                 if (!routeAnnotation.name().isEmpty()) {
                     actionName = routeAnnotation.name();
@@ -89,11 +79,12 @@ public class Router extends ContainerAware
                 addAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
-                    ActionFilterEvent actionFilterEvent = new ActionFilterEvent(runtimeBag, parameters, actionInvoker);
-
-                    eventDispatcher.dispatch(KernelEvents.ACTION_FILTER, actionFilterEvent);
-
-                    return actionFilterEvent.getActionInvoker().invoke(actionFilterEvent.getParameters());
+                    try {
+                        return (Response) method.invoke(null, parameters);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
                 });
             }
         }
