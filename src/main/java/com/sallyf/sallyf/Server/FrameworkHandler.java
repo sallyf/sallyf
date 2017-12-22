@@ -50,11 +50,13 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
 
             Route route = router.match(request);
 
-            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(request, route));
-
             if (route == null) {
                 return new com.sallyf.sallyf.Router.Response("Not Found", Status.NOT_FOUND, "text/plain");
             }
+
+            route = (Route) route.clone();
+
+            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(request, route));
 
             com.sallyf.sallyf.Router.Response response = route.getHandler().apply(new RuntimeBag(request, route));
 
