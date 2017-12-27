@@ -45,8 +45,6 @@ public class Router extends ContainerAware
 
     public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
     {
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
-
         com.sallyf.sallyf.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
 
         String pathPrefix = controllerAnnotation == null ? "" : controllerAnnotation.path();
