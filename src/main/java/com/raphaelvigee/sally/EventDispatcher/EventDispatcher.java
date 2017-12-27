@@ -38,7 +38,7 @@ public class EventDispatcher extends ContainerAware
         }
     }
 
-    public <E extends EventInterface> void dispatch(EventType<E> eventType, E event)
+    public <E extends EventInterface> E dispatch(EventType<E> eventType, E event)
     {
         ArrayList<EventHandlerInterface> handlers = events.get(eventType);
 
@@ -47,6 +47,8 @@ public class EventDispatcher extends ContainerAware
                 handler.dispatch(eventType, event);
             }
         }
+
+        return event;
     }
 
     public void dispatch(EventType eventType)
