@@ -1,19 +1,18 @@
 package com.sallyf.sallyf.Event;
 
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
-import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
-public class ResponseEvent implements EventInterface
+public class TransformResponseEvent implements EventInterface
 {
     private RuntimeBag runtimeBag;
 
-    private Response response;
+    private Object handlerResponse;
 
-    public ResponseEvent(RuntimeBag runtimeBag, Response response)
+    public TransformResponseEvent(RuntimeBag runtimeBag, Object handlerResponse)
     {
         this.runtimeBag = runtimeBag;
-        this.response = response;
+        this.handlerResponse = handlerResponse;
     }
 
     public RuntimeBag getRuntimeBag()
@@ -26,13 +25,13 @@ public class ResponseEvent implements EventInterface
         this.runtimeBag = runtimeBag;
     }
 
-    public Response getResponse()
+    public Object getHandlerResponse()
     {
-        return response;
+        return handlerResponse;
     }
 
-    public void setResponse(Response response)
+    public void setHandlerResponse(Object handlerResponse)
     {
-        this.response = response;
+        this.handlerResponse = handlerResponse;
     }
 }

@@ -6,6 +6,7 @@ import com.sallyf.sallyf.Container.ContainerAware;
 import com.sallyf.sallyf.Event.RouteParametersEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.Exception.InvalidResponseTypeException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.KernelEvents;
@@ -13,6 +14,7 @@ import com.sallyf.sallyf.Router.ActionParameterResolver.ContainerResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RequestResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RouteParameterResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.ServiceResolver;
+import com.sallyf.sallyf.Router.ResponseTransformer.PrimitiveTransformer;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
 import org.eclipse.jetty.server.Request;
@@ -25,6 +27,16 @@ import java.util.regex.Pattern;
 
 public class Router extends ContainerAware
 {
+    private HashMap<String, Route> routes = new HashMap<>();
+
+    private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
+
+    private ArrayList<ActionParameterResolverInterface> actionParameterResolvers = new ArrayList<>();
+
+    private ArrayList<ResponseTransformerInterface> responseTransformers = new ArrayList<>();
+
+    private ArrayList<String> routeSignatures = new ArrayList<>();
+
     public Router(Container container)
     {
         super(container);
@@ -33,15 +45,9 @@ public class Router extends ContainerAware
         addActionParameterResolver(new RequestResolver());
         addActionParameterResolver(new RouteParameterResolver(container));
         addActionParameterResolver(new ServiceResolver(container));
+
+        addResponseTransformer(new PrimitiveTransformer());
     }
-
-    private HashMap<String, Route> routes = new HashMap<>();
-
-    private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
-
-    private ArrayList<ActionParameterResolverInterface> actionParameterResolvers = new ArrayList<>();
-
-    private ArrayList<String> routeSignatures = new ArrayList<>();
 
     public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
     {
@@ -78,7 +84,7 @@ public class Router extends ContainerAware
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
-                        return (Response) method.invoke(null, parameters);
+                        return method.invoke(null, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                         return null;
@@ -184,6 +190,21 @@ public class Router extends ContainerAware
         return value;
     }
 
+    public Response transformResponse(RuntimeBag runtimeBag, Object response) throws InvalidResponseTypeException
+    {
+        if (response instanceof Response) {
+            return (Response) response;
+        }
+
+        for (ResponseTransformerInterface transformer : responseTransformers) {
+            if (transformer.supports(runtimeBag, response)) {
+                return transformer.resolve(runtimeBag, response);
+            }
+        }
+
+        throw new InvalidResponseTypeException(response);
+    }
+
     public void addRouteParameterResolver(RouteParameterResolverInterface resolver)
     {
         routeParameterResolvers.add(resolver);
@@ -192,5 +213,10 @@ public class Router extends ContainerAware
     public void addActionParameterResolver(ActionParameterResolverInterface resolver)
     {
         actionParameterResolvers.add(resolver);
+    }
+
+    public void addResponseTransformer(ResponseTransformerInterface transformer)
+    {
+        responseTransformers.add(transformer);
     }
 }

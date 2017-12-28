@@ -148,11 +148,11 @@ public class RouterTest
 
         HashMap<String, Route> routes = router.getRoutes();
 
-        assertEquals(2, routes.size());
+        assertEquals(3, routes.size());
 
         Route route = routes.get("test_hello_named");
 
-        Response response = route.getHandler().apply(null);
+        Response response = (Response) route.getHandler().apply(null);
 
         assertEquals("hello", response.getContent());
         assertEquals("/prefixed/hello", route.getPath().getDeclaration());
