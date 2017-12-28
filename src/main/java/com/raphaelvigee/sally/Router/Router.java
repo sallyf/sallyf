@@ -6,6 +6,7 @@ import com.raphaelvigee.sally.Container.ContainerAware;
 import com.raphaelvigee.sally.Event.RouteParametersEvent;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Exception.FrameworkException;
+import com.raphaelvigee.sally.Exception.InvalidResponseTypeException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
 import com.raphaelvigee.sally.KernelEvents;
@@ -13,6 +14,7 @@ import com.raphaelvigee.sally.Router.ActionParameterResolver.ContainerResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.RequestResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.RouteParameterResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.ServiceResolver;
+import com.raphaelvigee.sally.Router.ResponseTransformer.PrimitiveTransformer;
 import com.raphaelvigee.sally.Server.Method;
 import com.raphaelvigee.sally.Server.RuntimeBag;
 import org.eclipse.jetty.server.Request;
@@ -25,6 +27,16 @@ import java.util.regex.Pattern;
 
 public class Router extends ContainerAware
 {
+    private HashMap<String, Route> routes = new HashMap<>();
+
+    private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
+
+    private ArrayList<ActionParameterResolverInterface> actionParameterResolvers = new ArrayList<>();
+
+    private ArrayList<ResponseTransformerInterface> responseTransformers = new ArrayList<>();
+
+    private ArrayList<String> routeSignatures = new ArrayList<>();
+
     public Router(Container container)
     {
         super(container);
@@ -33,15 +45,9 @@ public class Router extends ContainerAware
         addActionParameterResolver(new RequestResolver());
         addActionParameterResolver(new RouteParameterResolver(container));
         addActionParameterResolver(new ServiceResolver(container));
+
+        addResponseTransformer(new PrimitiveTransformer());
     }
-
-    private HashMap<String, Route> routes = new HashMap<>();
-
-    private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
-
-    private ArrayList<ActionParameterResolverInterface> actionParameterResolvers = new ArrayList<>();
-
-    private ArrayList<String> routeSignatures = new ArrayList<>();
 
     public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
     {
@@ -78,7 +84,7 @@ public class Router extends ContainerAware
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
-                        return (Response) method.invoke(null, parameters);
+                        return method.invoke(null, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                         return null;
@@ -184,6 +190,21 @@ public class Router extends ContainerAware
         return value;
     }
 
+    public Response transformResponse(RuntimeBag runtimeBag, Object response) throws InvalidResponseTypeException
+    {
+        if (response instanceof Response) {
+            return (Response) response;
+        }
+
+        for (ResponseTransformerInterface transformer : responseTransformers) {
+            if (transformer.supports(runtimeBag, response)) {
+                return transformer.resolve(runtimeBag, response);
+            }
+        }
+
+        throw new InvalidResponseTypeException(response);
+    }
+
     public void addRouteParameterResolver(RouteParameterResolverInterface resolver)
     {
         routeParameterResolvers.add(resolver);
@@ -192,5 +213,10 @@ public class Router extends ContainerAware
     public void addActionParameterResolver(ActionParameterResolverInterface resolver)
     {
         actionParameterResolvers.add(resolver);
+    }
+
+    public void addResponseTransformer(ResponseTransformerInterface transformer)
+    {
+        responseTransformers.add(transformer);
     }
 }

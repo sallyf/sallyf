@@ -32,6 +32,12 @@ public class TestController extends BaseController
     @Route(path = "/hello/{name}")
     public static Response hello5(RouteParameters parameters)
     {
-        return new Response("hello, "+parameters.get("name"));
+        return new Response("hello, " + parameters.get("name"));
+    }
+
+    @Route(path = "/transform/{name}")
+    public static Object toTransform(RouteParameters parameters)
+    {
+        return "hello, " + parameters.get("name");
     }
 }

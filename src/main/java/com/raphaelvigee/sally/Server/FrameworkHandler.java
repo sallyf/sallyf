@@ -5,6 +5,7 @@ import com.raphaelvigee.sally.Container.ContainerAwareInterface;
 import com.raphaelvigee.sally.Event.RequestEvent;
 import com.raphaelvigee.sally.Event.ResponseEvent;
 import com.raphaelvigee.sally.Event.RouteMatchEvent;
+import com.raphaelvigee.sally.Event.TransformResponseEvent;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Router.Route;
@@ -56,11 +57,17 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
 
             route = (Route) route.clone();
 
-            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(request, route));
+            RuntimeBag runtimeBag = new RuntimeBag(request, route);
 
-            com.raphaelvigee.sally.Router.Response response = route.getHandler().apply(new RuntimeBag(request, route));
+            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(runtimeBag));
 
-            eventDispatcher.dispatch(KernelEvents.PRE_SEND_RESPONSE, new ResponseEvent(request, response));
+            Object handlerResponse = route.getHandler().apply(runtimeBag);
+
+            eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
+
+            com.raphaelvigee.sally.Router.Response response = router.transformResponse(runtimeBag, handlerResponse);
+
+            eventDispatcher.dispatch(KernelEvents.PRE_SEND_RESPONSE, new ResponseEvent(runtimeBag, response));
 
             return response;
         } catch (Exception e) {

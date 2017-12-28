@@ -5,10 +5,7 @@ import com.raphaelvigee.sally.Container.ContainerAwareInterface;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.EventDispatcher.EventType;
 import com.raphaelvigee.sally.KernelEvents;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.session.DefaultSessionIdManager;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -17,6 +14,7 @@ import org.eclipse.jetty.util.log.Logger;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collection;
 
 
 public class FrameworkServer extends Server implements ContainerAwareInterface
@@ -52,7 +50,7 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
         super.doStart();
 
         getContainer().get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, (eventType, responseEvent) -> {
-            Request request = responseEvent.getRequest();
+            Request request = responseEvent.getRuntimeBag().getRequest();
 
             LOG.info(request.getMethod() + " \"" + request.getPathInfo() + "\"");
         });

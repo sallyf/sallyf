@@ -20,17 +20,17 @@ And `MyController.java`:
 public class MyController extends BaseController
 {
     @Route(path = "/hello/{name}")
-    public static Response helloAction(RouteParameters parameters)
+    public static String helloAction(RouteParameters parameters)
     {
         String name = parameters.get("name");
 
-        return new Response("Hello, " + name + "!");
+        return "Hello, " + name + "!";
     }
 }
 ```
 
 Here the controller declares one route matching `/hello/{name}`, `name` being a URL parameter.
-All routes should return a `Response`.
+The return type is free, see [ResponseTransformer](response-transformer.md).
 
 In an action , several instances can be injected:
 
