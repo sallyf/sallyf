@@ -189,7 +189,6 @@ public class RouterTest
         Router router = app.getContainer().get(Router.class);
 
         Class[] classes = {
-                Container.class,
                 EventDispatcher.class
         };
 
