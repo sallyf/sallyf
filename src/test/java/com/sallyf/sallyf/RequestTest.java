@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,10 +30,10 @@ public class RequestTest extends BaseFrameworkTest
 
         EventType[] monitoredEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
-                KernelEvents.ACTION_FILTER,
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.PRE_MATCH_ROUTE,
-                KernelEvents.ROUTE_PARAMETERS
+                KernelEvents.ROUTE_PARAMETERS,
+                KernelEvents.PRE_TRANSFORM_RESPONSE
         };
 
         eventDispatcher.register(monitoredEvents, (eventType, eventInterface) -> {
@@ -51,9 +50,9 @@ public class RequestTest extends BaseFrameworkTest
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
-                KernelEvents.ACTION_FILTER,
                 KernelEvents.POST_MATCH_ROUTE,
-                KernelEvents.PRE_MATCH_ROUTE
+                KernelEvents.PRE_MATCH_ROUTE,
+                KernelEvents.PRE_TRANSFORM_RESPONSE
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
     }
@@ -68,10 +67,28 @@ public class RequestTest extends BaseFrameworkTest
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
-                KernelEvents.ACTION_FILTER,
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.PRE_MATCH_ROUTE,
-                KernelEvents.ROUTE_PARAMETERS
+                KernelEvents.ROUTE_PARAMETERS,
+                KernelEvents.PRE_TRANSFORM_RESPONSE
+        };
+        assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
+    }
+
+    @Test
+    public void testTransform() throws IOException
+    {
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/transform/YOLO").openConnection();
+        http.connect();
+        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
+        assertThat("Content", streamToString(http), is("hello, YOLO"));
+
+        EventType[] expectedEvents = {
+                KernelEvents.PRE_SEND_RESPONSE,
+                KernelEvents.POST_MATCH_ROUTE,
+                KernelEvents.PRE_MATCH_ROUTE,
+                KernelEvents.ROUTE_PARAMETERS,
+                KernelEvents.PRE_TRANSFORM_RESPONSE
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
     }

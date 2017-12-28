@@ -6,5 +6,5 @@ import com.sallyf.sallyf.Server.RuntimeBag;
 @FunctionalInterface
 public interface ActionWrapperInterface
 {
-    Response apply(RuntimeBag runtimeBag) throws UnhandledParameterException;
+    Object apply(RuntimeBag runtimeBag) throws UnhandledParameterException;
 }

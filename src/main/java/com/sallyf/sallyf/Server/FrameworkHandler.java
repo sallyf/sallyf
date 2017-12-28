@@ -5,6 +5,7 @@ import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Event.RequestEvent;
 import com.sallyf.sallyf.Event.ResponseEvent;
 import com.sallyf.sallyf.Event.RouteMatchEvent;
+import com.sallyf.sallyf.Event.TransformResponseEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.Route;
@@ -50,15 +51,23 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
 
             Route route = router.match(request);
 
-            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(request, route));
-
             if (route == null) {
                 return new com.sallyf.sallyf.Router.Response("Not Found", Status.NOT_FOUND, "text/plain");
             }
 
-            com.sallyf.sallyf.Router.Response response = route.getHandler().apply(new RuntimeBag(request, route));
+            route = (Route) route.clone();
 
-            eventDispatcher.dispatch(KernelEvents.PRE_SEND_RESPONSE, new ResponseEvent(request, response));
+            RuntimeBag runtimeBag = new RuntimeBag(request, route);
+
+            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(runtimeBag));
+
+            Object handlerResponse = route.getHandler().apply(runtimeBag);
+
+            eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
+
+            com.sallyf.sallyf.Router.Response response = router.transformResponse(runtimeBag, handlerResponse);
+
+            eventDispatcher.dispatch(KernelEvents.PRE_SEND_RESPONSE, new ResponseEvent(runtimeBag, response));
 
             return response;
         } catch (Exception e) {

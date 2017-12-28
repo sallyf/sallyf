@@ -9,5 +9,5 @@ This table presents the lifecycle of a request. The events are presented in the 
 | `PRE_MATCH_ROUTE` | Dispatched before matching a `Route` to the `HTTPSession` |
 | `POST_MATCH_ROUTE` | Dispatched after matching a `Route` to the `HTTPSession` |
 | `ROUTE_PARAMETERS` | Dispatched after binding the URL parameters |
-| `ACTION_FILTER` | Dispatched after binding the parameters to the `Action` |
+| `PRE_TRANSFORM_RESPONSE` | Dispatched before transforming the handler response to a `Response` |
 | `PRE_SEND_RESPONSE` | Dispatched before sending the `Response` |
