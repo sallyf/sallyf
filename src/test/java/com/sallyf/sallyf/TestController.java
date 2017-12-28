@@ -2,6 +2,7 @@ package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Annotation.Route;
 import com.sallyf.sallyf.Controller.BaseController;
+import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.RouteParameters;
 
@@ -17,6 +18,12 @@ public class TestController extends BaseController
     public Response hello4()
     {
         return new Response("hello");
+    }
+
+    @Route(path = "/redirect", name = "redirect")
+    public Response redirect() throws UnableToGenerateURLException
+    {
+        return redirectToRoute("test_hello_named");
     }
 
     @Route(path = "/hello/{name}")

@@ -29,8 +29,10 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
     public void handle(String target,
                        Request baseRequest,
                        HttpServletRequest servletRequest,
-                       HttpServletResponse servletResponse)
+                       HttpServletResponse r)
     {
+
+        org.eclipse.jetty.server.Response servletResponse = (org.eclipse.jetty.server.Response) r;
 
         Jetty.applyResponse(servletResponse, handle(servletRequest, servletResponse));
 
