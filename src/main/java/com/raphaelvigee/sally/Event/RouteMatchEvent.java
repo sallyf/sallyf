@@ -1,18 +1,24 @@
 package com.raphaelvigee.sally.Event;
 
 import com.raphaelvigee.sally.EventDispatcher.EventInterface;
-import com.raphaelvigee.sally.Router.Route;
-import org.eclipse.jetty.server.Request;
+import com.raphaelvigee.sally.Server.RuntimeBag;
 
 public class RouteMatchEvent implements EventInterface
 {
-    public Request request;
+    private RuntimeBag request;
 
-    private Route route;
-
-    public RouteMatchEvent(Request request, Route route)
+    public RouteMatchEvent(RuntimeBag request)
     {
         this.request = request;
-        this.route = route;
+    }
+
+    public RuntimeBag getRequest()
+    {
+        return request;
+    }
+
+    public void setRequest(RuntimeBag request)
+    {
+        this.request = request;
     }
 }
