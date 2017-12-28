@@ -1,6 +1,10 @@
 package com.raphaelvigee.sally.Router;
 
 import com.raphaelvigee.sally.Server.Status;
+import org.eclipse.jetty.http.HttpFields;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public class Response
 {
@@ -9,6 +13,13 @@ public class Response
     Status status;
 
     String mimeType;
+
+    HttpFields httpFields = new HttpFields();
+
+    public Response()
+    {
+
+    }
 
     public Response(String content)
     {
@@ -52,5 +63,28 @@ public class Response
     public void setMimeType(String mimeType)
     {
         this.mimeType = mimeType;
+    }
+
+    public void addHeader(String name, String value)
+    {
+        httpFields.add(name, value);
+    }
+
+    public Collection<String> getHeaderNames()
+    {
+        return httpFields.getFieldNamesCollection();
+    }
+
+    public String getHeader(String name)
+    {
+        return httpFields.get(name);
+    }
+
+    public Collection<String> getHeaders(String name)
+    {
+        Collection<String> i = httpFields.getValuesList(name);
+        if (i == null)
+            return Collections.emptyList();
+        return i;
     }
 }

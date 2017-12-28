@@ -2,6 +2,7 @@ package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Annotation.Route;
 import com.raphaelvigee.sally.Controller.BaseController;
+import com.raphaelvigee.sally.Exception.UnableToGenerateURLException;
 import com.raphaelvigee.sally.Router.Response;
 import com.raphaelvigee.sally.Router.RouteParameters;
 
@@ -17,6 +18,12 @@ public class TestController extends BaseController
     public Response hello4()
     {
         return new Response("hello");
+    }
+
+    @Route(path = "/redirect", name = "redirect")
+    public Response redirect() throws UnableToGenerateURLException
+    {
+        return redirectToRoute("test_hello_named");
     }
 
     @Route(path = "/hello/{name}")

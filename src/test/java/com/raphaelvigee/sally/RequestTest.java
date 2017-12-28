@@ -2,6 +2,7 @@ package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.EventDispatcher.EventType;
+import com.raphaelvigee.sally.Router.URLGenerator;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,5 +92,16 @@ public class RequestTest extends BaseFrameworkTest
                 KernelEvents.PRE_TRANSFORM_RESPONSE
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
+    }
+
+    @Test
+    public void testRedirect() throws Exception
+    {
+        String target = app.getContainer().get(URLGenerator.class).url("test_hello_named");
+
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/redirect").openConnection();
+        http.connect();
+        http = followRedirects(http);
+        assertThat("Target URL", http.getURL().toString(), is(target));
     }
 }

@@ -1,16 +1,36 @@
 package com.raphaelvigee.sally.Util;
 
+import com.raphaelvigee.sally.Router.RedirectResponse;
 import com.raphaelvigee.sally.Router.Response;
+import com.raphaelvigee.sally.Server.Status;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class Jetty
 {
-    public static void applyResponse(HttpServletResponse servletResponse, Response response)
+    public static void applyResponse(org.eclipse.jetty.server.Response servletResponse, Response response)
     {
+        if (response instanceof RedirectResponse) {
+            RedirectResponse redirectResponse = (RedirectResponse) response;
+
+            try {
+                servletResponse.sendRedirect(redirectResponse.getStatus().getRequestStatus(), redirectResponse.getTargetUrl());
+            } catch (IOException e) {
+                e.printStackTrace();
+                Response error = new Response("Internal Error", Status.INTERNAL_ERROR, "text/plain");
+
+                applyResponse(servletResponse, error);
+                return;
+            }
+        }
+
+        for (String n : response.getHeaderNames()) {
+            servletResponse.addHeader(n, response.getHeader(n));
+        }
+
         servletResponse.setContentType(response.getMimeType());
         servletResponse.setStatus(response.getStatus().getRequestStatus());
+
         try {
             servletResponse.getWriter().print(response.getContent());
         } catch (IOException e) {
