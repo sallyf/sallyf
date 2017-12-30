@@ -11,7 +11,7 @@ This is the preferred way of declaring your Route.
 An example is the best explanation :
 
 ```java
-router.addController(MyController);
+router.addController(MyController.class);
 ```
 
 And `MyController.java`:
@@ -20,7 +20,7 @@ And `MyController.java`:
 public class MyController extends BaseController
 {
     @Route(path = "/hello/{name}")
-    public static String helloAction(RouteParameters parameters)
+    public String helloAction(RouteParameters parameters)
     {
         String name = parameters.get("name");
 
@@ -34,6 +34,6 @@ The return type is free, see [ResponseTransformer](response-transformer.md).
 
 In an action , several instances can be injected:
 
-- the `Container`
 - the `HTTPSession`
 - the `RoutePatameters`
+- any service from the `Container`

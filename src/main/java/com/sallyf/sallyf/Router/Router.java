@@ -1,8 +1,8 @@
 package com.sallyf.sallyf.Router;
 
-import com.sallyf.sallyf.BaseController;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAware;
+import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Event.RouteParametersEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
@@ -10,7 +10,6 @@ import com.sallyf.sallyf.Exception.InvalidResponseTypeException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.KernelEvents;
-import com.sallyf.sallyf.Router.ActionParameterResolver.ContainerResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RequestResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RouteParameterResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.ServiceResolver;
@@ -41,7 +40,6 @@ public class Router extends ContainerAware
     {
         super(container);
 
-        addActionParameterResolver(new ContainerResolver(container));
         addActionParameterResolver(new RequestResolver());
         addActionParameterResolver(new RouteParameterResolver(container));
         addActionParameterResolver(new ServiceResolver(container));
@@ -49,8 +47,10 @@ public class Router extends ContainerAware
         addResponseTransformer(new PrimitiveTransformer());
     }
 
-    public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
+    public <C extends ControllerInterface> C addController(Class<C> controllerClass) throws FrameworkException
     {
+        C controller = getContainer().add(controllerClass);
+
         com.sallyf.sallyf.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
 
         String pathPrefix = controllerAnnotation == null ? "" : controllerAnnotation.path();
@@ -64,11 +64,6 @@ public class Router extends ContainerAware
 
         for (java.lang.reflect.Method method : methods) {
             if (method.isAnnotationPresent(com.sallyf.sallyf.Annotation.Route.class)) {
-                if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
-                    System.err.println("Method `" + method.getName() + "` is not static, ignoring");
-                    continue;
-                }
-
                 com.sallyf.sallyf.Annotation.Route routeAnnotation = method.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
@@ -84,7 +79,7 @@ public class Router extends ContainerAware
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
-                        return method.invoke(null, parameters);
+                        return method.invoke(controller, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                         return null;
@@ -92,6 +87,8 @@ public class Router extends ContainerAware
                 });
             }
         }
+
+        return controller;
     }
 
     public Object[] resolveActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag) throws UnhandledParameterException
