@@ -195,7 +195,7 @@ public class Router extends ContainerAware
 
         for (ResponseTransformerInterface transformer : responseTransformers) {
             if (transformer.supports(runtimeBag, response)) {
-                return transformer.resolve(runtimeBag, response);
+                return transformer.transform(runtimeBag, response);
             }
         }
 
