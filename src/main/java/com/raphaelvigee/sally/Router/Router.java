@@ -1,8 +1,8 @@
 package com.raphaelvigee.sally.Router;
 
-import com.raphaelvigee.sally.BaseController;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
+import com.raphaelvigee.sally.Controller.ControllerInterface;
 import com.raphaelvigee.sally.Event.RouteParametersEvent;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Exception.FrameworkException;
@@ -10,7 +10,6 @@ import com.raphaelvigee.sally.Exception.InvalidResponseTypeException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
 import com.raphaelvigee.sally.Exception.UnhandledParameterException;
 import com.raphaelvigee.sally.KernelEvents;
-import com.raphaelvigee.sally.Router.ActionParameterResolver.ContainerResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.RequestResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.RouteParameterResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.ServiceResolver;
@@ -41,7 +40,6 @@ public class Router extends ContainerAware
     {
         super(container);
 
-        addActionParameterResolver(new ContainerResolver(container));
         addActionParameterResolver(new RequestResolver());
         addActionParameterResolver(new RouteParameterResolver(container));
         addActionParameterResolver(new ServiceResolver(container));
@@ -49,8 +47,10 @@ public class Router extends ContainerAware
         addResponseTransformer(new PrimitiveTransformer());
     }
 
-    public void addController(Class<? extends BaseController> controllerClass) throws FrameworkException
+    public <C extends ControllerInterface> C addController(Class<C> controllerClass) throws FrameworkException
     {
+        C controller = getContainer().add(controllerClass);
+
         com.raphaelvigee.sally.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
 
         String pathPrefix = controllerAnnotation == null ? "" : controllerAnnotation.path();
@@ -64,11 +64,6 @@ public class Router extends ContainerAware
 
         for (java.lang.reflect.Method method : methods) {
             if (method.isAnnotationPresent(com.raphaelvigee.sally.Annotation.Route.class)) {
-                if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
-                    System.err.println("Method `" + method.getName() + "` is not static, ignoring");
-                    continue;
-                }
-
                 com.raphaelvigee.sally.Annotation.Route routeAnnotation = method.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
 
                 final Class<?>[] parameterTypes = method.getParameterTypes();
@@ -84,7 +79,7 @@ public class Router extends ContainerAware
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
-                        return method.invoke(null, parameters);
+                        return method.invoke(controller, parameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                         return null;
@@ -92,6 +87,8 @@ public class Router extends ContainerAware
                 });
             }
         }
+
+        return controller;
     }
 
     public Object[] resolveActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag) throws UnhandledParameterException
