@@ -16,9 +16,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 class CapitalizerResolver implements RouteParameterResolverInterface<String>
 {
@@ -142,7 +140,9 @@ public class RouterTest
 
         Router router = app.getContainer().add(Router.class);
 
-        router.addController(TestController.class);
+        TestController testController = router.addController(TestController.class);
+
+        assertNotNull(testController);
 
         app.start();
 

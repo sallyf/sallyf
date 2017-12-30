@@ -47,9 +47,9 @@ public class Router extends ContainerAware
         addResponseTransformer(new PrimitiveTransformer());
     }
 
-    public void addController(Class<? extends ControllerInterface> controllerClass) throws FrameworkException
+    public <C extends ControllerInterface> C addController(Class<C> controllerClass) throws FrameworkException
     {
-        ControllerInterface controller = getContainer().add(controllerClass);
+        C controller = getContainer().add(controllerClass);
 
         com.raphaelvigee.sally.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.raphaelvigee.sally.Annotation.Route.class);
 
@@ -87,6 +87,8 @@ public class Router extends ContainerAware
                 });
             }
         }
+
+        return controller;
     }
 
     public Object[] resolveActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag) throws UnhandledParameterException

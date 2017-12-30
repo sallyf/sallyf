@@ -18,14 +18,14 @@ public class Response
 
     public Response()
     {
-
+        this.status = Status.OK;
+        this.mimeType = "text/html";
     }
 
     public Response(String content)
     {
+        this();
         this.content = content;
-        this.status = Status.OK;
-        this.mimeType = "text/html";
     }
 
     public Response(String content, Status status, String mimeType)
