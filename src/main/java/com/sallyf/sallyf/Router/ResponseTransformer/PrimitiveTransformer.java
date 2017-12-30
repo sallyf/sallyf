@@ -13,7 +13,7 @@ public class PrimitiveTransformer implements ResponseTransformerInterface
     }
 
     @Override
-    public Response resolve(RuntimeBag runtimeBag, Object response)
+    public Response transform(RuntimeBag runtimeBag, Object response)
     {
         return new Response(response.toString());
     }

@@ -6,5 +6,5 @@ public interface ResponseTransformerInterface
 {
     boolean supports(RuntimeBag runtimeBag, Object response);
 
-    Response resolve(RuntimeBag runtimeBag, Object response);
+    Response transform(RuntimeBag runtimeBag, Object response);
 }
