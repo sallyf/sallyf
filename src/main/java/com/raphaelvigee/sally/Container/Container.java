@@ -2,8 +2,6 @@ package com.raphaelvigee.sally.Container;
 
 import com.raphaelvigee.sally.Exception.ServiceInstanciationException;
 
-import javax.lang.model.type.ExecutableType;
-import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -23,7 +21,7 @@ public class Container
         return add(serviceClass, new Object[]{this});
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> serviceNameClass, Class<T> serviceClass) throws ServiceInstanciationException
+    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceNameClass, Class<T> serviceClass) throws ServiceInstanciationException
     {
         return add(serviceNameClass, serviceClass, new Object[]{this});
     }
@@ -33,7 +31,7 @@ public class Container
         return add(serviceClass.toString(), serviceClass, parameters);
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> serviceNameClass, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
+    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceNameClass, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
     {
         return add(serviceNameClass.toString(), serviceClass, parameters);
     }
@@ -90,6 +88,11 @@ public class Container
     }
 
     public <T extends ContainerAwareInterface> T get(Class<T> type)
+    {
+        return (T) get(type.toString());
+    }
+
+    public <N extends ContainerAwareInterface, T extends N> T get(Class<N> type, Class<T> referenceType)
     {
         return (T) get(type.toString());
     }

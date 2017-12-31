@@ -2,6 +2,7 @@ package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Exception.UnableToGenerateURLException;
 import com.raphaelvigee.sally.Router.URLGenerator;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -10,6 +11,13 @@ import static org.junit.Assert.assertEquals;
 
 public class URLGeneratorTest extends BaseFrameworkTest
 {
+    @Override
+    @Before
+    public void setUp() throws Exception
+    {
+        setUp(TestController.class);
+    }
+
     @Test
     public void testWithoutParameter() throws UnableToGenerateURLException
     {
