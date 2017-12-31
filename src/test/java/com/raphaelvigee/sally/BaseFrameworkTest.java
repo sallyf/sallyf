@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
-abstract class BaseFrameworkTest
+public abstract class BaseFrameworkTest
 {
     protected Kernel app;
 
