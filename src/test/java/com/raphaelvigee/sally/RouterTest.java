@@ -4,6 +4,7 @@ import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
 import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Exception.RouteDuplicateException;
+import com.raphaelvigee.sally.Exception.UnhandledParameterException;
 import com.raphaelvigee.sally.Router.*;
 import com.raphaelvigee.sally.Server.Method;
 import com.raphaelvigee.sally.Server.RuntimeBag;
@@ -13,6 +14,7 @@ import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -148,7 +150,7 @@ public class RouterTest
 
         HashMap<String, Route> routes = router.getRoutes();
 
-        assertEquals(4, routes.size());
+        assertEquals(5, routes.size());
 
         Route route = routes.get("test_hello_named");
 
@@ -201,5 +203,19 @@ public class RouterTest
         }
 
         assertArrayEquals(classes, actualClasses);
+    }
+
+    @Test(expected = UnhandledParameterException.class)
+    public void invalidActionParameterTest() throws Exception
+    {
+        Kernel app = Kernel.newInstance();
+
+        Router router = app.getContainer().get(Router.class);
+
+        Class[] classes = {
+                ArrayList.class
+        };
+
+        router.resolveActionParameters(classes, null);
     }
 }

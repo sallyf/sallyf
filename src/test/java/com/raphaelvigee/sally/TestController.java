@@ -6,6 +6,9 @@ import com.raphaelvigee.sally.Exception.UnableToGenerateURLException;
 import com.raphaelvigee.sally.Router.Response;
 import com.raphaelvigee.sally.Router.RouteParameters;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Route(path = "/prefixed", name = "test_")
 public class TestController extends BaseController
 {
@@ -29,7 +32,13 @@ public class TestController extends BaseController
     @Route(path = "/hello/{name}")
     public Response hello5(RouteParameters parameters)
     {
-        return new Response("hello, " + parameters.get("name"));
+        return new Response("hello, " + parameters.get("name") + " " + parameters.get("___", "fallback"));
+    }
+
+    @Route(path = "/invalidresponse")
+    public List invalidResponse()
+    {
+        return new ArrayList();
     }
 
     @Route(path = "/transform/{name}")

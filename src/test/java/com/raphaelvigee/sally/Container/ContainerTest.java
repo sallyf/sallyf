@@ -1,11 +1,13 @@
 package com.raphaelvigee.sally.Container;
 
 import com.raphaelvigee.sally.Exception.FrameworkException;
+import com.raphaelvigee.sally.Exception.ServiceInstanciationException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 
-class MyAlias extends ContainerAware {
+class MyAlias extends ContainerAware
+{
     public MyAlias(Container container)
     {
         super(container);
@@ -56,5 +58,12 @@ public class ContainerTest
         container.add(c, ExampleServiceImplements.class);
 
         assertNotNull(container.get(c));
+    }
+
+    @Test(expected = ServiceInstanciationException.class)
+    public void testInvalid() throws FrameworkException
+    {
+        Container container = new Container();
+        container.add(ExampleServiceInvalid.class);
     }
 }
