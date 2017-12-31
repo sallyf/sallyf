@@ -1,5 +1,7 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Controller.ControllerInterface;
+import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.FrameworkServer;
 import org.junit.After;
@@ -93,11 +95,18 @@ public abstract class BaseFrameworkTest
     @Before
     public void setUp() throws Exception
     {
+        setUp(null);
+    }
+
+    public void setUp(Class<? extends ControllerInterface> controllerClass) throws FrameworkException
+    {
         app = Kernel.newInstance();
 
         Router router = app.getContainer().get(Router.class);
 
-        router.addController(TestController.class);
+        if (null != controllerClass) {
+            router.addController(controllerClass);
+        }
 
         app.start();
     }

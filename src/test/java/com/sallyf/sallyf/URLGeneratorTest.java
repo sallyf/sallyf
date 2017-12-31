@@ -2,6 +2,7 @@ package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
 import com.sallyf.sallyf.Router.URLGenerator;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -10,6 +11,13 @@ import static org.junit.Assert.assertEquals;
 
 public class URLGeneratorTest extends BaseFrameworkTest
 {
+    @Override
+    @Before
+    public void setUp() throws Exception
+    {
+        setUp(TestController.class);
+    }
+
     @Test
     public void testWithoutParameter() throws UnableToGenerateURLException
     {

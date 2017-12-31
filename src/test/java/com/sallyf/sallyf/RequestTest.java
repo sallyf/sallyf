@@ -25,7 +25,7 @@ public class RequestTest extends BaseFrameworkTest
     @Before
     public void setUp() throws Exception
     {
-        super.setUp();
+        setUp(TestController.class);
 
         EventDispatcher eventDispatcher = app.getContainer().get(EventDispatcher.class);
 

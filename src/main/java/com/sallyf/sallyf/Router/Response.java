@@ -1,10 +1,9 @@
 package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Server.Status;
-import org.eclipse.jetty.http.HttpFields;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Response
 {
@@ -14,7 +13,7 @@ public class Response
 
     String mimeType;
 
-    HttpFields httpFields = new HttpFields();
+    HashMap<String, ArrayList<String>> headers = new HashMap<>();
 
     public Response()
     {
@@ -67,24 +66,20 @@ public class Response
 
     public void addHeader(String name, String value)
     {
-        httpFields.add(name, value);
+        if(!headers.containsKey(name)) {
+            headers.put(name, new ArrayList<>());
+        }
+
+        getHeaders(name).add(value);
     }
 
-    public Collection<String> getHeaderNames()
+    public HashMap<String, ArrayList<String>> getHeaders()
     {
-        return httpFields.getFieldNamesCollection();
+        return headers;
     }
 
-    public String getHeader(String name)
+    public ArrayList<String> getHeaders(String name)
     {
-        return httpFields.get(name);
-    }
-
-    public Collection<String> getHeaders(String name)
-    {
-        Collection<String> i = httpFields.getValuesList(name);
-        if (i == null)
-            return Collections.emptyList();
-        return i;
+        return headers.get(name);
     }
 }
