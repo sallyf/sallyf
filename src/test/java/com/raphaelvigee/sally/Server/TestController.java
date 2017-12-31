@@ -12,6 +12,8 @@ public class TestController extends BaseController
 
         r.addHeader("test1", "hello1");
 
+        r.addCookie("cookie1", "hello1");
+
         return r;
     }
 }

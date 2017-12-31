@@ -33,5 +33,6 @@ public class ServerTest extends BaseFrameworkTest
         Map<String, List<String>> headerFields = http.getHeaderFields();
 
         assertThat("Header", headerFields.get("test1").get(0), is("hello1"));
+        assertThat("Cookie", headerFields.get("Set-Cookie").get(0), is("cookie1=hello1"));
     }
 }

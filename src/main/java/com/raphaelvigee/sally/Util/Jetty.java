@@ -3,6 +3,7 @@ package com.raphaelvigee.sally.Util;
 import com.raphaelvigee.sally.Router.RedirectResponse;
 import com.raphaelvigee.sally.Router.Response;
 import com.raphaelvigee.sally.Server.Status;
+import org.eclipse.jetty.http.HttpCookie;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +33,10 @@ public class Jetty
             for (String values : headers) {
                 servletResponse.addHeader(name, values);
             }
+        }
+
+        for (HttpCookie cookie : response.getCookies()) {
+            servletResponse.addCookie(cookie);
         }
 
         servletResponse.setContentType(response.getMimeType());
