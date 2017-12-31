@@ -29,7 +29,7 @@ public class TestController extends BaseController
     @Route(path = "/hello/{name}")
     public Response hello5(RouteParameters parameters)
     {
-        return new Response("hello, " + parameters.get("name"));
+        return new Response("hello, " + parameters.get("name") + " " + parameters.get("___", "fallback"));
     }
 
     @Route(path = "/transform/{name}")

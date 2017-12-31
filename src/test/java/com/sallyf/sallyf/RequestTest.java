@@ -77,7 +77,7 @@ public class RequestTest extends BaseFrameworkTest
         HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/hello/YOLO").openConnection();
         http.connect();
         assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http), is("hello, YOLO"));
+        assertThat("Content", streamToString(http), is("hello, YOLO fallback"));
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
