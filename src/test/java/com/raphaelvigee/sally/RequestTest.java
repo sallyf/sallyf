@@ -117,4 +117,13 @@ public class RequestTest extends BaseFrameworkTest
         http = followRedirects(http);
         assertThat("Target URL", http.getURL().toString(), is(target));
     }
+
+    @Test
+    public void testInvalidResponse() throws Exception
+    {
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/invalidresponse").openConnection();
+        http.connect();
+        http = followRedirects(http);
+        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.INTERNAL_SERVER_ERROR_500));
+    }
 }
