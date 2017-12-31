@@ -14,8 +14,6 @@ import static org.junit.Assert.assertThat;
 
 public class ServerTest extends BaseFrameworkTest
 {
-    private org.eclipse.jetty.server.Response servletResponse;
-
     @Override
     public void setUp() throws Exception
     {
