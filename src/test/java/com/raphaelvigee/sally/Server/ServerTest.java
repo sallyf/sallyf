@@ -1,18 +1,13 @@
 package com.raphaelvigee.sally.Server;
 
 import com.raphaelvigee.sally.BaseFrameworkTest;
-import com.raphaelvigee.sally.Kernel;
-import com.raphaelvigee.sally.Router.Router;
-import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -24,25 +19,7 @@ public class ServerTest extends BaseFrameworkTest
     @Override
     public void setUp() throws Exception
     {
-        app = Kernel.newInstance();
-
-        FrameworkServer server = app.getContainer().add(FrameworkServer.class);
-        server.setHandler(new FrameworkHandler(app.getContainer())
-        {
-            @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest servletRequest, HttpServletResponse r)
-            {
-                super.handle(target, baseRequest, servletRequest, r);
-
-                servletResponse = (org.eclipse.jetty.server.Response) r;
-            }
-        });
-
-        Router router = app.getContainer().get(Router.class);
-
-        router.addController(TestController.class);
-
-        app.start();
+        setUp(TestController.class);
     }
 
     @Test
@@ -53,6 +30,8 @@ public class ServerTest extends BaseFrameworkTest
         assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
         assertThat("Content", streamToString(http), is("OK"));
 
-        assertThat("Header", servletResponse.getHeader("test1"), is("hello1"));
+        Map<String, List<String>> headerFields = http.getHeaderFields();
+
+        assertThat("Header", headerFields.get("test1").get(0), is("hello1"));
     }
 }

@@ -5,6 +5,8 @@ import com.raphaelvigee.sally.Router.Response;
 import com.raphaelvigee.sally.Server.Status;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class Jetty
 {
@@ -24,8 +26,12 @@ public class Jetty
             }
         }
 
-        for (String n : response.getHeaderNames()) {
-            servletResponse.addHeader(n, response.getHeader(n));
+        for (Map.Entry<String, ArrayList<String>> entry : response.getHeaders().entrySet()) {
+            String name = entry.getKey();
+            ArrayList<String> headers = entry.getValue();
+            for (String values : headers) {
+                servletResponse.addHeader(name, values);
+            }
         }
 
         servletResponse.setContentType(response.getMimeType());
