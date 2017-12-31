@@ -59,6 +59,19 @@ public class RequestTest extends BaseFrameworkTest
     }
 
     @Test
+    public void test404() throws IOException
+    {
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/notfound").openConnection();
+        http.connect();
+        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.NOT_FOUND_404));
+
+        EventType[] expectedEvents = {
+                KernelEvents.PRE_MATCH_ROUTE
+        };
+        assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
+    }
+
+    @Test
     public void testHelloParameter() throws IOException
     {
         HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/hello/YOLO").openConnection();

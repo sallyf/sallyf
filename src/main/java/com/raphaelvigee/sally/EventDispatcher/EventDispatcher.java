@@ -53,12 +53,6 @@ public class EventDispatcher extends ContainerAware
 
     public void dispatch(EventType eventType)
     {
-        ArrayList<EventHandlerInterface> handlers = events.get(eventType);
-
-        if (handlers != null) {
-            for (EventHandlerInterface handler : handlers) {
-                handler.dispatch(eventType, null);
-            }
-        }
+        dispatch(eventType, null);
     }
 }
