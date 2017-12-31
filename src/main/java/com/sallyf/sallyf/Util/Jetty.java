@@ -3,6 +3,7 @@ package com.sallyf.sallyf.Util;
 import com.sallyf.sallyf.Router.RedirectResponse;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Server.Status;
+import org.eclipse.jetty.http.HttpCookie;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +33,10 @@ public class Jetty
             for (String values : headers) {
                 servletResponse.addHeader(name, values);
             }
+        }
+
+        for (HttpCookie cookie : response.getCookies()) {
+            servletResponse.addCookie(cookie);
         }
 
         servletResponse.setContentType(response.getMimeType());

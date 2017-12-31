@@ -1,6 +1,7 @@
 package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Server.Status;
+import org.eclipse.jetty.http.HttpCookie;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,8 @@ public class Response
     String mimeType;
 
     HashMap<String, ArrayList<String>> headers = new HashMap<>();
+
+    ArrayList<HttpCookie> cookies = new ArrayList<>();
 
     public Response()
     {
@@ -66,7 +69,7 @@ public class Response
 
     public void addHeader(String name, String value)
     {
-        if(!headers.containsKey(name)) {
+        if (!headers.containsKey(name)) {
             headers.put(name, new ArrayList<>());
         }
 
@@ -81,5 +84,36 @@ public class Response
     public ArrayList<String> getHeaders(String name)
     {
         return headers.get(name);
+    }
+
+    public void addCookie(String name, String value)
+    {
+        addCookie(new HttpCookie(name, value));
+    }
+
+    public void addCookie(HttpCookie cookie)
+    {
+        HttpCookie c = getCookie(cookie.getName());
+        if (null != c) {
+            cookies.remove(c);
+        }
+
+        cookies.add(cookie);
+    }
+
+    public HttpCookie getCookie(String name)
+    {
+        for (HttpCookie cookie : cookies) {
+            if (cookie.getName().equals(name)) {
+                return cookie;
+            }
+        }
+
+        return null;
+    }
+
+    public ArrayList<HttpCookie> getCookies()
+    {
+        return cookies;
     }
 }
