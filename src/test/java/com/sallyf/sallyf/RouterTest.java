@@ -148,7 +148,7 @@ public class RouterTest
 
         HashMap<String, Route> routes = router.getRoutes();
 
-        assertEquals(4, routes.size());
+        assertEquals(5, routes.size());
 
         Route route = routes.get("test_hello_named");
 
