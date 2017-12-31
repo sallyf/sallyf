@@ -59,12 +59,25 @@ public class RequestTest extends BaseFrameworkTest
     }
 
     @Test
+    public void test404() throws IOException
+    {
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/notfound").openConnection();
+        http.connect();
+        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.NOT_FOUND_404));
+
+        EventType[] expectedEvents = {
+                KernelEvents.PRE_MATCH_ROUTE
+        };
+        assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
+    }
+
+    @Test
     public void testHelloParameter() throws IOException
     {
         HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/hello/YOLO").openConnection();
         http.connect();
         assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http), is("hello, YOLO"));
+        assertThat("Content", streamToString(http), is("hello, YOLO fallback"));
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
@@ -103,5 +116,14 @@ public class RequestTest extends BaseFrameworkTest
         http.connect();
         http = followRedirects(http);
         assertThat("Target URL", http.getURL().toString(), is(target));
+    }
+
+    @Test
+    public void testInvalidResponse() throws Exception
+    {
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/invalidresponse").openConnection();
+        http.connect();
+        http = followRedirects(http);
+        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 }
