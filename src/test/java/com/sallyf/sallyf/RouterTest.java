@@ -4,6 +4,7 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.RouteDuplicateException;
+import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
@@ -13,6 +14,7 @@ import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -201,5 +203,19 @@ public class RouterTest
         }
 
         assertArrayEquals(classes, actualClasses);
+    }
+
+    @Test(expected = UnhandledParameterException.class)
+    public void invalidActionParameterTest() throws Exception
+    {
+        Kernel app = Kernel.newInstance();
+
+        Router router = app.getContainer().get(Router.class);
+
+        Class[] classes = {
+                ArrayList.class
+        };
+
+        router.resolveActionParameters(classes, null);
     }
 }
