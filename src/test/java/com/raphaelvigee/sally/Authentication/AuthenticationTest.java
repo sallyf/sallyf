@@ -8,8 +8,6 @@ import org.junit.Test;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -35,11 +33,20 @@ public class AuthenticationTest extends BaseFrameworkTest
     }
 
     @Test
+    public void dataSourcesTest() throws AuthenticationException
+    {
+        AuthenticationManager authenticationManager = app.getContainer().get(AuthenticationManager.class);
+
+        assertThat("Count", authenticationManager.getDataSources().size(), is(1));
+    }
+
+    @Test
     public void testAuthenticateThenRetrieve() throws Exception
     {
         HttpURLConnection http1 = (HttpURLConnection) new URL(getRootURL() + "/authenticate").openConnection();
         http1.connect();
         assertThat("Response Code", http1.getResponseCode(), is(HttpStatus.OK_200));
+        assertThat("Content", streamToString(http1), is("adminadmin"));
 
         HttpURLConnection http2 = (HttpURLConnection) new URL(getRootURL() + "/user").openConnection();
         http2.setRequestProperty("Cookie", http1.getHeaderField("Set-Cookie"));

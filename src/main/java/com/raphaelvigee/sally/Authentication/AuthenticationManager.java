@@ -29,7 +29,7 @@ public class AuthenticationManager extends ContainerAware
         return authenticate(request, username, password, null);
     }
 
-    public UserInterface authenticate(Request request, String username, String password, Class<UserDataSourceInterface> dataSourceClass) throws AuthenticationException
+    public UserInterface authenticate(Request request, String username, String password, Class<? extends UserDataSourceInterface> dataSourceClass) throws AuthenticationException
     {
         if (dataSources.size() == 0) {
             throw new AuthenticationException("No datasource provided");
@@ -64,7 +64,7 @@ public class AuthenticationManager extends ContainerAware
         return dataSources;
     }
 
-    public UserDataSourceInterface getDataSource(Class<UserDataSourceInterface> dataSourceClass) throws AuthenticationException
+    public UserDataSourceInterface getDataSource(Class<? extends UserDataSourceInterface> dataSourceClass) throws AuthenticationException
     {
         for (UserDataSourceInterface dataSource : dataSources) {
             if (dataSource.getClass().equals(dataSourceClass)) {
