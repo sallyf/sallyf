@@ -33,6 +33,14 @@ public class AuthenticationTest extends BaseFrameworkTest
     }
 
     @Test(expected = AuthenticationException.class)
+    public void unknownDataSourceTest() throws AuthenticationException
+    {
+        AuthenticationManager authenticationManager = new AuthenticationManager(null);
+
+        authenticationManager.getDataSource(InMemoryDataSource.class);
+    }
+
+    @Test(expected = AuthenticationException.class)
     public void noDataSourceTest() throws AuthenticationException
     {
         AuthenticationManager authenticationManager = new AuthenticationManager(null);
