@@ -7,6 +7,7 @@ import com.raphaelvigee.sally.Event.ResponseEvent;
 import com.raphaelvigee.sally.Event.RouteMatchEvent;
 import com.raphaelvigee.sally.Event.TransformResponseEvent;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
+import com.raphaelvigee.sally.Exception.HttpException;
 import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Router.RedirectResponse;
 import com.raphaelvigee.sally.Router.Response;
@@ -48,29 +49,36 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
     {
         Request request = (Request) servletRequest;
 
+        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+        Router router = getContainer().get(Router.class);
+
         try {
+            RuntimeBag runtimeBag = new RuntimeBag();
+            Object handlerResponse;
 
-            EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+            try {
+                eventDispatcher.dispatch(KernelEvents.REQUEST, new RequestEvent(request));
+                runtimeBag.setRequest(request);
 
-            Router router = getContainer().get(Router.class);
+                Route route = router.match(request);
 
-            eventDispatcher.dispatch(KernelEvents.PRE_MATCH_ROUTE, new RequestEvent(request));
+                if (route == null) {
+                    throw new HttpException(Status.NOT_FOUND);
+                }
 
-            Route route = router.match(request);
+                route = (Route) route.clone();
+                runtimeBag.setRoute(route);
 
-            if (route == null) {
-                return new com.raphaelvigee.sally.Router.Response("Not Found", Status.NOT_FOUND, "text/plain");
+                eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(runtimeBag));
+
+                handlerResponse = route.getHandler().apply(runtimeBag);
+
+                eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
+            } catch (HttpException httpException) {
+                handlerResponse = httpException;
+
+                eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
             }
-
-            route = (Route) route.clone();
-
-            RuntimeBag runtimeBag = new RuntimeBag(request, route);
-
-            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(runtimeBag));
-
-            Object handlerResponse = route.getHandler().apply(runtimeBag);
-
-            eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
 
             com.raphaelvigee.sally.Router.Response response = router.transformResponse(runtimeBag, handlerResponse);
 

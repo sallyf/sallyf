@@ -32,7 +32,7 @@ public class RequestTest extends BaseFrameworkTest
         EventType[] monitoredEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
                 KernelEvents.POST_MATCH_ROUTE,
-                KernelEvents.PRE_MATCH_ROUTE,
+                KernelEvents.REQUEST,
                 KernelEvents.ROUTE_PARAMETERS,
                 KernelEvents.PRE_TRANSFORM_RESPONSE
         };
@@ -52,7 +52,7 @@ public class RequestTest extends BaseFrameworkTest
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
                 KernelEvents.POST_MATCH_ROUTE,
-                KernelEvents.PRE_MATCH_ROUTE,
+                KernelEvents.REQUEST,
                 KernelEvents.PRE_TRANSFORM_RESPONSE
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
@@ -66,7 +66,7 @@ public class RequestTest extends BaseFrameworkTest
         assertThat("Response Code", http.getResponseCode(), is(HttpStatus.NOT_FOUND_404));
 
         EventType[] expectedEvents = {
-                KernelEvents.PRE_MATCH_ROUTE
+                KernelEvents.REQUEST
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
     }
@@ -82,7 +82,7 @@ public class RequestTest extends BaseFrameworkTest
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
                 KernelEvents.POST_MATCH_ROUTE,
-                KernelEvents.PRE_MATCH_ROUTE,
+                KernelEvents.REQUEST,
                 KernelEvents.ROUTE_PARAMETERS,
                 KernelEvents.PRE_TRANSFORM_RESPONSE
         };
@@ -100,7 +100,7 @@ public class RequestTest extends BaseFrameworkTest
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
                 KernelEvents.POST_MATCH_ROUTE,
-                KernelEvents.PRE_MATCH_ROUTE,
+                KernelEvents.REQUEST,
                 KernelEvents.ROUTE_PARAMETERS,
                 KernelEvents.PRE_TRANSFORM_RESPONSE
         };

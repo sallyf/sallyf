@@ -1,18 +1,29 @@
 package com.raphaelvigee.sally.Authentication;
 
+import com.raphaelvigee.sally.Authentication.Annotation.Security;
+import com.raphaelvigee.sally.Authentication.Voter.VoterInterface;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
+import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
+import com.raphaelvigee.sally.Exception.HttpException;
+import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.UserInterfaceResolver;
+import com.raphaelvigee.sally.Router.Route;
 import com.raphaelvigee.sally.Router.Router;
 import com.raphaelvigee.sally.Server.RuntimeBag;
+import com.raphaelvigee.sally.Server.Status;
 import org.eclipse.jetty.server.Request;
 
 import javax.servlet.http.HttpSession;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AuthenticationManager extends ContainerAware
 {
     ArrayList<UserDataSourceInterface> dataSources = new ArrayList<>();
+
+    HashMap<Route, ArrayList<VoterInterface>> securedRoutes = new HashMap<>();
 
     public AuthenticationManager(Container container)
     {
@@ -22,6 +33,63 @@ public class AuthenticationManager extends ContainerAware
     public void initialize()
     {
         getContainer().get(Router.class).addActionParameterResolver(new UserInterfaceResolver(getContainer()));
+
+        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+
+        eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
+            Method method = routeRegisterEvent.getMethod();
+
+            Security annotation = method.getAnnotation(Security.class);
+
+            if (null == annotation) {
+                return;
+            }
+
+            Class<? extends VoterInterface>[] voterClasses = annotation.value();
+
+            ArrayList<VoterInterface> voterInstances = new ArrayList<>();
+
+            for (Class<? extends VoterInterface> voterClass : voterClasses) {
+                VoterInterface voter;
+                try {
+                    voter = voterClass.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+
+                voterInstances.add(voter);
+            }
+
+            securedRoutes.put(routeRegisterEvent.getRoute(), voterInstances);
+        });
+
+        eventDispatcher.register(KernelEvents.POST_MATCH_ROUTE, (et1, routeMatchEvent) -> {
+            Route route = routeMatchEvent.getRuntimeBag().getRoute();
+            if (!vote(route, routeMatchEvent.getRuntimeBag())) {
+                route.setHandler(rb -> {
+                    throw new HttpException(Status.FORBIDDEN);
+                });
+            }
+        });
+    }
+
+    public boolean vote(Route route, RuntimeBag runtimeBag)
+    {
+        if (securedRoutes.containsKey(route)) {
+            AuthenticationManager authenticationManager = getContainer().get(AuthenticationManager.class);
+
+            ArrayList<VoterInterface> voters = securedRoutes.get(route);
+            UserInterface user = authenticationManager.getUser(runtimeBag);
+
+            for (VoterInterface voter : voters) {
+                if (!voter.test(getContainer(), user, runtimeBag)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public UserInterface authenticate(Request request, String username, String password) throws AuthenticationException

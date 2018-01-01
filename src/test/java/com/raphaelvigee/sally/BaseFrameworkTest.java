@@ -1,7 +1,6 @@
 package com.raphaelvigee.sally;
 
 import com.raphaelvigee.sally.Controller.ControllerInterface;
-import com.raphaelvigee.sally.Exception.FrameworkException;
 import com.raphaelvigee.sally.Router.Router;
 import com.raphaelvigee.sally.Server.FrameworkServer;
 import org.junit.After;
@@ -122,7 +121,7 @@ public abstract class BaseFrameworkTest
 
         initAfterRoute();
 
-        app.start();
+        app.boot();
     }
 
     @After

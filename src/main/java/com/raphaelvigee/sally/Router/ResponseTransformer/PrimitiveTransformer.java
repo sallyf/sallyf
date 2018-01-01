@@ -4,7 +4,7 @@ import com.raphaelvigee.sally.Router.Response;
 import com.raphaelvigee.sally.Router.ResponseTransformerInterface;
 import com.raphaelvigee.sally.Server.RuntimeBag;
 
-public class PrimitiveTransformer implements ResponseTransformerInterface
+public class PrimitiveTransformer implements ResponseTransformerInterface<Object, Response>
 {
     @Override
     public boolean supports(RuntimeBag runtimeBag, Object response)

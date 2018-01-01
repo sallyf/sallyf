@@ -5,20 +5,20 @@ import com.raphaelvigee.sally.Server.RuntimeBag;
 
 public class RouteMatchEvent implements EventInterface
 {
-    private RuntimeBag request;
+    private RuntimeBag runtimeBag;
 
-    public RouteMatchEvent(RuntimeBag request)
+    public RouteMatchEvent(RuntimeBag runtimeBag)
     {
-        this.request = request;
+        this.runtimeBag = runtimeBag;
     }
 
-    public RuntimeBag getRequest()
+    public RuntimeBag getRuntimeBag()
     {
-        return request;
+        return runtimeBag;
     }
 
-    public void setRequest(RuntimeBag request)
+    public void setRuntimeBag(RuntimeBag runtimeBag)
     {
-        this.request = request;
+        this.runtimeBag = runtimeBag;
     }
 }
