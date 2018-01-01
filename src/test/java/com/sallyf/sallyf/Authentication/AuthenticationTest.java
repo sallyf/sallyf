@@ -32,8 +32,32 @@ public class AuthenticationTest extends BaseFrameworkTest
         setUp(TestController.class);
     }
 
+    @Test(expected = AuthenticationException.class)
+    public void noDataSourceTest() throws AuthenticationException
+    {
+        AuthenticationManager authenticationManager = new AuthenticationManager(null);
+
+        authenticationManager.authenticate(null, null, null);
+        authenticationManager.authenticate(null, null, null, null);
+
+    }
+
+    @Test(expected = AuthenticationException.class)
+    public void ambiguousDataSourceTest() throws AuthenticationException
+    {
+        AuthenticationManager authenticationManager = new AuthenticationManager(null);
+
+        InMemoryDataSource<User> ds1 = new InMemoryDataSource<>();
+        InMemoryDataSource<User> ds2 = new InMemoryDataSource<>();
+        authenticationManager.addDataSource(ds1);
+        authenticationManager.addDataSource(ds2);
+
+        authenticationManager.authenticate(null, null, null);
+        authenticationManager.authenticate(null, null, null, null);
+    }
+
     @Test
-    public void dataSourcesTest() throws AuthenticationException
+    public void dataSourcesTest()
     {
         AuthenticationManager authenticationManager = app.getContainer().get(AuthenticationManager.class);
 
