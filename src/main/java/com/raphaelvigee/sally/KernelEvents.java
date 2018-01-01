@@ -6,7 +6,7 @@ import com.raphaelvigee.sally.EventDispatcher.EventType;
 public class KernelEvents
 {
     //  Dispatched before matching a `Route` to the `HTTPSession`
-    public static final EventType<RequestEvent> PRE_MATCH_ROUTE = new EventType<>("kernel.pre_match_route");
+    public static final EventType<RequestEvent> REQUEST = new EventType<>("kernel.pre_match_route");
 
     // Dispatched after matching a `Route` to the `HTTPSession`
     public static final EventType<RouteMatchEvent> POST_MATCH_ROUTE = new EventType<>("kernel.post_match_route");
@@ -22,4 +22,6 @@ public class KernelEvents
 
     // Dispatched after registering a route from a controller
     public static final EventType<RouteRegisterEvent> ROUTE_REGISTER = new EventType<>("kernel.route_register");
+
+    public static final EventType BOOT = new EventType<>("kernel.boot");
 }
