@@ -12,7 +12,7 @@ public class Main
 
         router.addController(AppController.class);
 
-        app.start();
+        app.boot();
     }
 }
 ```

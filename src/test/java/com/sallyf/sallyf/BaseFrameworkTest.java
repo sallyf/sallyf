@@ -1,7 +1,6 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Controller.ControllerInterface;
-import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.FrameworkServer;
 import org.junit.After;
@@ -122,7 +121,7 @@ public abstract class BaseFrameworkTest
 
         initAfterRoute();
 
-        app.start();
+        app.boot();
     }
 
     @After

@@ -54,7 +54,7 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
 
             Router router = getContainer().get(Router.class);
 
-            eventDispatcher.dispatch(KernelEvents.PRE_MATCH_ROUTE, new RequestEvent(request));
+            eventDispatcher.dispatch(KernelEvents.REQUEST, new RequestEvent(request));
 
             Route route = router.match(request);
 
