@@ -14,6 +14,7 @@ import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.RequestResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.RouteParameterResolver;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.ServiceResolver;
+import com.raphaelvigee.sally.Router.ResponseTransformer.HttpExceptionTransformer;
 import com.raphaelvigee.sally.Router.ResponseTransformer.PrimitiveTransformer;
 import com.raphaelvigee.sally.Server.Method;
 import com.raphaelvigee.sally.Server.RuntimeBag;
@@ -40,12 +41,16 @@ public class Router extends ContainerAware
     public Router(Container container)
     {
         super(container);
+    }
 
+    public void initialize()
+    {
         addActionParameterResolver(new RequestResolver());
-        addActionParameterResolver(new RouteParameterResolver(container));
-        addActionParameterResolver(new ServiceResolver(container));
+        addActionParameterResolver(new RouteParameterResolver(getContainer()));
+        addActionParameterResolver(new ServiceResolver(getContainer()));
 
         addResponseTransformer(new PrimitiveTransformer());
+        addResponseTransformer(new HttpExceptionTransformer());
     }
 
     public <C extends ControllerInterface> C registerController(Class<C> controllerClass) throws FrameworkException
@@ -196,17 +201,23 @@ public class Router extends ContainerAware
 
     public Response transformResponse(RuntimeBag runtimeBag, Object response) throws InvalidResponseTypeException
     {
-        if (response instanceof Response) {
-            return (Response) response;
-        }
+        while (true) {
+            boolean transformed = false;
+            for (ResponseTransformerInterface transformer : responseTransformers) {
+                if (transformer.supports(runtimeBag, response)) {
+                    response = transformer.transform(runtimeBag, response);
+                    transformed = true;
+                }
+            }
 
-        for (ResponseTransformerInterface transformer : responseTransformers) {
-            if (transformer.supports(runtimeBag, response)) {
-                return transformer.transform(runtimeBag, response);
+            if (response instanceof Response) {
+                return (Response) response;
+            }
+
+            if (!transformed) {
+                throw new InvalidResponseTypeException(response);
             }
         }
-
-        throw new InvalidResponseTypeException(response);
     }
 
     public void addRouteParameterResolver(RouteParameterResolverInterface resolver)

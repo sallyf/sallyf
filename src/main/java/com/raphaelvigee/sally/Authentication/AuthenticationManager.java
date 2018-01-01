@@ -5,9 +5,9 @@ import com.raphaelvigee.sally.Authentication.Voter.VoterInterface;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
 import com.raphaelvigee.sally.EventDispatcher.EventDispatcher;
+import com.raphaelvigee.sally.Exception.HttpException;
 import com.raphaelvigee.sally.KernelEvents;
 import com.raphaelvigee.sally.Router.ActionParameterResolver.UserInterfaceResolver;
-import com.raphaelvigee.sally.Router.Response;
 import com.raphaelvigee.sally.Router.Route;
 import com.raphaelvigee.sally.Router.Router;
 import com.raphaelvigee.sally.Server.RuntimeBag;
@@ -68,7 +68,7 @@ public class AuthenticationManager extends ContainerAware
             Route route = routeMatchEvent.getRuntimeBag().getRoute();
             if (!vote(route, routeMatchEvent.getRuntimeBag())) {
                 route.setHandler(rb -> {
-                    return new Response("Forbidden", Status.FORBIDDEN, "text/html");
+                    throw new HttpException(Status.FORBIDDEN);
                 });
             }
         });

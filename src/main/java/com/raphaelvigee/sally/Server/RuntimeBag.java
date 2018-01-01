@@ -8,6 +8,10 @@ public class RuntimeBag
     private Request request;
     private Route route;
 
+    public RuntimeBag()
+    {
+    }
+
     public RuntimeBag(Request request, Route route)
     {
         this.request = request;
