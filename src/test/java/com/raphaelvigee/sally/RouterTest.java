@@ -73,10 +73,10 @@ public class RouterTest
         Container container = new Container();
 
         Router router = new Router(container);
-        router.addRoute("route_1", route1);
-        router.addRoute("route_2", route2);
-        router.addRoute("route_3", route3);
-        router.addRoute("route_4", route4);
+        router.registerRoute("route_1", route1);
+        router.registerRoute("route_2", route2);
+        router.registerRoute("route_3", route3);
+        router.registerRoute("route_4", route4);
 
         Request request1 = new Request(null, null);
         MetaData.Request httpFields1 = new MetaData.Request(new HttpFields());
@@ -118,8 +118,8 @@ public class RouterTest
         Container container = new Container();
 
         Router router = new Router(container);
-        router.addRoute("route_1", route1);
-        router.addRoute("route_2", route2);
+        router.registerRoute("route_1", route1);
+        router.registerRoute("route_2", route2);
     }
 
     @Test
@@ -131,8 +131,8 @@ public class RouterTest
         Container container = new Container();
 
         Router router = new Router(container);
-        router.addRoute("route_1", route1);
-        router.addRoute("route_2", route2);
+        router.registerRoute("route_1", route1);
+        router.registerRoute("route_2", route2);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class RouterTest
 
         Router router = app.getContainer().add(Router.class);
 
-        TestController testController = router.addController(TestController.class);
+        TestController testController = router.registerController(TestController.class);
 
         assertNotNull(testController);
 
@@ -172,7 +172,7 @@ public class RouterTest
         router.addRouteParameterResolver(new CapitalizerResolver());
 
         Route route = new Route(Method.GET, "/{name}", (rb) -> null);
-        router.addRoute("route_1", route);
+        router.registerRoute("route_1", route);
 
         Request request = new Request(null, null);
         request.setPathInfo("/lowercase");

@@ -48,7 +48,7 @@ public class Router extends ContainerAware
         addResponseTransformer(new PrimitiveTransformer());
     }
 
-    public <C extends ControllerInterface> C addController(Class<C> controllerClass) throws FrameworkException
+    public <C extends ControllerInterface> C registerController(Class<C> controllerClass) throws FrameworkException
     {
         EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
@@ -78,7 +78,7 @@ public class Router extends ContainerAware
 
                 String fullName = actionNamePrefix + actionName;
 
-                Route route = addAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
+                Route route = registerAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
@@ -118,7 +118,7 @@ public class Router extends ContainerAware
         throw new UnhandledParameterException(parameterType);
     }
 
-    public Route addRoute(String name, Route route) throws RouteDuplicateException
+    public Route registerRoute(String name, Route route) throws RouteDuplicateException
     {
         String signature = route.getMethod() + " " + route.getPath().getPattern();
         if (routeSignatures.contains(signature)) {
@@ -133,9 +133,9 @@ public class Router extends ContainerAware
         return route;
     }
 
-    public Route addAction(String name, Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
+    public Route registerAction(String name, Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
     {
-        return addRoute(name, new Route(name, method, path, handler));
+        return registerRoute(name, new Route(name, method, path, handler));
     }
 
     public HashMap<String, Route> getRoutes()
