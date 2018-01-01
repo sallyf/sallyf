@@ -11,7 +11,7 @@ This is the preferred way of declaring your Route.
 An example is the best explanation :
 
 ```java
-router.addController(MyController.class);
+router.registerController(MyController.class);
 ```
 
 And `MyController.java`:
