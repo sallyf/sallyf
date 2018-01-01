@@ -90,6 +90,7 @@ public class Container
                 initialize.invoke(instance);
             } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
+            System.out.println("Called initializer for " + serviceClass);
         } catch (NoSuchMethodException ignored) {
         }
 

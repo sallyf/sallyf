@@ -98,15 +98,29 @@ public abstract class BaseFrameworkTest
         setUp(null);
     }
 
-    public void setUp(Class<? extends ControllerInterface> controllerClass) throws FrameworkException
+    public void initBeforeRoute() throws Exception
+    {
+
+    }
+
+    public void initAfterRoute() throws Exception
+    {
+
+    }
+
+    public void setUp(Class<? extends ControllerInterface> controllerClass) throws Exception
     {
         app = Kernel.newInstance();
+
+        initBeforeRoute();
 
         Router router = app.getContainer().get(Router.class);
 
         if (null != controllerClass) {
             router.registerController(controllerClass);
         }
+
+        initAfterRoute();
 
         app.start();
     }
