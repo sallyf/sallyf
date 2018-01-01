@@ -1,6 +1,7 @@
 package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Authentication.Annotation.Security;
+import com.sallyf.sallyf.Authentication.Voter.VoterInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAware;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
@@ -22,7 +23,7 @@ public class AuthenticationManager extends ContainerAware
 {
     ArrayList<UserDataSourceInterface> dataSources = new ArrayList<>();
 
-    HashMap<Route, ArrayList<SecurityValidator>> securedRoutes = new HashMap<>();
+    HashMap<Route, ArrayList<VoterInterface>> securedRoutes = new HashMap<>();
 
     public AuthenticationManager(Container container)
     {
@@ -45,36 +46,35 @@ public class AuthenticationManager extends ContainerAware
                 return;
             }
 
-            Class<? extends SecurityValidator>[] validatorClasses = annotation.value();
+            Class<? extends VoterInterface>[] voterClasses = annotation.value();
 
-            ArrayList<SecurityValidator> validatorInstances = new ArrayList<>();
+            ArrayList<VoterInterface> voterInstances = new ArrayList<>();
 
-            for (Class<? extends SecurityValidator> validatorClass : validatorClasses) {
-                SecurityValidator validator;
+            for (Class<? extends VoterInterface> voterClass : voterClasses) {
+                VoterInterface voter;
                 try {
-                    validator = validatorClass.newInstance();
+                    voter = voterClass.newInstance();
                 } catch (InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
                     continue;
                 }
 
-                validatorInstances.add(validator);
+                voterInstances.add(voter);
             }
 
-            securedRoutes.put(routeRegisterEvent.getRoute(), validatorInstances);
+            securedRoutes.put(routeRegisterEvent.getRoute(), voterInstances);
         });
 
         eventDispatcher.register(KernelEvents.POST_MATCH_ROUTE, (et1, routeMatchEvent) -> {
             Route route = routeMatchEvent.getRuntimeBag().getRoute();
 
             if (securedRoutes.containsKey(route)) {
-                ArrayList<SecurityValidator> validators = securedRoutes.get(route);
+                ArrayList<VoterInterface> voters = securedRoutes.get(route);
+                RuntimeBag runtimeBag = routeMatchEvent.getRuntimeBag();
+                UserInterface user = authenticationManager.getUser(runtimeBag);
 
-                for (SecurityValidator validator : validators) {
-                    RuntimeBag runtimeBag = routeMatchEvent.getRuntimeBag();
-                    UserInterface user = authenticationManager.getUser(runtimeBag);
-
-                    if (!validator.test(getContainer(), user, runtimeBag)) {
+                for (VoterInterface voter : voters) {
+                    if (!voter.test(getContainer(), user, runtimeBag)) {
                         route.setHandler(rb -> {
                             return new Response("Forbidden", Status.FORBIDDEN, "text/html");
                         });

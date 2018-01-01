@@ -1,11 +1,10 @@
-package com.sallyf.sallyf.Authentication.Validator;
+package com.sallyf.sallyf.Authentication.Voter;
 
-import com.sallyf.sallyf.Authentication.SecurityValidator;
 import com.sallyf.sallyf.Authentication.UserInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
-public class LoggedInValidator implements SecurityValidator
+public class LoggedIn implements VoterInterface
 {
     @Override
     public boolean test(Container container, UserInterface user, RuntimeBag runtimeBag)

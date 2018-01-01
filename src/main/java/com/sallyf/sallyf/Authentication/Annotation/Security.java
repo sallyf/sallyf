@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Authentication.Annotation;
 
-import com.sallyf.sallyf.Authentication.SecurityValidator;
+import com.sallyf.sallyf.Authentication.Voter.VoterInterface;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Security
 {
-    Class<? extends SecurityValidator>[] value();
+    Class<? extends VoterInterface>[] value();
 }
