@@ -2,7 +2,12 @@ package com.raphaelvigee.sally.Authentication;
 
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Container.ContainerAware;
+import com.raphaelvigee.sally.Router.ActionParameterResolver.UserInterfaceResolver;
+import com.raphaelvigee.sally.Router.Router;
+import com.raphaelvigee.sally.Server.RuntimeBag;
+import org.eclipse.jetty.server.Request;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 
 public class AuthenticationManager extends ContainerAware
@@ -14,12 +19,17 @@ public class AuthenticationManager extends ContainerAware
         super(container);
     }
 
-    public UserInterface authenticate(String username, String password) throws AuthenticationException
+    public void initialize()
     {
-        return authenticate(username, password, null);
+        getContainer().get(Router.class).addActionParameterResolver(new UserInterfaceResolver(getContainer()));
     }
 
-    public UserInterface authenticate(String username, String password, Class<UserDataSourceInterface> dataSourceClass) throws AuthenticationException
+    public UserInterface authenticate(Request request, String username, String password) throws AuthenticationException
+    {
+        return authenticate(request, username, password, null);
+    }
+
+    public UserInterface authenticate(Request request, String username, String password, Class<UserDataSourceInterface> dataSourceClass) throws AuthenticationException
     {
         if (dataSources.size() == 0) {
             throw new AuthenticationException("No datasource provided");
@@ -37,7 +47,11 @@ public class AuthenticationManager extends ContainerAware
             dataSource = getDataSource(dataSourceClass);
         }
 
-        return dataSource.getUser(username, password);
+        UserInterface user = dataSource.getUser(username, password);
+
+        request.getSession(true).setAttribute("user", user);
+
+        return user;
     }
 
     public void addDataSource(UserDataSourceInterface ds)
@@ -59,5 +73,18 @@ public class AuthenticationManager extends ContainerAware
         }
 
         throw new AuthenticationException("No datasource found for class: " + dataSourceClass);
+    }
+
+    public UserInterface getUser(RuntimeBag runtimeBag)
+    {
+        Request request = runtimeBag.getRequest();
+
+        HttpSession session = request.getSession();
+
+        if (null == session) {
+            return null;
+        }
+
+        return (UserInterface) session.getAttribute("user");
     }
 }
