@@ -7,6 +7,7 @@ import com.sallyf.sallyf.Event.ResponseEvent;
 import com.sallyf.sallyf.Event.RouteMatchEvent;
 import com.sallyf.sallyf.Event.TransformResponseEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
+import com.sallyf.sallyf.Exception.HttpException;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.RedirectResponse;
 import com.sallyf.sallyf.Router.Response;
@@ -48,29 +49,36 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
     {
         Request request = (Request) servletRequest;
 
+        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+        Router router = getContainer().get(Router.class);
+
         try {
+            RuntimeBag runtimeBag = new RuntimeBag();
+            Object handlerResponse;
 
-            EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+            try {
+                eventDispatcher.dispatch(KernelEvents.REQUEST, new RequestEvent(request));
+                runtimeBag.setRequest(request);
 
-            Router router = getContainer().get(Router.class);
+                Route route = router.match(request);
 
-            eventDispatcher.dispatch(KernelEvents.REQUEST, new RequestEvent(request));
+                if (route == null) {
+                    throw new HttpException(Status.NOT_FOUND);
+                }
 
-            Route route = router.match(request);
+                route = (Route) route.clone();
+                runtimeBag.setRoute(route);
 
-            if (route == null) {
-                return new com.sallyf.sallyf.Router.Response("Not Found", Status.NOT_FOUND, "text/plain");
+                eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(runtimeBag));
+
+                handlerResponse = route.getHandler().apply(runtimeBag);
+
+                eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
+            } catch (HttpException httpException) {
+                handlerResponse = httpException;
+
+                eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
             }
-
-            route = (Route) route.clone();
-
-            RuntimeBag runtimeBag = new RuntimeBag(request, route);
-
-            eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(runtimeBag));
-
-            Object handlerResponse = route.getHandler().apply(runtimeBag);
-
-            eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
 
             com.sallyf.sallyf.Router.Response response = router.transformResponse(runtimeBag, handlerResponse);
 
