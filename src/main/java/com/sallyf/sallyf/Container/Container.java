@@ -84,6 +84,15 @@ public class Container
 
         services.put(name, instance);
 
+        try {
+            Method initialize = serviceClass.getMethod("initialize");
+            try {
+                initialize.invoke(instance);
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
+            }
+        } catch (NoSuchMethodException ignored) {
+        }
+
         return instance;
     }
 
