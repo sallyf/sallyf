@@ -105,7 +105,7 @@ public abstract class BaseFrameworkTest
         Router router = app.getContainer().get(Router.class);
 
         if (null != controllerClass) {
-            router.addController(controllerClass);
+            router.registerController(controllerClass);
         }
 
         app.start();
