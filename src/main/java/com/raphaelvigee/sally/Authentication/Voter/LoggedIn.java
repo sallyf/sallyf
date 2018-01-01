@@ -1,11 +1,10 @@
-package com.raphaelvigee.sally.Authentication.Validator;
+package com.raphaelvigee.sally.Authentication.Voter;
 
-import com.raphaelvigee.sally.Authentication.SecurityValidator;
 import com.raphaelvigee.sally.Authentication.UserInterface;
 import com.raphaelvigee.sally.Container.Container;
 import com.raphaelvigee.sally.Server.RuntimeBag;
 
-public class LoggedInValidator implements SecurityValidator
+public class LoggedIn implements VoterInterface
 {
     @Override
     public boolean test(Container container, UserInterface user, RuntimeBag runtimeBag)
