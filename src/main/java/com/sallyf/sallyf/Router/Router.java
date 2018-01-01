@@ -4,6 +4,7 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAware;
 import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Event.RouteParametersEvent;
+import com.sallyf.sallyf.Event.RouteRegisterEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.InvalidResponseTypeException;
@@ -47,8 +48,10 @@ public class Router extends ContainerAware
         addResponseTransformer(new PrimitiveTransformer());
     }
 
-    public <C extends ControllerInterface> C addController(Class<C> controllerClass) throws FrameworkException
+    public <C extends ControllerInterface> C registerController(Class<C> controllerClass) throws FrameworkException
     {
+        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+
         C controller = getContainer().add(controllerClass);
 
         com.sallyf.sallyf.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
@@ -75,7 +78,7 @@ public class Router extends ContainerAware
 
                 String fullName = actionNamePrefix + actionName;
 
-                addAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
+                Route route = registerAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
@@ -85,6 +88,8 @@ public class Router extends ContainerAware
                         return null;
                     }
                 });
+
+                eventDispatcher.dispatch(KernelEvents.ROUTE_REGISTER, new RouteRegisterEvent(route, controller, method));
             }
         }
 
@@ -113,7 +118,7 @@ public class Router extends ContainerAware
         throw new UnhandledParameterException(parameterType);
     }
 
-    public void addRoute(String name, Route route) throws RouteDuplicateException
+    public Route registerRoute(String name, Route route) throws RouteDuplicateException
     {
         String signature = route.getMethod() + " " + route.getPath().getPattern();
         if (routeSignatures.contains(signature)) {
@@ -124,11 +129,13 @@ public class Router extends ContainerAware
 
         routes.put(name, route);
         routeSignatures.add(signature);
+
+        return route;
     }
 
-    public void addAction(String name, Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
+    public Route registerAction(String name, Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
     {
-        addRoute(name, new Route(name, method, path, handler));
+        return registerRoute(name, new Route(name, method, path, handler));
     }
 
     public HashMap<String, Route> getRoutes()
