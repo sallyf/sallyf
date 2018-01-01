@@ -35,7 +35,6 @@ public class AuthenticationManager extends ContainerAware
         getContainer().get(Router.class).addActionParameterResolver(new UserInterfaceResolver(getContainer()));
 
         EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
-        AuthenticationManager authenticationManager = getContainer().get(AuthenticationManager.class);
 
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
@@ -67,22 +66,30 @@ public class AuthenticationManager extends ContainerAware
 
         eventDispatcher.register(KernelEvents.POST_MATCH_ROUTE, (et1, routeMatchEvent) -> {
             Route route = routeMatchEvent.getRuntimeBag().getRoute();
-
-            if (securedRoutes.containsKey(route)) {
-                ArrayList<VoterInterface> voters = securedRoutes.get(route);
-                RuntimeBag runtimeBag = routeMatchEvent.getRuntimeBag();
-                UserInterface user = authenticationManager.getUser(runtimeBag);
-
-                for (VoterInterface voter : voters) {
-                    if (!voter.test(getContainer(), user, runtimeBag)) {
-                        route.setHandler(rb -> {
-                            return new Response("Forbidden", Status.FORBIDDEN, "text/html");
-                        });
-                        break;
-                    }
-                }
+            if (!vote(route, routeMatchEvent.getRuntimeBag())) {
+                route.setHandler(rb -> {
+                    return new Response("Forbidden", Status.FORBIDDEN, "text/html");
+                });
             }
         });
+    }
+
+    public boolean vote(Route route, RuntimeBag runtimeBag)
+    {
+        if (securedRoutes.containsKey(route)) {
+            AuthenticationManager authenticationManager = getContainer().get(AuthenticationManager.class);
+
+            ArrayList<VoterInterface> voters = securedRoutes.get(route);
+            UserInterface user = authenticationManager.getUser(runtimeBag);
+
+            for (VoterInterface voter : voters) {
+                if (!voter.test(getContainer(), user, runtimeBag)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public UserInterface authenticate(Request request, String username, String password) throws AuthenticationException
