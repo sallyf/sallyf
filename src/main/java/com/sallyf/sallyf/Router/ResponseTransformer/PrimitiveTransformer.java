@@ -4,7 +4,7 @@ import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.ResponseTransformerInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
-public class PrimitiveTransformer implements ResponseTransformerInterface
+public class PrimitiveTransformer implements ResponseTransformerInterface<Object, Response>
 {
     @Override
     public boolean supports(RuntimeBag runtimeBag, Object response)

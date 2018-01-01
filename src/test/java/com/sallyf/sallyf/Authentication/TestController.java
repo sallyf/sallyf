@@ -1,7 +1,9 @@
 package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Annotation.Route;
+import com.sallyf.sallyf.Authentication.Annotation.Security;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
+import com.sallyf.sallyf.Authentication.Voter.LoggedIn;
 import com.sallyf.sallyf.Controller.BaseController;
 import org.eclipse.jetty.server.Request;
 
@@ -20,5 +22,12 @@ public class TestController extends BaseController
     public String user(User user)
     {
         return user.getUsername();
+    }
+
+    @Route(path = "/secured")
+    @Security({LoggedIn.class})
+    public String secured()
+    {
+        return "Secured";
     }
 }

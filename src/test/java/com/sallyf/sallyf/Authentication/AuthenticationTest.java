@@ -86,4 +86,27 @@ public class AuthenticationTest extends BaseFrameworkTest
         assertThat("Response Code", http2.getResponseCode(), is(HttpStatus.OK_200));
         assertThat("Content", streamToString(http2), is("admin"));
     }
+
+    @Test
+    public void testAnonymousAccess() throws Exception
+    {
+        HttpURLConnection http1 = (HttpURLConnection) new URL(getRootURL() + "/secured").openConnection();
+        http1.connect();
+        assertThat("Response Code", http1.getResponseCode(), is(HttpStatus.FORBIDDEN_403));
+    }
+
+    @Test
+    public void testAuthenticatedAcces() throws Exception
+    {
+        HttpURLConnection http1 = (HttpURLConnection) new URL(getRootURL() + "/authenticate").openConnection();
+        http1.connect();
+        assertThat("Response Code", http1.getResponseCode(), is(HttpStatus.OK_200));
+
+        HttpURLConnection http2 = (HttpURLConnection) new URL(getRootURL() + "/secured").openConnection();
+        http2.setRequestProperty("Cookie", http1.getHeaderField("Set-Cookie"));
+        http2.connect();
+        assertThat("Response Code", http2.getResponseCode(), is(HttpStatus.OK_200));
+        assertThat("Content", streamToString(http2), is("Secured"));
+    }
+
 }

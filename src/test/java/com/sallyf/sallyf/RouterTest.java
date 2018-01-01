@@ -146,7 +146,7 @@ public class RouterTest
 
         assertNotNull(testController);
 
-        app.start();
+        app.boot();
 
         HashMap<String, Route> routes = router.getRoutes();
 

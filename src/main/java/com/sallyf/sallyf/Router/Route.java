@@ -2,6 +2,8 @@ package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Server.Method;
 
+import java.util.Objects;
+
 public class Route implements Cloneable
 {
     private Method method;
@@ -73,7 +75,31 @@ public class Route implements Cloneable
         return String.format("%s %s", getMethod(), getPath().declaration);
     }
 
-    public Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException
+    {
         return super.clone();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Route route = (Route) o;
+        return getMethod() == route.getMethod() &&
+                Objects.equals(getPath(), route.getPath()) &&
+                Objects.equals(getName(), route.getName());
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(getMethod(), getPath(), getName());
     }
 }

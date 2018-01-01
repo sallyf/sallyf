@@ -36,8 +36,10 @@ public class Kernel
         return container;
     }
 
-    public void start()
+    public void boot()
     {
+        getContainer().get(EventDispatcher.class).dispatch(KernelEvents.BOOT);
+
         FrameworkServer server = container.get(FrameworkServer.class);
         Router router = container.get(Router.class);
         try {
