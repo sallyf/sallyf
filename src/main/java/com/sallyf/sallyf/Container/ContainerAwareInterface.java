@@ -5,5 +5,5 @@ public interface ContainerAwareInterface
 {
     Container getContainer();
 
-    default void initialize() {}
+    default void initialize() throws Exception {}
 }

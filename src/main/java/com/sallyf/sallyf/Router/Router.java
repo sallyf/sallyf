@@ -199,13 +199,17 @@ public class Router extends ContainerAware
         return value;
     }
 
-    public Response transformResponse(RuntimeBag runtimeBag, Object response) throws InvalidResponseTypeException
+    public Response transformResponse(RuntimeBag runtimeBag, Object response) throws FrameworkException
     {
         while (true) {
             boolean transformed = false;
             for (ResponseTransformerInterface transformer : responseTransformers) {
                 if (transformer.supports(runtimeBag, response)) {
-                    response = transformer.transform(runtimeBag, response);
+                    try {
+                        response = transformer.transform(runtimeBag, response);
+                    } catch (Exception e) {
+                        throw new FrameworkException(e);
+                    }
                     transformed = true;
                 }
             }
