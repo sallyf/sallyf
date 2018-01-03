@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Container
 {
-    private Map<String, ContainerAwareInterface> services;
+    private Map<Class<? extends ContainerAwareInterface>, ContainerAwareInterface> services;
 
     public Container()
     {
@@ -21,41 +21,31 @@ public class Container
         return add(serviceClass, new Object[]{this});
     }
 
-    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceNameClass, Class<T> serviceClass) throws ServiceInstanciationException
+    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceReferenceClass, Class<T> serviceClass) throws ServiceInstanciationException
     {
-        return add(serviceNameClass, serviceClass, new Object[]{this});
+        return add(serviceReferenceClass, serviceClass, new Object[]{this});
     }
 
     public <T extends ContainerAwareInterface> T add(Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
     {
-        return add(serviceClass.toString(), serviceClass, parameters);
+        return add(serviceClass, serviceClass, parameters);
     }
 
-    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceNameClass, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
-    {
-        return add(serviceNameClass.toString(), serviceClass, parameters);
-    }
-
-    public <T extends ContainerAwareInterface> T add(String name, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
+    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceReferenceClass, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
     {
         T instance;
-
-        boolean parametersContainsContainer = false;
-        boolean instantiatedWithContainer = false;
 
         Class[] parameterTypes = new Class[parameters.length];
         int i = 0;
         for (Object parameter : parameters) {
             Class parameterClass = parameter.getClass();
             if (parameterClass == this.getClass()) {
-                parametersContainsContainer = true;
             }
             parameterTypes[i++] = parameterClass;
         }
 
         try {
             instance = serviceClass.getConstructor(parameterTypes).newInstance(parameters);
-            instantiatedWithContainer = parametersContainsContainer;
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             try {
                 instance = serviceClass.getConstructor().newInstance();
@@ -65,7 +55,7 @@ public class Container
             }
         }
 
-        if (!instantiatedWithContainer) {
+        if (instance.getContainer() == null) {
             try {
                 Method setContainer = serviceClass.getMethod("setContainer", Container.class);
                 try {
@@ -82,7 +72,7 @@ public class Container
             throw new ServiceInstanciationException("Container cannot be accessed");
         }
 
-        services.put(name, instance);
+        services.put(serviceReferenceClass, instance);
 
         try {
             Method initialize = serviceClass.getMethod("initialize");
@@ -98,26 +88,16 @@ public class Container
 
     public <T extends ContainerAwareInterface> T get(Class<T> type)
     {
-        return (T) get(type.toString());
+        return (T) services.get(type);
     }
 
-    public <N extends ContainerAwareInterface, T extends N> T get(Class<N> type, Class<T> referenceType)
+    public <C extends ContainerAwareInterface, T extends C> C get(Class<T> type, Class<C> castType)
     {
-        return (T) get(type.toString());
-    }
-
-    public Object get(String name)
-    {
-        return services.get(name);
+        return (C) get(type);
     }
 
     public <T extends ContainerAwareInterface> boolean has(Class<T> type)
     {
-        return has(type.toString());
-    }
-
-    public boolean has(String name)
-    {
-        return services.containsKey(name);
+        return services.containsKey(type);
     }
 }
