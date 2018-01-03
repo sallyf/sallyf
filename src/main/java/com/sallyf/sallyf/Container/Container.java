@@ -18,34 +18,15 @@ public class Container
 
     public <T extends ContainerAwareInterface> T add(Class<T> serviceClass) throws ServiceInstanciationException
     {
-        return add(serviceClass, new Object[]{this});
+        return add(serviceClass, serviceClass);
     }
 
     public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceReferenceClass, Class<T> serviceClass) throws ServiceInstanciationException
     {
-        return add(serviceReferenceClass, serviceClass, new Object[]{this});
-    }
-
-    public <T extends ContainerAwareInterface> T add(Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
-    {
-        return add(serviceClass, serviceClass, parameters);
-    }
-
-    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceReferenceClass, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
-    {
         T instance;
 
-        Class[] parameterTypes = new Class[parameters.length];
-        int i = 0;
-        for (Object parameter : parameters) {
-            Class parameterClass = parameter.getClass();
-            if (parameterClass == this.getClass()) {
-            }
-            parameterTypes[i++] = parameterClass;
-        }
-
         try {
-            instance = serviceClass.getConstructor(parameterTypes).newInstance(parameters);
+            instance = serviceClass.getConstructor(Container.class).newInstance(this);
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             try {
                 instance = serviceClass.getConstructor().newInstance();
