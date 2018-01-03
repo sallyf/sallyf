@@ -20,9 +20,11 @@ class ServerConfiguration extends Configuration
 
     public ServerConfiguration()
     {
-        Random rand = new Random();
+        Random r = new Random();
+        int low = 3000;
+        int high = 5000;
 
-        port = rand.nextInt(5000) + 3000;
+        port = r.nextInt(high - low) + low;
     }
 
     @Override
