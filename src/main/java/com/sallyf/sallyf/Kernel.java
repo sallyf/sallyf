@@ -1,8 +1,9 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Router.URLGenerator;
@@ -14,21 +15,26 @@ public class Kernel
 {
     private Container container;
 
-    Kernel(Container container)
+    public Kernel(Container container)
     {
         this.container = container;
+
+        container.addAll(getDefaultServices());
     }
 
-    public static Kernel newInstance() throws FrameworkException
+    public static Kernel newInstance()
     {
-        Container container = new Container();
+        return new Kernel(new Container());
+    }
 
-        container.add(FrameworkServer.class);
-        container.add(Router.class);
-        container.add(URLGenerator.class);
-        container.add(EventDispatcher.class);
-
-        return new Kernel(container);
+    private ServiceDefinition[] getDefaultServices()
+    {
+        return new ServiceDefinition[]{
+                new ServiceDefinition<>(EventDispatcher.class),
+                new ServiceDefinition<>(FrameworkServer.class),
+                new ServiceDefinition<>(Router.class),
+                new ServiceDefinition<>(URLGenerator.class),
+        };
     }
 
     public Container getContainer()
@@ -36,12 +42,17 @@ public class Kernel
         return container;
     }
 
-    public void boot()
+    public void boot() throws ServiceInstantiationException
     {
-        getContainer().get(EventDispatcher.class).dispatch(KernelEvents.BOOT);
+        Container container = getContainer();
 
-        FrameworkServer server = container.get(FrameworkServer.class);
-        Router router = container.get(Router.class);
+        container.instantiateServices();
+
+        container.get(EventDispatcher.class).dispatch(KernelEvents.BOOT);
+
+        FrameworkServer server = this.container.get(FrameworkServer.class);
+        Router router = this.container.get(Router.class);
+        System.out.println(server.getRootURL());
         try {
             server.start();
             //server.join();

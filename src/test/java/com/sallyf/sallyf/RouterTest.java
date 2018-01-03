@@ -42,6 +42,8 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
+        app.boot();
+
         Router router = app.getContainer().get(Router.class);
 
         Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
@@ -140,7 +142,9 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
-        Router router = app.getContainer().add(Router.class);
+        app.boot();
+
+        Router router = app.getContainer().get(Router.class);
 
         TestController testController = router.registerController(TestController.class);
 
@@ -167,6 +171,8 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
+        app.boot();
+
         Router router = app.getContainer().get(Router.class);
 
         router.addRouteParameterResolver(new CapitalizerResolver());
@@ -187,6 +193,8 @@ public class RouterTest
     public void actionParameterTest() throws Exception
     {
         Kernel app = Kernel.newInstance();
+
+        app.boot();
 
         Router router = app.getContainer().get(Router.class);
 
@@ -209,6 +217,8 @@ public class RouterTest
     public void invalidActionParameterTest() throws Exception
     {
         Kernel app = Kernel.newInstance();
+
+        app.boot();
 
         Router router = app.getContainer().get(Router.class);
 

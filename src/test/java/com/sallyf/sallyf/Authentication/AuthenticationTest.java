@@ -2,7 +2,8 @@ package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
-import com.sallyf.sallyf.Exception.ServiceInstanciationException;
+import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.Exception.ServiceInstantiationException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.Test;
 
@@ -15,9 +16,9 @@ import static org.junit.Assert.assertThat;
 public class AuthenticationTest extends BaseFrameworkTest
 {
     @Override
-    public void initBeforeRoute() throws ServiceInstanciationException
+    public void initBeforeRoute() throws ServiceInstantiationException
     {
-        AuthenticationManager authenticationManager = app.getContainer().add(AuthenticationManager.class);
+        AuthenticationManager authenticationManager = app.getContainer().add(new ServiceDefinition<>(AuthenticationManager.class));
 
         InMemoryDataSource<User> memoryDS = new InMemoryDataSource<>();
         memoryDS.addUser(new User("admin", "password"));

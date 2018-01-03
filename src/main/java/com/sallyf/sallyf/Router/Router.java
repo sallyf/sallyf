@@ -2,6 +2,7 @@ package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAware;
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Event.RouteParametersEvent;
 import com.sallyf.sallyf.Event.RouteRegisterEvent;
@@ -57,7 +58,7 @@ public class Router extends ContainerAware
     {
         EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
-        C controller = getContainer().add(controllerClass);
+        C controller = getContainer().add(new ServiceDefinition<>(controllerClass));
 
         com.sallyf.sallyf.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
 

@@ -19,24 +19,22 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
 
     public ServiceDefinition(Class alias, Class<T> type)
     {
-        this.type = type;
-        this.alias = alias;
-
-        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference(), new DefaultConfigurationReference<>(type)));
-        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference()));
-        constructorDefinitions.add(new ConstructorDefinition());
-
-        callDefinitions.add(new CallDefinition("setContainer", new ContainerReference()));
-        callDefinitions.add(new CallDefinition("setConfiguration", new DefaultConfigurationReference<>(type)));
+        this(alias, type, null);
     }
 
     public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration)
     {
-        this(alias, type);
+        this.type = type;
+        this.alias = alias;
 
-        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference(), new PlainReference(configuration)));
+        ReferenceInterface configurationReference = configuration != null ? new PlainReference(configuration) : new DefaultConfigurationReference<>(type);
 
-        callDefinitions.add(new CallDefinition("setConfiguration", new PlainReference(configuration)));
+        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference(), configurationReference));
+        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference()));
+        constructorDefinitions.add(new ConstructorDefinition());
+
+        callDefinitions.add(new CallDefinition("setContainer", new ContainerReference()));
+        callDefinitions.add(new CallDefinition("setConfiguration", configurationReference));
     }
 
     public ServiceDefinition(Class<T> type, ConfigurationInterface configuration)

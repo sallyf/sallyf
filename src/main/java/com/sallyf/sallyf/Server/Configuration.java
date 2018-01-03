@@ -4,7 +4,7 @@ import com.sallyf.sallyf.Container.ConfigurationInterface;
 
 public class Configuration implements ConfigurationInterface
 {
-    int getPort()
+    public int getPort()
     {
         return 4367;
     }

@@ -1,7 +1,7 @@
 package com.sallyf.sallyf.Container;
 
 import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.ServiceInstanciationException;
+import com.sallyf.sallyf.Exception.ServiceInstantiationException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -22,7 +22,9 @@ public class ContainerTest
         Class c = ExampleServiceExtend.class;
 
         Container container = new Container();
-        container.add(c);
+        container.add(new ServiceDefinition<>(c));
+
+        container.instantiateServices();
 
         assertNotNull(container.get(c));
     }
@@ -33,7 +35,9 @@ public class ContainerTest
         Class c = ExampleServiceImplements.class;
 
         Container container = new Container();
-        container.add(c);
+        container.add(new ServiceDefinition<>(c));
+
+        container.instantiateServices();
 
         assertNotNull(container.get(c));
     }
@@ -44,7 +48,9 @@ public class ContainerTest
         Class c = MyAlias.class;
 
         Container container = new Container();
-        container.add(c, ExampleServiceExtend.class);
+        container.add(new ServiceDefinition<>(c, ExampleServiceExtend.class));
+
+        container.instantiateServices();
 
         assertNotNull(container.get(c));
     }
@@ -55,15 +61,19 @@ public class ContainerTest
         Class c = MyAlias.class;
 
         Container container = new Container();
-        container.add(c, ExampleServiceImplements.class);
+        container.add(new ServiceDefinition<>(c, ExampleServiceImplements.class));
+
+        container.instantiateServices();
 
         assertNotNull(container.get(c));
     }
 
-    @Test(expected = ServiceInstanciationException.class)
+    @Test(expected = ServiceInstantiationException.class)
     public void testInvalid() throws FrameworkException
     {
         Container container = new Container();
-        container.add(ExampleServiceInvalid.class);
+        container.add(new ServiceDefinition<>(ExampleServiceInvalid.class));
+
+        container.instantiateServices();
     }
 }
