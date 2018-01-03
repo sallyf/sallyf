@@ -150,8 +150,6 @@ public class RouterTest
 
         assertNotNull(testController);
 
-        app.boot();
-
         HashMap<String, Route> routes = router.getRoutes();
 
         assertEquals(5, routes.size());

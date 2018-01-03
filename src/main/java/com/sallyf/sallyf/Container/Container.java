@@ -23,26 +23,20 @@ public class Container
         serviceDefinitions = new HashMap<>();
     }
 
-    public void addAll(ServiceDefinition<? extends ContainerAwareInterface>[] serviceDefinitions)
+    public void addAll(ServiceDefinition<? extends ContainerAwareInterface>[] serviceDefinitions) throws ServiceInstantiationException
     {
         for (ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition : serviceDefinitions) {
             add(serviceDefinition);
         }
     }
 
-    public <T extends ContainerAwareInterface> T add(ServiceDefinition<T> serviceDefinition)
+    public <T extends ContainerAwareInterface> void add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
-        serviceDefinitions.put(serviceDefinition.alias, serviceDefinition);
-
         if(instantiated) {
-            try {
-                return instantiateService(serviceDefinition);
-            } catch (ServiceInstantiationException e) {
-                e.printStackTrace();
-            }
+            throw new ServiceInstantiationException("Container is already instantiated");
         }
 
-        return null;
+        serviceDefinitions.put(serviceDefinition.alias, serviceDefinition);
     }
 
     public void instantiateServices() throws ServiceInstantiationException
@@ -97,12 +91,10 @@ public class Container
         services.put(serviceDefinition.alias, instance);
 
         try {
-            Method initialize = serviceClass.getMethod("initialize");
-            try {
-                initialize.invoke(instance);
-            } catch (IllegalAccessException | InvocationTargetException ignored) {
-            }
-        } catch (NoSuchMethodException ignored) {
+            instance.initialize();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ServiceInstantiationException(e);
         }
 
         return instance;

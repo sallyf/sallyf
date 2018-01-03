@@ -15,14 +15,14 @@ public class Kernel
 {
     private Container container;
 
-    public Kernel(Container container)
+    public Kernel(Container container) throws ServiceInstantiationException
     {
         this.container = container;
 
         container.addAll(getDefaultServices());
     }
 
-    public static Kernel newInstance()
+    public static Kernel newInstance() throws ServiceInstantiationException
     {
         return new Kernel(new Container());
     }
@@ -52,7 +52,7 @@ public class Kernel
 
         FrameworkServer server = this.container.get(FrameworkServer.class);
         Router router = this.container.get(Router.class);
-        System.out.println(server.getRootURL());
+
         try {
             server.start();
             //server.join();
@@ -76,10 +76,12 @@ public class Kernel
     {
         FrameworkServer server = container.get(FrameworkServer.class);
 
-        try {
-            server.stop();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(null != server) {
+            try {
+                server.stop();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

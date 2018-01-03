@@ -118,7 +118,7 @@ public abstract class BaseFrameworkTest
         setUp(null);
     }
 
-    public void initBeforeRoute() throws Exception
+    public void initBeforeBoot() throws Exception
     {
 
     }
@@ -134,9 +134,9 @@ public abstract class BaseFrameworkTest
 
         app.getContainer().add(new ServiceDefinition<>(FrameworkServer.class, new ServerConfiguration()));
 
-        app.boot();
+        initBeforeBoot();
 
-        initBeforeRoute();
+        app.boot();
 
         Router router = app.getContainer().get(Router.class);
 

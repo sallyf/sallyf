@@ -2,6 +2,7 @@ package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Authentication.Annotation.Security;
 import com.sallyf.sallyf.Authentication.Voter.VoterInterface;
+import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAware;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
@@ -21,13 +22,15 @@ import java.util.HashMap;
 
 public class AuthenticationManager extends ContainerAware
 {
-    ArrayList<UserDataSourceInterface> dataSources = new ArrayList<>();
+    ArrayList<UserDataSourceInterface> dataSources;
 
     HashMap<Route, ArrayList<VoterInterface>> securedRoutes = new HashMap<>();
 
-    public AuthenticationManager(Container container)
+    public AuthenticationManager(Container container, Configuration configuration)
     {
         super(container);
+
+        dataSources = configuration.getDataSources();
     }
 
     public void initialize()
@@ -122,11 +125,6 @@ public class AuthenticationManager extends ContainerAware
         return user;
     }
 
-    public void addDataSource(UserDataSourceInterface ds)
-    {
-        dataSources.add(ds);
-    }
-
     public ArrayList<UserDataSourceInterface> getDataSources()
     {
         return dataSources;
@@ -154,5 +152,10 @@ public class AuthenticationManager extends ContainerAware
         }
 
         return (UserInterface) session.getAttribute("user");
+    }
+
+    public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
+    {
+        return Configuration.class;
     }
 }
