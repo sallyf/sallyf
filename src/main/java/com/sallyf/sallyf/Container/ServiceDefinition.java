@@ -22,10 +22,12 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
         this.type = type;
         this.alias = alias;
 
+        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference(), new DefaultConfigurationReference<>(type)));
         constructorDefinitions.add(new ConstructorDefinition(new ContainerReference()));
         constructorDefinitions.add(new ConstructorDefinition());
 
         callDefinitions.add(new CallDefinition("setContainer", new ContainerReference()));
+        callDefinitions.add(new CallDefinition("setConfiguration", new DefaultConfigurationReference<>(type)));
     }
 
     public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration)
@@ -33,6 +35,8 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
         this(alias, type);
 
         constructorDefinitions.add(new ConstructorDefinition(new ContainerReference(), new PlainReference(configuration)));
+
+        callDefinitions.add(new CallDefinition("setConfiguration", new PlainReference(configuration)));
     }
 
     public ServiceDefinition(Class<T> type, ConfigurationInterface configuration)

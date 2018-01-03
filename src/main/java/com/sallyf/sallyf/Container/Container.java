@@ -110,6 +110,10 @@ public class Container
             return ((PlainReference) reference).value;
         }
 
+        if (reference instanceof DefaultConfigurationReference) {
+            return resolveDefaultConfiguration((DefaultConfigurationReference<? extends ContainerAwareInterface>) reference);
+        }
+
         if (reference instanceof ServiceReference) {
             return resolveServiceReference((ServiceReference<? extends ContainerAwareInterface>) reference);
         }
@@ -128,18 +132,39 @@ public class Container
         return get(type);
     }
 
-    public <T extends ContainerAwareInterface> T get(Class<T> type)
+    private <T extends ContainerAwareInterface> ConfigurationInterface resolveDefaultConfiguration(DefaultConfigurationReference<T> configurationReference) throws ServiceInstanciationException
     {
-        return (T) services.get(type);
+        Class<T> type = configurationReference.serviceReference.type;
+
+        try {
+            Method method = type.getDeclaredMethod("getDefaultConfigurationClass");
+            Class<? extends ConfigurationInterface> configurationClass = (Class) method.invoke(null);
+
+            if (configurationClass == null) {
+                return null;
+            }
+
+            return configurationClass.newInstance();
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new ServiceInstanciationException(e);
+        } catch (NoSuchMethodException ignored) {
+        }
+
+        return null;
     }
 
-    public <C extends ContainerAwareInterface, T extends C> C get(Class<T> type, Class<C> castType)
+    public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
     {
-        return (C) get(type);
+        return (T) services.get(serviceClass);
     }
 
-    public <T extends ContainerAwareInterface> boolean has(Class<T> type)
+    public <T extends ContainerAwareInterface, C> C get(Class<T> serviceClass, Class<C> castType)
     {
-        return services.containsKey(type);
+        return (C) get(serviceClass);
+    }
+
+    public boolean has(Class serviceClass)
+    {
+        return services.containsKey(serviceClass);
     }
 }
