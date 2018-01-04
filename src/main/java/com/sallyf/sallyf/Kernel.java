@@ -3,7 +3,7 @@ package com.sallyf.sallyf;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Router.URLGenerator;

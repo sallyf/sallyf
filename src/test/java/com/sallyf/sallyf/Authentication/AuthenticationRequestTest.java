@@ -2,10 +2,8 @@ package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
-import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceDefinition;
-import com.sallyf.sallyf.Exception.ServiceInstantiationException;
-import com.sallyf.sallyf.Kernel;
+import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.Test;
 

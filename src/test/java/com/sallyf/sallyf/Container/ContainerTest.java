@@ -1,7 +1,7 @@
 package com.sallyf.sallyf.Container;
 
 import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;

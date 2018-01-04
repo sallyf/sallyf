@@ -45,8 +45,6 @@ public class AuthenticationManager implements ContainerAwareInterface
     {
         router.addActionParameterResolver(new UserInterfaceResolver(container));
 
-        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
-
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
 

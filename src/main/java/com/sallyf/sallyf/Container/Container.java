@@ -1,6 +1,9 @@
 package com.sallyf.sallyf.Container;
 
-import com.sallyf.sallyf.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.Exception.CircularReferenceException;
+import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
+import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.Exception.ServiceResolutionException;
 import com.sallyf.sallyf.Utils;
 
 import java.lang.reflect.Constructor;
@@ -32,7 +35,7 @@ public class Container
     public <T extends ContainerAwareInterface> void add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
         if (instantiated) {
-            throw new ServiceInstantiationException("Container is already instantiated");
+            throw new ServiceInstantiationException();
         }
 
         if (serviceDefinition.autoConfigure) {
@@ -47,24 +50,7 @@ public class Container
 
                 int i = 0;
                 for (Class<?> type : parameterTypes) {
-                    ReferenceInterface reference = null;
-                    if (ConfigurationInterface.class.isAssignableFrom(type)) {
-                        reference = serviceDefinition.configurationReference;
-                    }
-
-                    if (Container.class.isAssignableFrom(type)) {
-                        reference = new ContainerReference();
-                    }
-
-                    if (ContainerAwareInterface.class.isAssignableFrom(type)) {
-                        reference = new ServiceReference<>((Class<? extends ContainerAwareInterface>) type);
-                    }
-
-                    if (null == reference) {
-                        throw new ServiceInstantiationException("Unable to auto configure reference for " + type);
-                    }
-
-                    references[i++] = reference;
+                    references[i++] = resolveTypeToReference(serviceDefinition, type);
                 }
 
                 constructorDefinitions.add(new ConstructorDefinition(references));
@@ -79,7 +65,7 @@ public class Container
     public void instantiateServices() throws ServiceInstantiationException
     {
         if (instantiated) {
-            throw new ServiceInstantiationException("Container already instantiated");
+            throw new ContainerInstantiatedException();
         }
 
         Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new HashMap<>(this.serviceDefinitions);
@@ -95,7 +81,7 @@ public class Container
                 try {
                     instantiateService(serviceDefinition);
                     hasInstantiated = true;
-                } catch (ServiceInstantiationException e) {
+                } catch (ServiceResolutionException e) {
                     continue;
                 }
 
@@ -103,7 +89,7 @@ public class Container
             }
 
             if (!hasInstantiated) {
-                throw new ServiceInstantiationException("Potential circular reference detected");
+                throw new CircularReferenceException();
             }
         }
 
@@ -129,7 +115,7 @@ public class Container
         }
 
         if (null == instance) {
-            throw new ServiceInstantiationException("No valid constructor available");
+            throw new ServiceInstantiationException("Unable to instantiate service " + serviceClass);
         }
 
         for (CallDefinition callDefinition : serviceDefinition.callDefinitions) {
@@ -151,14 +137,30 @@ public class Container
         try {
             instance.initialize();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new ServiceInstantiationException(e);
         }
 
         return instance;
     }
 
-    public Object[] resolveReferences(ReferenceInterface[] references) throws ServiceInstantiationException
+    private ReferenceInterface resolveTypeToReference(ServiceDefinition serviceDefinition, Class type) throws ServiceInstantiationException
+    {
+        if (ConfigurationInterface.class.isAssignableFrom(type)) {
+            return serviceDefinition.configurationReference;
+        }
+
+        if (Container.class.isAssignableFrom(type)) {
+            return new ContainerReference();
+        }
+
+        if (ContainerAwareInterface.class.isAssignableFrom(type)) {
+            return new ServiceReference<>((Class<? extends ContainerAwareInterface>) type);
+        }
+
+        throw new ServiceInstantiationException("Unable to auto configure reference for " + type);
+    }
+
+    private Object[] resolveReferences(ReferenceInterface[] references) throws ServiceInstantiationException
     {
         Object[] services = new Object[references.length];
 
@@ -170,7 +172,7 @@ public class Container
         return services;
     }
 
-    public Object resolveReference(ReferenceInterface reference) throws ServiceInstantiationException
+    private Object resolveReference(ReferenceInterface reference) throws ServiceInstantiationException
     {
         if (reference instanceof ContainerReference) {
             return this;
@@ -188,15 +190,15 @@ public class Container
             return resolveServiceReference((ServiceReference<? extends ContainerAwareInterface>) reference);
         }
 
-        throw new ServiceInstantiationException("Unhandled reference type");
+        throw new ServiceInstantiationException("Unhandled reference type: " + reference);
     }
 
-    private <T extends ContainerAwareInterface> T resolveServiceReference(ServiceReference<T> serviceReference) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> T resolveServiceReference(ServiceReference<T> serviceReference) throws ServiceResolutionException
     {
         Class<T> type = serviceReference.type;
 
         if (!has(type)) {
-            throw new ServiceInstantiationException("Unable to resolve service " + type);
+            throw new ServiceResolutionException(type);
         }
 
         return get(type);
