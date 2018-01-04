@@ -4,7 +4,7 @@ import com.sallyf.sallyf.Authentication.Annotation.Security;
 import com.sallyf.sallyf.Authentication.Voter.VoterInterface;
 import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAware;
+import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.HttpException;
 import com.sallyf.sallyf.KernelEvents;
@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class AuthenticationManager extends ContainerAware
+public class AuthenticationManager implements ContainerAwareInterface
 {
     ArrayList<UserDataSourceInterface> dataSources;
 

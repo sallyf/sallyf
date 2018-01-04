@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-public class ExampleServiceExtend extends ContainerAware
+public class ExampleServiceExtend implements ContainerAwareInterface
 {
     private Container container;
 

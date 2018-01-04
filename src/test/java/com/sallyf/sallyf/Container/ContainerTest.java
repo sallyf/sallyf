@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 
-class MyAlias extends ContainerAware
+class MyAlias implements ContainerAwareInterface
 {
     public MyAlias()
     {
