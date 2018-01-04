@@ -35,7 +35,7 @@ public class Container
     public <T extends ContainerAwareInterface> void add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
         if (instantiated) {
-            throw new ServiceInstantiationException();
+            throw new ContainerInstantiatedException();
         }
 
         if (serviceDefinition.autoConfigure) {
@@ -119,16 +119,14 @@ public class Container
         }
 
         for (CallDefinition callDefinition : serviceDefinition.callDefinitions) {
-            try {
-                Object[] args = resolveReferences(callDefinition.args);
+            Object[] args = resolveReferences(callDefinition.args);
 
-                Method setContainer = serviceClass.getMethod(callDefinition.name, Utils.getClasses(args));
-                try {
-                    setContainer.invoke(instance, args);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new ServiceInstantiationException(e);
-                }
-            } catch (NoSuchMethodException ignored) {
+            try {
+                Method method = serviceClass.getMethod(callDefinition.name, Utils.getClasses(args));
+
+                method.invoke(instance, args);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new ServiceInstantiationException(e);
             }
         }
 
