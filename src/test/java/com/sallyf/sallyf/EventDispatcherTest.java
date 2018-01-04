@@ -1,6 +1,5 @@
 package com.sallyf.sallyf;
 
-import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.EventDispatcher.EventHandlerInterface;
 import com.sallyf.sallyf.EventDispatcher.EventInterface;
@@ -26,8 +25,7 @@ public class EventDispatcherTest
     @Test
     public void registerTest()
     {
-        Container container = new Container();
-        EventDispatcher eventDispatcher = new EventDispatcher(container);
+        EventDispatcher eventDispatcher = new EventDispatcher();
 
         EventType<TestEvent> testEventType = new EventType<>("test.test_event");
 
@@ -45,8 +43,7 @@ public class EventDispatcherTest
     {
         System.setOut(new PrintStream(outContent));
 
-        Container container = new Container();
-        EventDispatcher eventDispatcher = new EventDispatcher(container);
+        EventDispatcher eventDispatcher = new EventDispatcher();
 
         EventType<TestEvent> testEventType = new EventType<>("test.test_event");
 

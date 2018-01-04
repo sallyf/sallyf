@@ -26,18 +26,26 @@ public class AuthenticationManager extends ContainerAware
 
     HashMap<Route, ArrayList<VoterInterface>> securedRoutes = new HashMap<>();
 
-    public AuthenticationManager(Container container, Configuration configuration)
+    private Container container;
+
+    private Router router;
+
+    private EventDispatcher eventDispatcher;
+
+    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher)
     {
-        super(container);
+        this.container = container;
+        this.router = router;
+        this.eventDispatcher = eventDispatcher;
 
         dataSources = configuration.getDataSources();
     }
 
     public void initialize()
     {
-        getContainer().get(Router.class).addActionParameterResolver(new UserInterfaceResolver(getContainer()));
+        router.addActionParameterResolver(new UserInterfaceResolver(container));
 
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
 
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
@@ -80,13 +88,12 @@ public class AuthenticationManager extends ContainerAware
     public boolean vote(Route route, RuntimeBag runtimeBag)
     {
         if (securedRoutes.containsKey(route)) {
-            AuthenticationManager authenticationManager = getContainer().get(AuthenticationManager.class);
 
             ArrayList<VoterInterface> voters = securedRoutes.get(route);
-            UserInterface user = authenticationManager.getUser(runtimeBag);
+            UserInterface user = getUser(runtimeBag);
 
             for (VoterInterface voter : voters) {
-                if (!voter.test(getContainer(), user, runtimeBag)) {
+                if (!voter.test(container, user, runtimeBag)) {
                     return false;
                 }
             }

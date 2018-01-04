@@ -15,11 +15,6 @@ public class EventDispatcher extends ContainerAware
         return events;
     }
 
-    public EventDispatcher(Container container)
-    {
-        super(container);
-    }
-
     public <E extends EventInterface> void register(EventType<E>[] eventTypes, EventHandlerInterface<E> eventHandler)
     {
         for (EventType<E> eventType : eventTypes) {

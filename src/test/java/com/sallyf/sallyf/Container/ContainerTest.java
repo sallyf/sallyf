@@ -8,9 +8,8 @@ import static org.junit.Assert.assertNotNull;
 
 class MyAlias extends ContainerAware
 {
-    public MyAlias(Container container)
+    public MyAlias()
     {
-        super(container);
     }
 }
 

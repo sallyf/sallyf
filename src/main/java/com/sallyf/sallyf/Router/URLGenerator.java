@@ -11,17 +11,21 @@ import java.util.Map;
 
 public class URLGenerator implements ContainerAwareInterface
 {
-    private Container container;
+    private final Container container;
 
-    public URLGenerator(Container container)
+    private final FrameworkServer server;
+
+    private final Router router;
+
+    public URLGenerator(Container container, FrameworkServer server, Router router)
     {
         this.container = container;
+        this.server = server;
+        this.router = router;
     }
 
     public String url(String actionName, HashMap<String, String> parameters) throws UnableToGenerateURLException
     {
-        FrameworkServer server = getContainer().get(FrameworkServer.class);
-
         return server.getRootURL() + path(actionName, parameters);
     }
 
@@ -32,9 +36,6 @@ public class URLGenerator implements ContainerAwareInterface
 
     public String path(String actionName, HashMap<String, String> parameters) throws UnableToGenerateURLException
     {
-        Router router = getContainer().get(Router.class);
-        FrameworkServer server = getContainer().get(FrameworkServer.class);
-
         Route route = router.getRoutes().get(actionName);
 
         if (route == null) {
@@ -63,11 +64,5 @@ public class URLGenerator implements ContainerAwareInterface
     public String path(String actionName) throws UnableToGenerateURLException
     {
         return path(actionName, new HashMap<>());
-    }
-
-    @Override
-    public Container getContainer()
-    {
-        return container;
     }
 }

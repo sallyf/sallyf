@@ -26,6 +26,10 @@ import java.util.regex.Pattern;
 
 public class Router extends ContainerAware
 {
+    private final Container container;
+
+    private final EventDispatcher eventDispatcher;
+
     private HashMap<String, Route> routes = new HashMap<>();
 
     private Map<Class, ControllerInterface> controllers = new HashMap<>();
@@ -38,16 +42,17 @@ public class Router extends ContainerAware
 
     private ArrayList<String> routeSignatures = new ArrayList<>();
 
-    public Router(Container container)
+    public Router(Container container, EventDispatcher eventDispatcher)
     {
-        super(container);
+        this.container = container;
+        this.eventDispatcher = eventDispatcher;
     }
 
     public void initialize()
     {
         addActionParameterResolver(new RequestResolver());
-        addActionParameterResolver(new RouteParameterResolver(getContainer()));
-        addActionParameterResolver(new ServiceResolver(getContainer()));
+        addActionParameterResolver(new RouteParameterResolver(container));
+        addActionParameterResolver(new ServiceResolver(container));
 
         addResponseTransformer(new PrimitiveTransformer());
         addResponseTransformer(new HttpExceptionTransformer());
@@ -55,7 +60,7 @@ public class Router extends ContainerAware
 
     public <C extends ControllerInterface> C registerController(Class<C> controllerClass) throws FrameworkException
     {
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
 
         C controller = instantiateController(controllerClass);
 
@@ -149,7 +154,7 @@ public class Router extends ContainerAware
     {
         try {
             T controller = controllerClass.newInstance();
-            controller.setContainer(getContainer());
+            controller.setContainer(container);
 
             return controller;
         } catch (InstantiationException | IllegalAccessException e) {
@@ -192,8 +197,6 @@ public class Router extends ContainerAware
                 parameterValues.put(name, resolveRouteParameter(m, index, name, runtimeBag));
             });
         }
-
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
         eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(runtimeBag, parameterValues));
 

@@ -12,6 +12,10 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
 
     ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
 
+    ReferenceInterface configurationReference;
+
+    boolean autoConfigure = true;
+
     public ServiceDefinition(Class<T> type)
     {
         this(type, type);
@@ -22,31 +26,35 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
         this(alias, type, null);
     }
 
-    public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration)
-    {
-        this.type = type;
-        this.alias = alias;
-
-        ReferenceInterface configurationReference = configuration != null ? new PlainReference(configuration) : new DefaultConfigurationReference<>(type);
-
-        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference(), configurationReference));
-        constructorDefinitions.add(new ConstructorDefinition(new ContainerReference()));
-        constructorDefinitions.add(new ConstructorDefinition());
-
-        callDefinitions.add(new CallDefinition("setContainer", new ContainerReference()));
-        callDefinitions.add(new CallDefinition("setConfiguration", configurationReference));
-    }
-
     public ServiceDefinition(Class<T> type, ConfigurationInterface configuration)
     {
         this(type, type, configuration);
     }
 
-    public ServiceDefinition(Class alias, Class<T> type, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
+    public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration)
     {
         this.type = type;
         this.alias = alias;
+
+        this.configurationReference = configuration == null ? new DefaultConfigurationReference<>(type) : new PlainReference(configuration);
+
+        this.autoConfigure = true;
+    }
+
+    public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
+    {
+        this(alias, type, configuration);
+
+        this.autoConfigure = false;
+
         this.constructorDefinitions = constructorDefinitions;
         this.callDefinitions = callDefinitions;
+    }
+
+    public ServiceDefinition(Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
+    {
+        this(type, type, configuration, constructorDefinitions, callDefinitions);
+
+        this.autoConfigure = false;
     }
 }

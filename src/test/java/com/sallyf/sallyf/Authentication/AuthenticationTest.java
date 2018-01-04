@@ -3,22 +3,26 @@ package com.sallyf.sallyf.Authentication;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ServiceDefinition;
-import com.sallyf.sallyf.Exception.ServiceInstantiationException;
-import com.sallyf.sallyf.Kernel;
+import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
+import com.sallyf.sallyf.Router.Router;
 import org.junit.Test;
 
 import java.util.ArrayList;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 public class AuthenticationTest extends BaseFrameworkTest
 {
+    public AuthenticationManager newInstance(Configuration configuration)
+    {
+        Container c = new Container();
+        EventDispatcher ed = new EventDispatcher();
+
+        return new AuthenticationManager(configuration, c, new Router(c, ed), ed);
+    }
+
     @Test(expected = AuthenticationException.class)
     public void unknownDataSourceTest() throws AuthenticationException
     {
-        AuthenticationManager authenticationManager = new AuthenticationManager(new Container(), new Configuration());
+        AuthenticationManager authenticationManager = newInstance(new Configuration());
 
         authenticationManager.getDataSource(InMemoryDataSource.class);
     }
@@ -26,7 +30,7 @@ public class AuthenticationTest extends BaseFrameworkTest
     @Test(expected = AuthenticationException.class)
     public void noDataSourceTest() throws AuthenticationException
     {
-        AuthenticationManager authenticationManager = new AuthenticationManager(new Container(), new Configuration());
+        AuthenticationManager authenticationManager = newInstance(new Configuration());
 
         authenticationManager.authenticate(null, null, null);
         authenticationManager.authenticate(null, null, null, null);
@@ -53,7 +57,7 @@ public class AuthenticationTest extends BaseFrameworkTest
             }
         };
 
-        AuthenticationManager authenticationManager = new AuthenticationManager(new Container(), configuration);
+        AuthenticationManager authenticationManager = newInstance(configuration);
 
         authenticationManager.authenticate(null, null, null);
         authenticationManager.authenticate(null, null, null, null);

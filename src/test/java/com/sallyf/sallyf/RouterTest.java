@@ -74,7 +74,7 @@ public class RouterTest
 
         Container container = new Container();
 
-        Router router = new Router(container);
+        Router router = new Router(container, new EventDispatcher());
         router.registerRoute("route_1", route1);
         router.registerRoute("route_2", route2);
         router.registerRoute("route_3", route3);
@@ -119,7 +119,7 @@ public class RouterTest
 
         Container container = new Container();
 
-        Router router = new Router(container);
+        Router router = new Router(container, new EventDispatcher());
         router.registerRoute("route_1", route1);
         router.registerRoute("route_2", route2);
     }
@@ -132,7 +132,7 @@ public class RouterTest
 
         Container container = new Container();
 
-        Router router = new Router(container);
+        Router router = new Router(container, new EventDispatcher());
         router.registerRoute("route_1", route1);
         router.registerRoute("route_2", route2);
     }

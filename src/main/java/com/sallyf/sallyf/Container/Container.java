@@ -6,8 +6,7 @@ import com.sallyf.sallyf.Utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Container
 {
@@ -32,8 +31,46 @@ public class Container
 
     public <T extends ContainerAwareInterface> void add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
-        if(instantiated) {
+        if (instantiated) {
             throw new ServiceInstantiationException("Container is already instantiated");
+        }
+
+        if (serviceDefinition.autoConfigure) {
+            Constructor<?>[] constructors = serviceDefinition.type.getConstructors();
+
+            ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
+
+            for (Constructor<?> constructor : constructors) {
+                Class<?>[] parameterTypes = constructor.getParameterTypes();
+
+                ReferenceInterface[] references = new ReferenceInterface[parameterTypes.length];
+
+                int i = 0;
+                for (Class<?> type : parameterTypes) {
+                    ReferenceInterface reference = null;
+                    if (ConfigurationInterface.class.isAssignableFrom(type)) {
+                        reference = serviceDefinition.configurationReference;
+                    }
+
+                    if (Container.class.isAssignableFrom(type)) {
+                        reference = new ContainerReference();
+                    }
+
+                    if (ContainerAwareInterface.class.isAssignableFrom(type)) {
+                        reference = new ServiceReference<>((Class<? extends ContainerAwareInterface>) type);
+                    }
+
+                    if (null == reference) {
+                        throw new ServiceInstantiationException("Unable to auto configure reference for " + type);
+                    }
+
+                    references[i++] = reference;
+                }
+
+                constructorDefinitions.add(new ConstructorDefinition(references));
+            }
+
+            serviceDefinition.constructorDefinitions.addAll(constructorDefinitions);
         }
 
         serviceDefinitions.put(serviceDefinition.alias, serviceDefinition);
@@ -41,14 +78,39 @@ public class Container
 
     public void instantiateServices() throws ServiceInstantiationException
     {
-        for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : serviceDefinitions.entrySet()) {
-            instantiateService(entry.getValue());
+        if (instantiated) {
+            throw new ServiceInstantiationException("Container already instantiated");
+        }
+
+        Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new HashMap<>(this.serviceDefinitions);
+
+        while (!serviceDefinitions.isEmpty()) {
+            boolean hasInstantiated = false;
+
+            Set<Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>>> entries = new HashSet<>(serviceDefinitions.entrySet());
+
+            for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : entries) {
+                ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
+
+                try {
+                    instantiateService(serviceDefinition);
+                    hasInstantiated = true;
+                } catch (ServiceInstantiationException e) {
+                    continue;
+                }
+
+                serviceDefinitions.remove(entry.getKey());
+            }
+
+            if (!hasInstantiated) {
+                throw new ServiceInstantiationException("Potential circular reference detected");
+            }
         }
 
         instantiated = true;
     }
 
-    public <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
         Class<T> serviceClass = serviceDefinition.type;
 
@@ -82,10 +144,6 @@ public class Container
                 }
             } catch (NoSuchMethodException ignored) {
             }
-        }
-
-        if (instance.getContainer() == null) {
-            throw new ServiceInstantiationException("Unable to inject Container, you need to implement a `setContainer` method or a valid constructor.");
         }
 
         services.put(serviceDefinition.alias, instance);
