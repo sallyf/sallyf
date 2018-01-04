@@ -120,12 +120,17 @@ public abstract class BaseFrameworkTest
         setUp(null);
     }
 
-    public void initBeforeBoot() throws Exception
+    public void preBoot() throws Exception
     {
 
     }
 
-    public void initAfterRoute() throws Exception
+    public void postBoot() throws Exception
+    {
+
+    }
+
+    public void postStart() throws Exception
     {
 
     }
@@ -136,7 +141,7 @@ public abstract class BaseFrameworkTest
 
         app.getContainer().add(new ServiceDefinition<>(FrameworkServer.class, new ServerConfiguration()));
 
-        initBeforeBoot();
+        preBoot();
 
         app.boot();
 
@@ -146,7 +151,11 @@ public abstract class BaseFrameworkTest
             router.registerController(controllerClass);
         }
 
-        initAfterRoute();
+        postBoot();
+
+        app.start();
+
+        postStart();
     }
 
     @After

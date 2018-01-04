@@ -1,9 +1,9 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Router.URLGenerator;
@@ -44,14 +44,36 @@ public class Kernel
 
     public void boot() throws ServiceInstantiationException
     {
-        Container container = getContainer();
-
         container.instantiateServices();
 
-        container.get(EventDispatcher.class).dispatch(KernelEvents.BOOT);
+        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
+
+        eventDispatcher.dispatch(KernelEvents.BOOTED);
+
+        eventDispatcher.register(KernelEvents.STARTED, (eventType, eventInterface) -> {
+            FrameworkServer server = container.get(FrameworkServer.class);
+            Router router = container.get(Router.class);
+
+            HashMap<String, Route> routes = router.getRoutes();
+
+            System.out.println(routes.size() + " routes registered:");
+            for (Route route : routes.values()) {
+                System.out.println(route.getName() + " -> " + route.toString());
+            }
+            System.out.println();
+
+            System.out.println("Listening on " + server.getRootURL());
+            System.out.println();
+        });
+    }
+
+    public void start()
+    {
+        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
+
+        eventDispatcher.dispatch(KernelEvents.START);
 
         FrameworkServer server = this.container.get(FrameworkServer.class);
-        Router router = this.container.get(Router.class);
 
         try {
             server.start();
@@ -60,23 +82,14 @@ public class Kernel
             e.printStackTrace();
         }
 
-        HashMap<String, Route> routes = router.getRoutes();
-
-        System.out.println(routes.size() + " routes registered:");
-        for (Route route : routes.values()) {
-            System.out.println(route.getName() + " -> " + route.toString());
-        }
-        System.out.println();
-
-        System.out.println("Listening on " + server.getRootURL());
-        System.out.println();
+        eventDispatcher.dispatch(KernelEvents.STARTED);
     }
 
     public void stop()
     {
         FrameworkServer server = container.get(FrameworkServer.class);
 
-        if(null != server) {
+        if (null != server) {
             try {
                 server.stop();
             } catch (Exception e) {

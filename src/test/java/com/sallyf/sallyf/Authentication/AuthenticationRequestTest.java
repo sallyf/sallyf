@@ -34,7 +34,7 @@ class AuthenticationConfiguration extends Configuration {
 public class AuthenticationRequestTest extends BaseFrameworkTest
 {
     @Override
-    public void initBeforeBoot() throws ServiceInstantiationException
+    public void preBoot() throws ServiceInstantiationException
     {
         app.getContainer().add(new ServiceDefinition<>(AuthenticationManager.class, new AuthenticationConfiguration()));
     }

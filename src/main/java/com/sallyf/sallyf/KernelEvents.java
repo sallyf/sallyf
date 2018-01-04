@@ -23,5 +23,8 @@ public class KernelEvents
     // Dispatched after registering a route from a controller
     public static final EventType<RouteRegisterEvent> ROUTE_REGISTER = new EventType<>("kernel.route_register");
 
-    public static final EventType BOOT = new EventType<>("kernel.boot");
+    public static final EventType BOOTED = new EventType<>("kernel.booted");
+
+    public static final EventType START = new EventType<>("kernel.start");
+    public static final EventType STARTED = new EventType<>("kernel.started");
 }
