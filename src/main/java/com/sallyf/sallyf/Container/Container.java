@@ -1,123 +1,240 @@
 package com.sallyf.sallyf.Container;
 
-import com.sallyf.sallyf.Exception.ServiceInstanciationException;
+import com.sallyf.sallyf.Container.Exception.CircularReferenceException;
+import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
+import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.Exception.ServiceResolutionException;
+import com.sallyf.sallyf.Utils;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Container
 {
-    private Map<String, ContainerAwareInterface> services;
+    private Map<Class, ContainerAwareInterface> services;
+
+    private Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions;
+
+    private boolean instantiated = false;
 
     public Container()
     {
         services = new HashMap<>();
+        serviceDefinitions = new HashMap<>();
     }
 
-    public <T extends ContainerAwareInterface> T add(Class<T> serviceClass) throws ServiceInstanciationException
+    public void addAll(ServiceDefinition<? extends ContainerAwareInterface>[] serviceDefinitions) throws ServiceInstantiationException
     {
-        return add(serviceClass, new Object[]{this});
+        for (ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition : serviceDefinitions) {
+            add(serviceDefinition);
+        }
     }
 
-    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceNameClass, Class<T> serviceClass) throws ServiceInstanciationException
+    public <T extends ContainerAwareInterface> void add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
-        return add(serviceNameClass, serviceClass, new Object[]{this});
-    }
-
-    public <T extends ContainerAwareInterface> T add(Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
-    {
-        return add(serviceClass.toString(), serviceClass, parameters);
-    }
-
-    public <N extends ContainerAwareInterface, T extends N> T add(Class<N> serviceNameClass, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
-    {
-        return add(serviceNameClass.toString(), serviceClass, parameters);
-    }
-
-    public <T extends ContainerAwareInterface> T add(String name, Class<T> serviceClass, Object[] parameters) throws ServiceInstanciationException
-    {
-        T instance;
-
-        boolean parametersContainsContainer = false;
-        boolean instantiatedWithContainer = false;
-
-        Class[] parameterTypes = new Class[parameters.length];
-        int i = 0;
-        for (Object parameter : parameters) {
-            Class parameterClass = parameter.getClass();
-            if (parameterClass == this.getClass()) {
-                parametersContainsContainer = true;
-            }
-            parameterTypes[i++] = parameterClass;
+        if (instantiated) {
+            throw new ContainerInstantiatedException();
         }
 
-        try {
-            instance = serviceClass.getConstructor(parameterTypes).newInstance(parameters);
-            instantiatedWithContainer = parametersContainsContainer;
-        } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            try {
-                instance = serviceClass.getConstructor().newInstance();
-            } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e2) {
-                e.addSuppressed(e2);
-                throw new ServiceInstanciationException(e);
-            }
-        }
+        if (serviceDefinition.autoConfigure) {
+            Constructor<?>[] constructors = serviceDefinition.type.getConstructors();
 
-        if (!instantiatedWithContainer) {
-            try {
-                Method setContainer = serviceClass.getMethod("setContainer", Container.class);
-                try {
-                    setContainer.invoke(instance, this);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new ServiceInstanciationException(e);
+            ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
+
+            for (Constructor<?> constructor : constructors) {
+                Class<?>[] parameterTypes = constructor.getParameterTypes();
+
+                ReferenceInterface[] references = new ReferenceInterface[parameterTypes.length];
+
+                int i = 0;
+                for (Class<?> type : parameterTypes) {
+                    references[i++] = resolveTypeToReference(serviceDefinition, type);
                 }
-            } catch (NoSuchMethodException e) {
-                throw new ServiceInstanciationException("Unable to inject Container, you need to implement a `setContainer` method.");
+
+                constructorDefinitions.add(new ConstructorDefinition(references));
+            }
+
+            serviceDefinition.constructorDefinitions.addAll(constructorDefinitions);
+        }
+
+        serviceDefinitions.put(serviceDefinition.alias, serviceDefinition);
+    }
+
+    public void instantiateServices() throws ServiceInstantiationException
+    {
+        if (instantiated) {
+            throw new ContainerInstantiatedException();
+        }
+
+        Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new HashMap<>(this.serviceDefinitions);
+
+        while (!serviceDefinitions.isEmpty()) {
+            boolean hasInstantiated = false;
+
+            Set<Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>>> entries = new HashSet<>(serviceDefinitions.entrySet());
+
+            for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : entries) {
+                ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
+
+                try {
+                    instantiateService(serviceDefinition);
+                    hasInstantiated = true;
+                } catch (ServiceResolutionException e) {
+                    continue;
+                }
+
+                serviceDefinitions.remove(entry.getKey());
+            }
+
+            if (!hasInstantiated) {
+                throw new CircularReferenceException();
             }
         }
 
-        if (instance.getContainer() != this) {
-            throw new ServiceInstanciationException("Container cannot be accessed");
+        instantiated = true;
+    }
+
+    private <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    {
+        Class<T> serviceClass = serviceDefinition.type;
+
+        T instance = null;
+
+        for (ConstructorDefinition constructorDefinition : serviceDefinition.constructorDefinitions) {
+            try {
+                Object[] args = resolveReferences(constructorDefinition.args);
+                Constructor<?> constructor = Utils.getConstructorForArgs(serviceClass, Utils.getClasses(args));
+                if (constructor != null) {
+                    instance = (T) constructor.newInstance(args);
+                    break;
+                }
+            } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
+            }
         }
 
-        services.put(name, instance);
+        if (null == instance) {
+            throw new ServiceInstantiationException("Unable to instantiate service " + serviceClass);
+        }
+
+        for (CallDefinition callDefinition : serviceDefinition.callDefinitions) {
+            Object[] args = resolveReferences(callDefinition.args);
+
+            try {
+                Method method = serviceClass.getMethod(callDefinition.name, Utils.getClasses(args));
+
+                method.invoke(instance, args);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new ServiceInstantiationException(e);
+            }
+        }
+
+        services.put(serviceDefinition.alias, instance);
 
         try {
-            Method initialize = serviceClass.getMethod("initialize");
-            try {
-                initialize.invoke(instance);
-            } catch (IllegalAccessException | InvocationTargetException ignored) {
-            }
-        } catch (NoSuchMethodException ignored) {
+            instance.initialize();
+        } catch (Exception e) {
+            throw new ServiceInstantiationException(e);
         }
 
         return instance;
     }
 
-    public <T extends ContainerAwareInterface> T get(Class<T> type)
+    private ReferenceInterface resolveTypeToReference(ServiceDefinition serviceDefinition, Class type) throws ServiceInstantiationException
     {
-        return (T) get(type.toString());
+        if (ConfigurationInterface.class.isAssignableFrom(type)) {
+            return serviceDefinition.configurationReference;
+        }
+
+        if (Container.class.isAssignableFrom(type)) {
+            return new ContainerReference();
+        }
+
+        if (ContainerAwareInterface.class.isAssignableFrom(type)) {
+            return new ServiceReference<>((Class<? extends ContainerAwareInterface>) type);
+        }
+
+        throw new ServiceInstantiationException("Unable to auto configure reference for " + type);
     }
 
-    public <N extends ContainerAwareInterface, T extends N> T get(Class<N> type, Class<T> referenceType)
+    private Object[] resolveReferences(ReferenceInterface[] references) throws ServiceInstantiationException
     {
-        return (T) get(type.toString());
+        Object[] services = new Object[references.length];
+
+        int i = 0;
+        for (ReferenceInterface reference : references) {
+            services[i++] = resolveReference(reference);
+        }
+
+        return services;
     }
 
-    public Object get(String name)
+    private Object resolveReference(ReferenceInterface reference) throws ServiceInstantiationException
     {
-        return services.get(name);
+        if (reference instanceof ContainerReference) {
+            return this;
+        }
+
+        if (reference instanceof PlainReference) {
+            return ((PlainReference) reference).value;
+        }
+
+        if (reference instanceof DefaultConfigurationReference) {
+            return resolveDefaultConfiguration((DefaultConfigurationReference<? extends ContainerAwareInterface>) reference);
+        }
+
+        if (reference instanceof ServiceReference) {
+            return resolveServiceReference((ServiceReference<? extends ContainerAwareInterface>) reference);
+        }
+
+        throw new ServiceInstantiationException("Unhandled reference type: " + reference);
     }
 
-    public <T extends ContainerAwareInterface> boolean has(Class<T> type)
+    private <T extends ContainerAwareInterface> T resolveServiceReference(ServiceReference<T> serviceReference) throws ServiceResolutionException
     {
-        return has(type.toString());
+        Class<T> type = serviceReference.type;
+
+        if (!has(type)) {
+            throw new ServiceResolutionException(type);
+        }
+
+        return get(type);
     }
 
-    public boolean has(String name)
+    private <T extends ContainerAwareInterface> ConfigurationInterface resolveDefaultConfiguration(DefaultConfigurationReference<T> configurationReference) throws ServiceInstantiationException
     {
-        return services.containsKey(name);
+        Class<T> type = configurationReference.serviceReference.type;
+
+        try {
+            Method method = type.getDeclaredMethod("getDefaultConfigurationClass");
+            Class<? extends ConfigurationInterface> configurationClass = (Class) method.invoke(null);
+
+            if (configurationClass == null) {
+                return null;
+            }
+
+            return configurationClass.newInstance();
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new ServiceInstantiationException(e);
+        } catch (NoSuchMethodException ignored) {
+        }
+
+        return null;
+    }
+
+    public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
+    {
+        return (T) services.get(serviceClass);
+    }
+
+    public <T extends ContainerAwareInterface, C> C get(Class<T> serviceClass, Class<C> castType)
+    {
+        return (C) get(serviceClass);
+    }
+
+    public boolean has(Class serviceClass)
+    {
+        return services.containsKey(serviceClass);
     }
 }

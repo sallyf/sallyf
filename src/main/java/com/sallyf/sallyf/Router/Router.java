@@ -1,15 +1,12 @@
 package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAware;
+import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Event.RouteParametersEvent;
 import com.sallyf.sallyf.Event.RouteRegisterEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.InvalidResponseTypeException;
-import com.sallyf.sallyf.Exception.RouteDuplicateException;
-import com.sallyf.sallyf.Exception.UnhandledParameterException;
+import com.sallyf.sallyf.Exception.*;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RequestResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RouteParameterResolver;
@@ -23,12 +20,19 @@ import org.eclipse.jetty.server.Request;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Router extends ContainerAware
+public class Router implements ContainerAwareInterface
 {
+    private final Container container;
+
+    private final EventDispatcher eventDispatcher;
+
     private HashMap<String, Route> routes = new HashMap<>();
+
+    private Map<Class, ControllerInterface> controllers = new HashMap<>();
 
     private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
 
@@ -38,16 +42,17 @@ public class Router extends ContainerAware
 
     private ArrayList<String> routeSignatures = new ArrayList<>();
 
-    public Router(Container container)
+    public Router(Container container, EventDispatcher eventDispatcher)
     {
-        super(container);
+        this.container = container;
+        this.eventDispatcher = eventDispatcher;
     }
 
     public void initialize()
     {
         addActionParameterResolver(new RequestResolver());
-        addActionParameterResolver(new RouteParameterResolver(getContainer()));
-        addActionParameterResolver(new ServiceResolver(getContainer()));
+        addActionParameterResolver(new RouteParameterResolver(container));
+        addActionParameterResolver(new ServiceResolver(container));
 
         addResponseTransformer(new PrimitiveTransformer());
         addResponseTransformer(new HttpExceptionTransformer());
@@ -55,9 +60,11 @@ public class Router extends ContainerAware
 
     public <C extends ControllerInterface> C registerController(Class<C> controllerClass) throws FrameworkException
     {
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
 
-        C controller = getContainer().add(controllerClass);
+        C controller = instantiateController(controllerClass);
+
+        controllers.put(controllerClass, controller);
 
         com.sallyf.sallyf.Annotation.Route controllerAnnotation = controllerClass.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
 
@@ -143,6 +150,18 @@ public class Router extends ContainerAware
         return registerRoute(name, new Route(name, method, path, handler));
     }
 
+    private <T extends ControllerInterface> T instantiateController(Class<T> controllerClass) throws ControllerInstantiationException
+    {
+        try {
+            T controller = controllerClass.newInstance();
+            controller.setContainer(container);
+
+            return controller;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new ControllerInstantiationException(e);
+        }
+    }
+
     public HashMap<String, Route> getRoutes()
     {
         return routes;
@@ -178,8 +197,6 @@ public class Router extends ContainerAware
                 parameterValues.put(name, resolveRouteParameter(m, index, name, runtimeBag));
             });
         }
-
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
 
         eventDispatcher.dispatch(KernelEvents.ROUTE_PARAMETERS, new RouteParametersEvent(runtimeBag, parameterValues));
 
@@ -222,6 +239,11 @@ public class Router extends ContainerAware
                 throw new InvalidResponseTypeException(response);
             }
         }
+    }
+
+    public Map<Class, ControllerInterface> getControllers()
+    {
+        return controllers;
     }
 
     public void addRouteParameterResolver(RouteParameterResolverInterface resolver)

@@ -42,6 +42,8 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
+        app.boot();
+
         Router router = app.getContainer().get(Router.class);
 
         Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
@@ -72,7 +74,7 @@ public class RouterTest
 
         Container container = new Container();
 
-        Router router = new Router(container);
+        Router router = new Router(container, new EventDispatcher());
         router.registerRoute("route_1", route1);
         router.registerRoute("route_2", route2);
         router.registerRoute("route_3", route3);
@@ -117,7 +119,7 @@ public class RouterTest
 
         Container container = new Container();
 
-        Router router = new Router(container);
+        Router router = new Router(container, new EventDispatcher());
         router.registerRoute("route_1", route1);
         router.registerRoute("route_2", route2);
     }
@@ -130,7 +132,7 @@ public class RouterTest
 
         Container container = new Container();
 
-        Router router = new Router(container);
+        Router router = new Router(container, new EventDispatcher());
         router.registerRoute("route_1", route1);
         router.registerRoute("route_2", route2);
     }
@@ -140,13 +142,13 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
-        Router router = app.getContainer().add(Router.class);
+        app.boot();
+
+        Router router = app.getContainer().get(Router.class);
 
         TestController testController = router.registerController(TestController.class);
 
         assertNotNull(testController);
-
-        app.boot();
 
         HashMap<String, Route> routes = router.getRoutes();
 
@@ -166,6 +168,8 @@ public class RouterTest
     public void routeParameterResolverTest() throws Exception
     {
         Kernel app = Kernel.newInstance();
+
+        app.boot();
 
         Router router = app.getContainer().get(Router.class);
 
@@ -188,6 +192,8 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
+        app.boot();
+
         Router router = app.getContainer().get(Router.class);
 
         Class[] classes = {
@@ -209,6 +215,8 @@ public class RouterTest
     public void invalidActionParameterTest() throws Exception
     {
         Kernel app = Kernel.newInstance();
+
+        app.boot();
 
         Router router = app.getContainer().get(Router.class);
 

@@ -1,7 +1,9 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Router.Router;
+import com.sallyf.sallyf.Server.Configuration;
 import com.sallyf.sallyf.Server.FrameworkServer;
 import org.junit.After;
 import org.junit.Before;
@@ -10,6 +12,27 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Random;
+
+class ServerConfiguration extends Configuration
+{
+    int port;
+
+    public ServerConfiguration()
+    {
+        Random r = new Random();
+        int low = 3000;
+        int high = 5000;
+
+        port = r.nextInt(high - low) + low;
+    }
+
+    @Override
+    public int getPort()
+    {
+        return port;
+    }
+}
 
 public abstract class BaseFrameworkTest
 {
@@ -97,12 +120,17 @@ public abstract class BaseFrameworkTest
         setUp(null);
     }
 
-    public void initBeforeRoute() throws Exception
+    public void preBoot() throws Exception
     {
 
     }
 
-    public void initAfterRoute() throws Exception
+    public void postBoot() throws Exception
+    {
+
+    }
+
+    public void postStart() throws Exception
     {
 
     }
@@ -111,7 +139,11 @@ public abstract class BaseFrameworkTest
     {
         app = Kernel.newInstance();
 
-        initBeforeRoute();
+        app.getContainer().add(new ServiceDefinition<>(FrameworkServer.class, new ServerConfiguration()));
+
+        preBoot();
+
+        app.boot();
 
         Router router = app.getContainer().get(Router.class);
 
@@ -119,9 +151,11 @@ public abstract class BaseFrameworkTest
             router.registerController(controllerClass);
         }
 
-        initAfterRoute();
+        postBoot();
 
-        app.boot();
+        app.start();
+
+        postStart();
     }
 
     @After

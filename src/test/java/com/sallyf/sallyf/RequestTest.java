@@ -26,7 +26,11 @@ public class RequestTest extends BaseFrameworkTest
     public void setUp() throws Exception
     {
         setUp(TestController.class);
+    }
 
+    @Override
+    public void postBoot() throws Exception
+    {
         EventDispatcher eventDispatcher = app.getContainer().get(EventDispatcher.class);
 
         EventType[] monitoredEvents = {
@@ -34,7 +38,9 @@ public class RequestTest extends BaseFrameworkTest
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.REQUEST,
                 KernelEvents.ROUTE_PARAMETERS,
-                KernelEvents.PRE_TRANSFORM_RESPONSE
+                KernelEvents.PRE_TRANSFORM_RESPONSE,
+                KernelEvents.START,
+                KernelEvents.STARTED,
         };
 
         eventDispatcher.register(monitoredEvents, (eventType, eventInterface) -> {
@@ -53,7 +59,9 @@ public class RequestTest extends BaseFrameworkTest
                 KernelEvents.PRE_SEND_RESPONSE,
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.REQUEST,
-                KernelEvents.PRE_TRANSFORM_RESPONSE
+                KernelEvents.PRE_TRANSFORM_RESPONSE,
+                KernelEvents.START,
+                KernelEvents.STARTED,
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
     }
@@ -66,7 +74,9 @@ public class RequestTest extends BaseFrameworkTest
         assertThat("Response Code", http.getResponseCode(), is(HttpStatus.NOT_FOUND_404));
 
         EventType[] expectedEvents = {
-                KernelEvents.REQUEST
+                KernelEvents.REQUEST,
+                KernelEvents.START,
+                KernelEvents.STARTED,
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
     }
@@ -84,7 +94,9 @@ public class RequestTest extends BaseFrameworkTest
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.REQUEST,
                 KernelEvents.ROUTE_PARAMETERS,
-                KernelEvents.PRE_TRANSFORM_RESPONSE
+                KernelEvents.PRE_TRANSFORM_RESPONSE,
+                KernelEvents.START,
+                KernelEvents.STARTED,
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
     }
@@ -102,7 +114,9 @@ public class RequestTest extends BaseFrameworkTest
                 KernelEvents.POST_MATCH_ROUTE,
                 KernelEvents.REQUEST,
                 KernelEvents.ROUTE_PARAMETERS,
-                KernelEvents.PRE_TRANSFORM_RESPONSE
+                KernelEvents.PRE_TRANSFORM_RESPONSE,
+                KernelEvents.START,
+                KernelEvents.STARTED,
         };
         assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
     }

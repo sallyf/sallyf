@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class FrameworkHandler extends AbstractHandler implements ContainerAwareInterface
+public class FrameworkHandler extends AbstractHandler
 {
     private Container container;
 
@@ -49,8 +49,8 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
     {
         Request request = (Request) servletRequest;
 
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
-        Router router = getContainer().get(Router.class);
+        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
+        Router router = container.get(Router.class);
 
         try {
             RuntimeBag runtimeBag = new RuntimeBag();
@@ -128,11 +128,5 @@ public class FrameworkHandler extends AbstractHandler implements ContainerAwareI
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public Container getContainer()
-    {
-        return container;
     }
 }

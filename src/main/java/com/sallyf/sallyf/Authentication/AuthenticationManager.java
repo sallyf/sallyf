@@ -2,8 +2,9 @@ package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Authentication.Annotation.Security;
 import com.sallyf.sallyf.Authentication.Voter.VoterInterface;
+import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAware;
+import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.HttpException;
 import com.sallyf.sallyf.KernelEvents;
@@ -19,22 +20,30 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class AuthenticationManager extends ContainerAware
+public class AuthenticationManager implements ContainerAwareInterface
 {
-    ArrayList<UserDataSourceInterface> dataSources = new ArrayList<>();
+    ArrayList<UserDataSourceInterface> dataSources;
 
     HashMap<Route, ArrayList<VoterInterface>> securedRoutes = new HashMap<>();
 
-    public AuthenticationManager(Container container)
+    private Container container;
+
+    private Router router;
+
+    private EventDispatcher eventDispatcher;
+
+    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher)
     {
-        super(container);
+        this.container = container;
+        this.router = router;
+        this.eventDispatcher = eventDispatcher;
+
+        dataSources = configuration.getDataSources();
     }
 
     public void initialize()
     {
-        getContainer().get(Router.class).addActionParameterResolver(new UserInterfaceResolver(getContainer()));
-
-        EventDispatcher eventDispatcher = getContainer().get(EventDispatcher.class);
+        router.addActionParameterResolver(new UserInterfaceResolver(container));
 
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
@@ -77,13 +86,12 @@ public class AuthenticationManager extends ContainerAware
     public boolean vote(Route route, RuntimeBag runtimeBag)
     {
         if (securedRoutes.containsKey(route)) {
-            AuthenticationManager authenticationManager = getContainer().get(AuthenticationManager.class);
 
             ArrayList<VoterInterface> voters = securedRoutes.get(route);
-            UserInterface user = authenticationManager.getUser(runtimeBag);
+            UserInterface user = getUser(runtimeBag);
 
             for (VoterInterface voter : voters) {
-                if (!voter.test(getContainer(), user, runtimeBag)) {
+                if (!voter.test(container, user, runtimeBag)) {
                     return false;
                 }
             }
@@ -122,11 +130,6 @@ public class AuthenticationManager extends ContainerAware
         return user;
     }
 
-    public void addDataSource(UserDataSourceInterface ds)
-    {
-        dataSources.add(ds);
-    }
-
     public ArrayList<UserDataSourceInterface> getDataSources()
     {
         return dataSources;
@@ -154,5 +157,10 @@ public class AuthenticationManager extends ContainerAware
         }
 
         return (UserInterface) session.getAttribute("user");
+    }
+
+    public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
+    {
+        return Configuration.class;
     }
 }

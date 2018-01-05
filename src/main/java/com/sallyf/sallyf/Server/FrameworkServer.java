@@ -1,11 +1,14 @@
 package com.sallyf.sallyf.Server;
 
+import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.EventDispatcher.EventType;
 import com.sallyf.sallyf.KernelEvents;
-import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SessionIdManager;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.session.DefaultSessionIdManager;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -14,8 +17,6 @@ import org.eclipse.jetty.util.log.Logger;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
-
 
 public class FrameworkServer extends Server implements ContainerAwareInterface
 {
@@ -23,9 +24,9 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
 
     private Container container;
 
-    public FrameworkServer(Container container)
+    public FrameworkServer(Container container, Configuration configuration)
     {
-        super(4367);
+        super(configuration.getPort());
 
         this.container = container;
 
@@ -78,6 +79,11 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
         }
 
         return "http://" + hostname + ":" + connector.getLocalPort();
+    }
+
+    public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
+    {
+        return Configuration.class;
     }
 }
 

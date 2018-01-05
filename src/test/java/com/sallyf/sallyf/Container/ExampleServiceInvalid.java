@@ -2,13 +2,7 @@ package com.sallyf.sallyf.Container;
 
 public class ExampleServiceInvalid implements ContainerAwareInterface
 {
-    public ExampleServiceInvalid()
+    public ExampleServiceInvalid(String foo)
     {
-    }
-
-    @Override
-    public Container getContainer()
-    {
-        return null;
     }
 }
