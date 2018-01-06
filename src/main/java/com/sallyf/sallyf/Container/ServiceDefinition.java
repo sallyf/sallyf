@@ -36,7 +36,7 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
         this.type = type;
         this.alias = alias;
 
-        this.configurationReference = configuration == null ? new DefaultConfigurationReference<>(type) : new PlainReference(configuration);
+        this.configurationReference = configuration == null ? new ConfigurationReference<>(type) : new PlainReference(configuration);
 
         this.autoConfigure = true;
     }

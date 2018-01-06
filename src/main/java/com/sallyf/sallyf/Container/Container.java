@@ -15,6 +15,8 @@ public class Container
 {
     private Map<Class, ContainerAwareInterface> services;
 
+    private Map<Class, ConfigurationInterface> configurations;
+
     private Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions;
 
     private boolean instantiated = false;
@@ -180,8 +182,8 @@ public class Container
             return ((PlainReference) reference).value;
         }
 
-        if (reference instanceof DefaultConfigurationReference) {
-            return resolveDefaultConfiguration((DefaultConfigurationReference<? extends ContainerAwareInterface>) reference);
+        if (reference instanceof ConfigurationReference) {
+            return resolveConfiguration((ConfigurationReference<? extends ContainerAwareInterface>) reference);
         }
 
         if (reference instanceof ServiceReference) {
@@ -202,19 +204,19 @@ public class Container
         return get(type);
     }
 
-    private <T extends ContainerAwareInterface> ConfigurationInterface resolveDefaultConfiguration(DefaultConfigurationReference<T> configurationReference) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> ConfigurationInterface resolveConfiguration(ConfigurationReference<T> configurationReference) throws ServiceInstantiationException
     {
-        Class<T> type = configurationReference.serviceReference.type;
+        Class<T> type = configurationReference.type;
 
         try {
             Method method = type.getDeclaredMethod("getDefaultConfigurationClass");
-            Class<? extends ConfigurationInterface> configurationClass = (Class) method.invoke(null);
+            Class<? extends ConfigurationInterface> defaultConfigurationClass = (Class) method.invoke(null);
 
-            if (configurationClass == null) {
+            if (defaultConfigurationClass == null) {
                 return null;
             }
 
-            return configurationClass.newInstance();
+            return defaultConfigurationClass.newInstance();
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
             throw new ServiceInstantiationException(e);
         } catch (NoSuchMethodException ignored) {
@@ -236,5 +238,20 @@ public class Container
     public boolean has(Class serviceClass)
     {
         return services.containsKey(serviceClass);
+    }
+
+    public Map<Class, ConfigurationInterface> getConfigurations()
+    {
+        return configurations;
+    }
+
+    public <T extends ContainerAwareInterface> void setConfiguration(Class<T> serviceClass, ConfigurationInterface configuration)
+    {
+        getConfigurations().put(serviceClass, configuration);
+    }
+
+    public <T extends ContainerAwareInterface> ConfigurationInterface getConfiguration(Class<T> serviceClass)
+    {
+        return getConfigurations().get(serviceClass);
     }
 }
