@@ -1,20 +1,11 @@
 package com.sallyf.sallyf.Container;
 
-public class PlainReference implements ReferenceInterface
+public class PlainReference<V> implements ReferenceInterface
 {
-    Object value;
+    public V value;
 
-    Class type;
-
-    public PlainReference(Object value)
+    public PlainReference(V value)
     {
         this.value = value;
-        this.type = value.getClass();
-    }
-
-    public PlainReference(Object value, Class type)
-    {
-        this.value = value;
-        this.type = type;
     }
 }

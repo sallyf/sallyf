@@ -4,15 +4,15 @@ import java.util.ArrayList;
 
 public class ServiceDefinition<T extends ContainerAwareInterface>
 {
-    Class alias;
+    public Class alias;
 
-    Class<T> type;
+    public Class<T> type;
 
-    ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
+    public ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
 
-    ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
+    public ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
 
-    ReferenceInterface configurationReference;
+    public ReferenceInterface configurationReference;
 
     boolean autoConfigure = true;
 
@@ -36,7 +36,7 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
         this.type = type;
         this.alias = alias;
 
-        this.configurationReference = configuration == null ? new ConfigurationReference<>(type) : new PlainReference(configuration);
+        this.configurationReference = configuration == null ? new ConfigurationReference() : new PlainReference<>(configuration);
 
         this.autoConfigure = true;
     }

@@ -41,7 +41,7 @@ public class TestController extends BaseController
         return new ArrayList();
     }
 
-    @Route(path = "/transform/{name}")
+    @Route(path = "/resolve/{name}")
     public Object toTransform(RouteParameters parameters)
     {
         return "hello, " + parameters.get("name");
