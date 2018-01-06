@@ -30,9 +30,9 @@ class Service2 implements ContainerAwareInterface
     }
 }
 
-class CallService implements ContainerAwareInterface
+class ServiceWithCall implements ContainerAwareInterface
 {
-    public CallService()
+    public ServiceWithCall()
     {
     }
 
@@ -147,14 +147,57 @@ public class ContainerTest
     {
         Container container = new Container();
 
-        ServiceDefinition<CallService> d = new ServiceDefinition<>(CallService.class);
+        ServiceDefinition<ServiceWithCall> d = new ServiceDefinition<>(ServiceWithCall.class);
         d.callDefinitions.add(new CallDefinition("setContainer", new ContainerReference()));
 
         container.add(d);
 
         container.instantiateServices();
 
-        assertEquals(container, container.get(CallService.class).getContainer());
+        assertEquals(container, container.get(ServiceWithCall.class).getContainer());
     }
 
+    @Test
+    public void testDefaultConfigurationAutoWiring() throws FrameworkException
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(ServiceWithConfiguration.class));
+
+        container.instantiateServices();
+
+        ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
+
+        assertEquals(1, service.configuration.getNumber());
+    }
+
+    @Test
+    public void testConfigurationManualDeclaration() throws FrameworkException
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(ServiceWithConfiguration.class, new ServiceWithConfiguration.CustomServiceConfiguration()));
+
+        container.instantiateServices();
+
+        ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
+
+        assertEquals(2, service.configuration.getNumber());
+    }
+
+    @Test
+    public void testConfigurationManualDeclarationInContainer() throws FrameworkException
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(ServiceWithConfiguration.class));
+
+        container.setConfiguration(ServiceWithConfiguration.class, new ServiceWithConfiguration.CustomServiceConfiguration());
+
+        container.instantiateServices();
+
+        ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
+
+        assertEquals(2, service.configuration.getNumber());
+    }
 }
