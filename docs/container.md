@@ -53,6 +53,8 @@ The configuration can be injected to a service in 3 ways resolved in the followi
 
     container.setConfiguration(ServiceWithConfiguration.class, new CustomServiceConfiguration());
 
+> **Note :** Must be called before `boot`
+
 ### 3. Default Configuration
     
 The service shoud implement a `static getDefaultConfigurationClass` method:
@@ -61,8 +63,6 @@ The service shoud implement a `static getDefaultConfigurationClass` method:
     {
         return DefaultServiceConfiguration.class;
     }
-
-> **Note :** Must be called before `boot`
 
 ## Accessing a service
 
