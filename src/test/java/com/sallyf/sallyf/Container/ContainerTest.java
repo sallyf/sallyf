@@ -147,10 +147,9 @@ public class ContainerTest
     {
         Container container = new Container();
 
-        ServiceDefinition<ServiceWithCall> d = new ServiceDefinition<>(ServiceWithCall.class);
-        d.callDefinitions.add(new CallDefinition("setContainer", new ContainerReference()));
-
-        container.add(d);
+        container
+                .add(new ServiceDefinition<>(ServiceWithCall.class))
+                .addCallDefinitions(new CallDefinition("setContainer", new ContainerReference()));
 
         container.instantiateServices();
 

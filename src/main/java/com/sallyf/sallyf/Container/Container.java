@@ -57,29 +57,15 @@ public class Container
         }
     }
 
-    public <T extends ContainerAwareInterface> void add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    public <T extends ContainerAwareInterface> ServiceDefinition<T> add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
         if (instantiated) {
             throw new ContainerInstantiatedException();
         }
 
-        if (serviceDefinition.autoConfigure) {
-            Constructor<?>[] constructors = serviceDefinition.type.getConstructors();
+        serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
 
-            ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
-
-            for (Constructor<?> constructor : constructors) {
-                Class<?>[] parameterTypes = constructor.getParameterTypes();
-
-                ReferenceInterface[] references = resolveReferencesFromType(serviceDefinition, parameterTypes);
-
-                constructorDefinitions.add(new ConstructorDefinition(references));
-            }
-
-            serviceDefinition.constructorDefinitions.addAll(constructorDefinitions);
-        }
-
-        serviceDefinitions.put(serviceDefinition.alias, serviceDefinition);
+        return serviceDefinition;
     }
 
     public void instantiateServices() throws ServiceInstantiationException
@@ -90,6 +76,8 @@ public class Container
 
         Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new HashMap<>(this.serviceDefinitions);
 
+        ArrayList<ServiceDefinition> autoWiredDefinitions = new ArrayList<>();
+
         while (!serviceDefinitions.isEmpty()) {
             boolean hasInstantiated = false;
 
@@ -97,6 +85,20 @@ public class Container
 
             for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : entries) {
                 ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
+
+                if (serviceDefinition.isAutoWire() && !autoWiredDefinitions.contains(serviceDefinition)) {
+                    Constructor<?>[] constructors = serviceDefinition.getType().getConstructors();
+
+                    for (Constructor<?> constructor : constructors) {
+                        Class<?>[] parameterTypes = constructor.getParameterTypes();
+
+                        ReferenceInterface[] references = resolveReferencesFromType(serviceDefinition, parameterTypes);
+
+                        serviceDefinition.addConstructorDefinition(new ConstructorDefinition(references));
+                    }
+
+                    autoWiredDefinitions.add(serviceDefinition);
+                }
 
                 try {
                     instantiateService(serviceDefinition);
@@ -118,11 +120,11 @@ public class Container
 
     private <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
-        Class<T> serviceClass = serviceDefinition.type;
+        Class<T> serviceClass = serviceDefinition.getType();
 
         T instance = null;
 
-        for (ConstructorDefinition constructorDefinition : serviceDefinition.constructorDefinitions) {
+        for (ConstructorDefinition constructorDefinition : serviceDefinition.getConstructorDefinitions()) {
             try {
                 Object[] args = resolveReferences(serviceDefinition, constructorDefinition.args);
                 Constructor<T> constructor = Utils.getConstructorForArgs(serviceClass, Utils.getClasses(args));
@@ -138,7 +140,7 @@ public class Container
             throw new ServiceInstantiationException("Unable to instantiate service " + serviceClass);
         }
 
-        for (CallDefinition callDefinition : serviceDefinition.callDefinitions) {
+        for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
             Object[] args = resolveReferences(serviceDefinition, callDefinition.args);
 
             try {
@@ -150,7 +152,7 @@ public class Container
             }
         }
 
-        services.put(serviceDefinition.alias, instance);
+        services.put(serviceDefinition.getAlias(), instance);
 
         try {
             instance.initialize();
