@@ -2,8 +2,15 @@ package com.sallyf.sallyf.Container;
 
 import com.sallyf.sallyf.Container.Exception.CircularReferenceException;
 import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
+import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
-import com.sallyf.sallyf.Container.Exception.ServiceResolutionException;
+import com.sallyf.sallyf.Container.ReferenceResolver.ConfigurationReferenceResolver;
+import com.sallyf.sallyf.Container.ReferenceResolver.ContainerReferenceResolver;
+import com.sallyf.sallyf.Container.ReferenceResolver.PlainReferenceResolver;
+import com.sallyf.sallyf.Container.ReferenceResolver.ServiceReferenceResolver;
+import com.sallyf.sallyf.Container.TypeResolver.ConfigurationResolver;
+import com.sallyf.sallyf.Container.TypeResolver.ContainerResolver;
+import com.sallyf.sallyf.Container.TypeResolver.ServiceResolver;
 import com.sallyf.sallyf.Utils;
 
 import java.lang.reflect.Constructor;
@@ -15,7 +22,13 @@ public class Container
 {
     private Map<Class, ContainerAwareInterface> services;
 
+    private Map<Class, ConfigurationInterface> configurations;
+
     private Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions;
+
+    private ArrayList<ReferenceResolverInterface> referenceResolvers;
+
+    private ArrayList<TypeResolverInterface> typeResolvers;
 
     private boolean instantiated = false;
 
@@ -23,6 +36,18 @@ public class Container
     {
         services = new HashMap<>();
         serviceDefinitions = new HashMap<>();
+        configurations = new HashMap<>();
+        referenceResolvers = new ArrayList<>();
+        typeResolvers = new ArrayList<>();
+
+        referenceResolvers.add(new ConfigurationReferenceResolver(this));
+        referenceResolvers.add(new ContainerReferenceResolver(this));
+        referenceResolvers.add(new PlainReferenceResolver());
+        referenceResolvers.add(new ServiceReferenceResolver(this));
+
+        typeResolvers.add(new ConfigurationResolver());
+        typeResolvers.add(new ContainerResolver());
+        typeResolvers.add(new ServiceResolver());
     }
 
     public void addAll(ServiceDefinition<? extends ContainerAwareInterface>[] serviceDefinitions) throws ServiceInstantiationException
@@ -46,12 +71,7 @@ public class Container
             for (Constructor<?> constructor : constructors) {
                 Class<?>[] parameterTypes = constructor.getParameterTypes();
 
-                ReferenceInterface[] references = new ReferenceInterface[parameterTypes.length];
-
-                int i = 0;
-                for (Class<?> type : parameterTypes) {
-                    references[i++] = resolveTypeToReference(serviceDefinition, type);
-                }
+                ReferenceInterface[] references = resolveReferencesFromType(serviceDefinition, parameterTypes);
 
                 constructorDefinitions.add(new ConstructorDefinition(references));
             }
@@ -81,7 +101,7 @@ public class Container
                 try {
                     instantiateService(serviceDefinition);
                     hasInstantiated = true;
-                } catch (ServiceResolutionException e) {
+                } catch (ReferenceResolutionException e) {
                     continue;
                 }
 
@@ -104,10 +124,10 @@ public class Container
 
         for (ConstructorDefinition constructorDefinition : serviceDefinition.constructorDefinitions) {
             try {
-                Object[] args = resolveReferences(constructorDefinition.args);
-                Constructor<?> constructor = Utils.getConstructorForArgs(serviceClass, Utils.getClasses(args));
+                Object[] args = resolveReferences(serviceDefinition, constructorDefinition.args);
+                Constructor<T> constructor = Utils.getConstructorForArgs(serviceClass, Utils.getClasses(args));
                 if (constructor != null) {
-                    instance = (T) constructor.newInstance(args);
+                    instance = constructor.newInstance(args);
                     break;
                 }
             } catch (InstantiationException | InvocationTargetException | IllegalAccessException ignored) {
@@ -119,7 +139,7 @@ public class Container
         }
 
         for (CallDefinition callDefinition : serviceDefinition.callDefinitions) {
-            Object[] args = resolveReferences(callDefinition.args);
+            Object[] args = resolveReferences(serviceDefinition, callDefinition.args);
 
             try {
                 Method method = serviceClass.getMethod(callDefinition.name, Utils.getClasses(args));
@@ -141,86 +161,54 @@ public class Container
         return instance;
     }
 
-    private ReferenceInterface resolveTypeToReference(ServiceDefinition serviceDefinition, Class type) throws ServiceInstantiationException
+    private ReferenceInterface[] resolveReferencesFromType(ServiceDefinition serviceDefinition, Class[] types) throws ServiceInstantiationException
     {
-        if (ConfigurationInterface.class.isAssignableFrom(type)) {
-            return serviceDefinition.configurationReference;
+        ReferenceInterface[] references = new ReferenceInterface[types.length];
+
+        int i = 0;
+        for (Class<?> type : types) {
+            references[i++] = resolveReferenceFromType(serviceDefinition, type);
         }
 
-        if (Container.class.isAssignableFrom(type)) {
-            return new ContainerReference();
-        }
-
-        if (ContainerAwareInterface.class.isAssignableFrom(type)) {
-            return new ServiceReference<>((Class<? extends ContainerAwareInterface>) type);
-        }
-
-        throw new ServiceInstantiationException("Unable to auto configure reference for " + type);
+        return references;
     }
 
-    private Object[] resolveReferences(ReferenceInterface[] references) throws ServiceInstantiationException
+    private ReferenceInterface resolveReferenceFromType(ServiceDefinition serviceDefinition, Class type) throws ServiceInstantiationException
     {
-        Object[] services = new Object[references.length];
+        for (TypeResolverInterface resolver : typeResolvers) {
+            if (resolver.supports(serviceDefinition, type)) {
+                try {
+                    return resolver.resolve(serviceDefinition, type);
+                } catch (Exception e) {
+                    throw new ServiceInstantiationException(e);
+                }
+            }
+        }
+
+        throw new ServiceInstantiationException("Unable to auto wire reference for " + type);
+    }
+
+    private Object[] resolveReferences(ServiceDefinition serviceDefinition, ReferenceInterface[] references) throws ReferenceResolutionException
+    {
+        Object[] args = new Object[references.length];
 
         int i = 0;
         for (ReferenceInterface reference : references) {
-            services[i++] = resolveReference(reference);
+            args[i++] = resolveReference(serviceDefinition, reference);
         }
 
-        return services;
+        return args;
     }
 
-    private Object resolveReference(ReferenceInterface reference) throws ServiceInstantiationException
+    private Object resolveReference(ServiceDefinition serviceDefinition, ReferenceInterface reference) throws ReferenceResolutionException
     {
-        if (reference instanceof ContainerReference) {
-            return this;
-        }
-
-        if (reference instanceof PlainReference) {
-            return ((PlainReference) reference).value;
-        }
-
-        if (reference instanceof DefaultConfigurationReference) {
-            return resolveDefaultConfiguration((DefaultConfigurationReference<? extends ContainerAwareInterface>) reference);
-        }
-
-        if (reference instanceof ServiceReference) {
-            return resolveServiceReference((ServiceReference<? extends ContainerAwareInterface>) reference);
-        }
-
-        throw new ServiceInstantiationException("Unhandled reference type: " + reference);
-    }
-
-    private <T extends ContainerAwareInterface> T resolveServiceReference(ServiceReference<T> serviceReference) throws ServiceResolutionException
-    {
-        Class<T> type = serviceReference.type;
-
-        if (!has(type)) {
-            throw new ServiceResolutionException(type);
-        }
-
-        return get(type);
-    }
-
-    private <T extends ContainerAwareInterface> ConfigurationInterface resolveDefaultConfiguration(DefaultConfigurationReference<T> configurationReference) throws ServiceInstantiationException
-    {
-        Class<T> type = configurationReference.serviceReference.type;
-
-        try {
-            Method method = type.getDeclaredMethod("getDefaultConfigurationClass");
-            Class<? extends ConfigurationInterface> configurationClass = (Class) method.invoke(null);
-
-            if (configurationClass == null) {
-                return null;
+        for (ReferenceResolverInterface resolver : referenceResolvers) {
+            if (resolver.supports(serviceDefinition, reference)) {
+                return resolver.resolve(serviceDefinition, reference);
             }
-
-            return configurationClass.newInstance();
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new ServiceInstantiationException(e);
-        } catch (NoSuchMethodException ignored) {
         }
 
-        return null;
+        throw new ReferenceResolutionException("Unhandled reference type: " + reference);
     }
 
     public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
@@ -236,5 +224,25 @@ public class Container
     public boolean has(Class serviceClass)
     {
         return services.containsKey(serviceClass);
+    }
+
+    public Map<Class, ConfigurationInterface> getConfigurations()
+    {
+        return configurations;
+    }
+
+    public <T extends ContainerAwareInterface> void setConfiguration(Class<T> serviceClass, ConfigurationInterface configuration)
+    {
+        getConfigurations().put(serviceClass, configuration);
+    }
+
+    public <T extends ContainerAwareInterface> ConfigurationInterface getConfiguration(Class<T> serviceClass)
+    {
+        return getConfigurations().get(serviceClass);
+    }
+
+    public void addReferenceResolver(ReferenceResolverInterface resolver)
+    {
+        referenceResolvers.add(resolver);
     }
 }

@@ -37,11 +37,33 @@ It represents a method signature; it accepts a method name and [`ReferenceInterf
 Several references are available :
 
 - `ContainerReference` : Represents the `Container`
-- `DefaultConfigurationReference` : Represents the default service configuration
+- `ConfigurationReference` : Represents the service configuration, see [Configuration](#configuration)
 - `PlainReference` : Represents a plain value
 - `ServiceReference` : Represents a `Service`
 
+## Configuration
+
+The configuration can be injected to a service in 3 ways resolved in the following order:
+
+### 1. PlainReference
+
+    new PlainReference(new DefaultServiceConfiguration());
+
+### 2. Declared in the `Container`
+
+    container.setConfiguration(ServiceWithConfiguration.class, new CustomServiceConfiguration());
+
+### 3. Default Configuration
     
+The service shoud implement a `static getDefaultConfigurationClass` method:
+
+    public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
+    {
+        return DefaultServiceConfiguration.class;
+    }
+
+> **Note :** Must be called before `boot`
+
 ## Accessing a service
 
-    container.get(<service class>)
+    container.get(<service class>);

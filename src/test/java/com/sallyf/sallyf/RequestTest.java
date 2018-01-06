@@ -104,7 +104,7 @@ public class RequestTest extends BaseFrameworkTest
     @Test
     public void testTransform() throws IOException
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/transform/YOLO").openConnection();
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/resolve/YOLO").openConnection();
         http.connect();
         assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
         assertThat("Content", streamToString(http), is("hello, YOLO"));
