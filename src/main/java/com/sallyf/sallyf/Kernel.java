@@ -50,7 +50,7 @@ public class Kernel
 
         eventDispatcher.dispatch(KernelEvents.BOOTED);
 
-        eventDispatcher.register(KernelEvents.STARTED, (eventType, eventInterface) -> {
+        eventDispatcher.register(KernelEvents.STARTED, (eventType) -> {
             FrameworkServer server = container.get(FrameworkServer.class);
             Router router = container.get(Router.class);
 

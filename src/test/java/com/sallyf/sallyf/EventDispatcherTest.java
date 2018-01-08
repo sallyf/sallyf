@@ -29,8 +29,8 @@ public class EventDispatcherTest
 
         EventType<TestEvent> testEventType = new EventType<>("test.test_event");
 
-        eventDispatcher.register(testEventType, null);
-        eventDispatcher.register(testEventType, null);
+        eventDispatcher.register(testEventType, (eventType, testEvent) -> {});
+        eventDispatcher.register(testEventType, (eventType) -> {});
 
         HashMap<EventType, ArrayList<EventHandlerInterface>> events = eventDispatcher.getEvents();
 
@@ -47,7 +47,7 @@ public class EventDispatcherTest
 
         EventType<TestEvent> testEventType = new EventType<>("test.test_event");
 
-        eventDispatcher.register(testEventType, (eventType, testEvent) -> {
+        eventDispatcher.register(testEventType, (eventType) -> {
             System.out.print("#1#");
         });
 

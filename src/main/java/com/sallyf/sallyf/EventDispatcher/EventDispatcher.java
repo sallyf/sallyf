@@ -21,15 +21,18 @@ public class EventDispatcher implements ContainerAwareInterface
         }
     }
 
+    public void register(EventType<?> eventType, EventFreeHandlerInterface eventHandler)
+    {
+        register(eventType, (et, e) -> eventHandler.dispatch(et));
+    }
+
     public <E extends EventInterface> void register(EventType<E> eventType, EventHandlerInterface<E> eventHandler)
     {
-        if (events.containsKey(eventType)) {
-            events.get(eventType).add(eventHandler);
-        } else {
-            ArrayList<EventHandlerInterface> handlers = new ArrayList<>();
-            handlers.add(eventHandler);
-            events.put(eventType, handlers);
+        if (!events.containsKey(eventType)) {
+            events.put(eventType, new ArrayList<>());
         }
+
+        events.get(eventType).add(eventHandler);
     }
 
     public <E extends EventInterface> E dispatch(EventType<E> eventType, E event)

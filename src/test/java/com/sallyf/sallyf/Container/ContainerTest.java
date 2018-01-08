@@ -10,13 +10,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-class MyAlias implements ContainerAwareInterface
-{
-    public MyAlias()
-    {
-    }
-}
-
 class Service1 implements ContainerAwareInterface
 {
     public Service1(Service2 service2)
