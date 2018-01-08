@@ -57,7 +57,7 @@ The configuration can be injected to a service in 3 ways resolved in the followi
 
 ### 3. Default Configuration
     
-The service shoud implement a `static getDefaultConfigurationClass` method:
+The service should implement a `static getDefaultConfigurationClass` method:
 
     public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
     {

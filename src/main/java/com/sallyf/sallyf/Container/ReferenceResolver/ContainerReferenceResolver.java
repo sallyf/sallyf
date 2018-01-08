@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Container.ReferenceResolver;
 
 import com.sallyf.sallyf.Container.*;
-import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
 
 public class ContainerReferenceResolver<T extends ContainerAwareInterface> implements ReferenceResolverInterface<T, ContainerReference, Container>
 {
@@ -19,7 +18,7 @@ public class ContainerReferenceResolver<T extends ContainerAwareInterface> imple
     }
 
     @Override
-    public Container resolve(ServiceDefinition<T> serviceDefinition, ContainerReference reference) throws ReferenceResolutionException
+    public Container resolve(ServiceDefinition<T> serviceDefinition, ContainerReference reference) throws Exception
     {
         return container;
     }

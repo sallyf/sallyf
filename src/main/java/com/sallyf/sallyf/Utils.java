@@ -33,6 +33,10 @@ public class Utils
                 boolean argumentsMatch = true;
                 for (int i = 0; i < args.length; i++) {
                     //Note that the types in args must be in same order as in the constructor if the checking is done this way
+                    if (args[i] == null) {
+                        continue;
+                    }
+
                     if (!types[i].isAssignableFrom(args[i])) {
                         argumentsMatch = false;
                         break;

@@ -19,7 +19,7 @@ public class ServiceReferenceResolver<T extends ContainerAwareInterface> impleme
     }
 
     @Override
-    public T resolve(ServiceDefinition<T> serviceDefinition, ServiceReference<T> reference) throws ReferenceResolutionException
+    public T resolve(ServiceDefinition<T> serviceDefinition, ServiceReference<T> reference) throws Exception
     {
         Class<T> type = reference.type;
 

@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Container.ReferenceResolver;
 
 import com.sallyf.sallyf.Container.*;
-import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,9 +21,9 @@ public class ConfigurationReferenceResolver<T extends ContainerAwareInterface> i
     }
 
     @Override
-    public ConfigurationInterface resolve(ServiceDefinition<T> serviceDefinition, ConfigurationReference reference) throws ReferenceResolutionException
+    public ConfigurationInterface resolve(ServiceDefinition<T> serviceDefinition, ConfigurationReference reference) throws Exception
     {
-        Class<T> type = serviceDefinition.type;
+        Class<T> type = serviceDefinition.getType();
 
         ConfigurationInterface configuration = container.getConfigurations().get(type);
 
@@ -42,7 +41,7 @@ public class ConfigurationReferenceResolver<T extends ContainerAwareInterface> i
 
             return defaultConfigurationClass.newInstance();
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new ReferenceResolutionException(e);
+            throw new Exception(e);
         } catch (NoSuchMethodException ignored) {
         }
 

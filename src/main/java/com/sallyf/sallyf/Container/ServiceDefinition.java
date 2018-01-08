@@ -4,17 +4,17 @@ import java.util.ArrayList;
 
 public class ServiceDefinition<T extends ContainerAwareInterface>
 {
-    public Class alias;
+    private Class alias;
 
-    public Class<T> type;
+    private Class<T> type;
 
-    public ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
+    private ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
 
-    public ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
+    private ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
 
-    public ReferenceInterface configurationReference;
+    private ReferenceInterface configurationReference;
 
-    boolean autoConfigure = true;
+    private boolean autoWire = true;
 
     public ServiceDefinition(Class<T> type)
     {
@@ -36,25 +36,95 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
         this.type = type;
         this.alias = alias;
 
-        this.configurationReference = configuration == null ? new ConfigurationReference() : new PlainReference<>(configuration);
+        setConfigurationReference(configuration == null ? new ConfigurationReference() : new PlainReference<>(configuration));
 
-        this.autoConfigure = true;
+        setAutoWire(true);
+    }
+
+    public ServiceDefinition(Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
+    {
+        this(type, type, configuration, constructorDefinitions, callDefinitions);
     }
 
     public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
     {
         this(alias, type, configuration);
 
-        this.autoConfigure = false;
+        setAutoWire(false);
 
-        this.constructorDefinitions = constructorDefinitions;
-        this.callDefinitions = callDefinitions;
+        setConstructorDefinitions(constructorDefinitions);
+        setCallDefinitions(callDefinitions);
     }
 
-    public ServiceDefinition(Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
+    public boolean isAutoWire()
     {
-        this(type, type, configuration, constructorDefinitions, callDefinitions);
+        return autoWire;
+    }
 
-        this.autoConfigure = false;
+    public ServiceDefinition<T> setAutoWire(boolean autoWire)
+    {
+        this.autoWire = autoWire;
+
+        return this;
+    }
+
+    public ReferenceInterface getConfigurationReference()
+    {
+        return configurationReference;
+    }
+
+    public ServiceDefinition<T> setConfigurationReference(ReferenceInterface configurationReference)
+    {
+        this.configurationReference = configurationReference;
+
+        return this;
+    }
+
+    public ArrayList<ConstructorDefinition> getConstructorDefinitions()
+    {
+        return constructorDefinitions;
+    }
+
+    public ServiceDefinition<T> setConstructorDefinitions(ArrayList<ConstructorDefinition> constructorDefinitions)
+    {
+        this.constructorDefinitions = constructorDefinitions;
+
+        return this;
+    }
+
+    public ServiceDefinition<T> addConstructorDefinition(ConstructorDefinition constructorDefinition)
+    {
+        this.constructorDefinitions.add(constructorDefinition);
+
+        return this;
+    }
+
+    public ArrayList<CallDefinition> getCallDefinitions()
+    {
+        return callDefinitions;
+    }
+
+    public ServiceDefinition<T> setCallDefinitions(ArrayList<CallDefinition> callDefinitions)
+    {
+        this.callDefinitions = callDefinitions;
+
+        return this;
+    }
+
+    public ServiceDefinition<T> addCallDefinitions(CallDefinition callDefinition)
+    {
+        this.callDefinitions.add(callDefinition);
+
+        return this;
+    }
+
+    public Class getAlias()
+    {
+        return alias;
+    }
+
+    public Class<T> getType()
+    {
+        return type;
     }
 }

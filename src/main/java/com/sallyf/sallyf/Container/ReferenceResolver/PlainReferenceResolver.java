@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Container.ReferenceResolver;
 
 import com.sallyf.sallyf.Container.*;
-import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
 
 public class PlainReferenceResolver<T extends ContainerAwareInterface, V> implements ReferenceResolverInterface<T, PlainReference<V>, V>
 {
@@ -12,7 +11,7 @@ public class PlainReferenceResolver<T extends ContainerAwareInterface, V> implem
     }
 
     @Override
-    public V resolve(ServiceDefinition<T> serviceDefinition, PlainReference<V> reference) throws ReferenceResolutionException
+    public V resolve(ServiceDefinition<T> serviceDefinition, PlainReference<V> reference) throws Exception
     {
         return reference.value;
     }

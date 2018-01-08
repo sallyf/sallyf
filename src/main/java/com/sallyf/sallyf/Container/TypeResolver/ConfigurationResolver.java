@@ -13,6 +13,6 @@ public class ConfigurationResolver<T extends ContainerAwareInterface> implements
     @Override
     public ReferenceInterface resolve(ServiceDefinition<T> serviceDefinition, Class<ConfigurationInterface> type) throws Exception
     {
-        return serviceDefinition.configurationReference;
+        return serviceDefinition.getConfigurationReference();
     }
 }
