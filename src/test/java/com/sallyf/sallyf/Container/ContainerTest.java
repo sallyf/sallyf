@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 class MyAlias implements ContainerAwareInterface
 {
@@ -168,6 +169,20 @@ public class ContainerTest
         container.instantiate();
 
         assertEquals(container, container.get(ServiceWithCall.class).getContainer());
+    }
+
+    @Test
+    public void testWithoutDefaultConfiguration() throws FrameworkException
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(ServiceWithoutDefaultConfiguration.class));
+
+        container.instantiate();
+
+        ServiceWithoutDefaultConfiguration service = container.get(ServiceWithoutDefaultConfiguration.class);
+
+        assertNull(service.configuration);
     }
 
     @Test
