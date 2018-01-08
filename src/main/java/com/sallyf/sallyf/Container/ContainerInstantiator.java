@@ -1,15 +1,25 @@
 package com.sallyf.sallyf.Container;
 
-import com.sallyf.sallyf.Container.Exception.CircularReferenceException;
-import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
-import com.sallyf.sallyf.Container.Exception.TypeResolutionException;
+import com.sallyf.sallyf.Container.Exception.*;
 import com.sallyf.sallyf.Utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+
+class CallDefinitionMeta<T extends ContainerAwareInterface>
+{
+    public CallDefinition callDefinition;
+
+    public ServiceDefinition<T> serviceDefinition;
+
+    public CallDefinitionMeta(CallDefinition callDefinition, ServiceDefinition<T> serviceDefinition)
+    {
+        this.callDefinition = callDefinition;
+        this.serviceDefinition = serviceDefinition;
+    }
+}
 
 class ContainerInstantiator
 {
@@ -25,6 +35,8 @@ class ContainerInstantiator
 
     private ArrayList<ServiceDefinition> autoWiredDefinitions = new ArrayList<>();
 
+    private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
+
     ContainerInstantiator(Map<Class, ContainerAwareInterface> services)
     {
         this.services = services;
@@ -32,6 +44,15 @@ class ContainerInstantiator
 
     public Map<Class, ContainerAwareInterface> boot() throws ServiceInstantiationException
     {
+        for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : serviceDefinitions.entrySet()) {
+            ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
+            ArrayList<CallDefinition> callDefinitions = serviceDefinition.getCallDefinitions();
+
+            for (CallDefinition callDefinition : callDefinitions) {
+                callDefinitionMetas.add(new CallDefinitionMeta<>(callDefinition, serviceDefinition));
+            }
+        }
+
         Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitionsPool = new HashMap<>(this.serviceDefinitions);
 
         while (!serviceDefinitionsPool.isEmpty()) {
@@ -51,12 +72,18 @@ class ContainerInstantiator
                     continue;
                 }
 
+                invokeCalls();
+
                 serviceDefinitionsPool.remove(entry.getKey());
             }
 
             if (!entries.isEmpty() && !hasInstantiated) {
                 throw new CircularReferenceException();
             }
+        }
+
+        if (!callDefinitionMetas.isEmpty()) {
+            throw new ServiceInstantiationException("All calls weren't called");
         }
 
         return services;
@@ -89,23 +116,11 @@ class ContainerInstantiator
             throw new ServiceInstantiationException("Unable to boot service " + serviceClass);
         }
 
-        for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
-            Object[] args = resolveReferences(serviceDefinition, callDefinition.args);
-
-            try {
-                Method method = serviceClass.getMethod(callDefinition.name, Utils.getClasses(args));
-
-                method.invoke(instance, args);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new ServiceInstantiationException(e);
-            }
-        }
-
         services.put(serviceDefinition.getAlias(), instance);
 
         try {
             instance.initialize();
-        } catch (java.lang.Exception e) {
+        } catch (Exception e) {
             throw new ServiceInstantiationException(e);
         }
     }
@@ -130,6 +145,32 @@ class ContainerInstantiator
         }
 
         return instance;
+    }
+
+    private void invokeCalls() throws CallException
+    {
+        ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>(this.callDefinitionMetas);
+
+        for (CallDefinitionMeta callDefinitionMeta : callDefinitionMetas) {
+            ServiceDefinition<?> serviceDefinition = callDefinitionMeta.serviceDefinition;
+            CallDefinition callDefinition = callDefinitionMeta.callDefinition;
+
+            ContainerAwareInterface instance = services.get(serviceDefinition.getAlias());
+
+            try {
+                Object[] args = resolveReferences(serviceDefinition, callDefinition.args);
+
+                Method method = serviceDefinition.getType().getMethod(callDefinition.name, Utils.getClasses(args));
+
+                method.invoke(instance, args);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new CallException(e);
+            } catch (ReferenceResolutionException ignored) {
+                continue;
+            }
+
+            this.callDefinitionMetas.remove(callDefinitionMeta);
+        }
     }
 
     private Object[] resolveReferences(ServiceDefinition serviceDefinition, ReferenceInterface[] references) throws ReferenceResolutionException

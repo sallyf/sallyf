@@ -156,6 +156,20 @@ public class ContainerTest
         assertEquals(container, container.get(ServiceWithCall.class).getContainer());
     }
 
+    @Test(expected = ServiceInstantiationException.class)
+    public void testInvalidCall() throws FrameworkException
+    {
+        Container container = new Container();
+
+        container
+                .add(new ServiceDefinition<>(ServiceWithCall.class))
+                .addCallDefinitions(new CallDefinition("setContainer", new ServiceReference<>(Service1.class)));
+
+        container.instantiate();
+
+        assertEquals(container, container.get(ServiceWithCall.class).getContainer());
+    }
+
     @Test
     public void testDefaultConfigurationAutoWiring() throws FrameworkException
     {
