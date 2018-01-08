@@ -59,7 +59,7 @@ public class ContainerTest
         Container container = new Container();
         container.add(new ServiceDefinition<>(c));
 
-        container.instantiateServices();
+        container.instantiate();
 
         assertNotNull(container.get(c));
     }
@@ -72,7 +72,7 @@ public class ContainerTest
         Container container = new Container();
         container.add(new ServiceDefinition<>(c));
 
-        container.instantiateServices();
+        container.instantiate();
 
         assertNotNull(container.get(c));
     }
@@ -85,7 +85,7 @@ public class ContainerTest
         Container container = new Container();
         container.add(new ServiceDefinition<>(c, ExampleServiceExtend.class));
 
-        container.instantiateServices();
+        container.instantiate();
 
         assertNotNull(container.get(c));
     }
@@ -98,7 +98,7 @@ public class ContainerTest
         Container container = new Container();
         container.add(new ServiceDefinition<>(c, ExampleServiceImplements.class));
 
-        container.instantiateServices();
+        container.instantiate();
 
         assertNotNull(container.get(c));
     }
@@ -109,7 +109,7 @@ public class ContainerTest
         Container container = new Container();
         container.add(new ServiceDefinition<>(ExampleServiceInvalid.class));
 
-        container.instantiateServices();
+        container.instantiate();
     }
 
     @Test(expected = ContainerInstantiatedException.class)
@@ -117,8 +117,8 @@ public class ContainerTest
     {
         Container container = new Container();
 
-        container.instantiateServices();
-        container.instantiateServices();
+        container.instantiate();
+        container.instantiate();
     }
 
     @Test(expected = ContainerInstantiatedException.class)
@@ -126,7 +126,7 @@ public class ContainerTest
     {
         Container container = new Container();
 
-        container.instantiateServices();
+        container.instantiate();
 
         container.add(new ServiceDefinition<>(ExampleServiceExtend.class));
     }
@@ -139,7 +139,7 @@ public class ContainerTest
         container.add(new ServiceDefinition<>(Service1.class));
         container.add(new ServiceDefinition<>(Service2.class));
 
-        container.instantiateServices();
+        container.instantiate();
     }
 
     @Test
@@ -151,7 +151,7 @@ public class ContainerTest
                 .add(new ServiceDefinition<>(ServiceWithCall.class))
                 .addCallDefinitions(new CallDefinition("setContainer", new ContainerReference()));
 
-        container.instantiateServices();
+        container.instantiate();
 
         assertEquals(container, container.get(ServiceWithCall.class).getContainer());
     }
@@ -163,7 +163,7 @@ public class ContainerTest
 
         container.add(new ServiceDefinition<>(ServiceWithConfiguration.class));
 
-        container.instantiateServices();
+        container.instantiate();
 
         ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
 
@@ -177,7 +177,7 @@ public class ContainerTest
 
         container.add(new ServiceDefinition<>(ServiceWithConfiguration.class, new ServiceWithConfiguration.CustomServiceConfiguration()));
 
-        container.instantiateServices();
+        container.instantiate();
 
         ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
 
@@ -193,7 +193,7 @@ public class ContainerTest
 
         container.setConfiguration(ServiceWithConfiguration.class, new ServiceWithConfiguration.CustomServiceConfiguration());
 
-        container.instantiateServices();
+        container.instantiate();
 
         ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
 

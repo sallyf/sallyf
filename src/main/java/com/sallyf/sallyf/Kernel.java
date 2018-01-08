@@ -44,7 +44,7 @@ public class Kernel
 
     public void boot() throws ServiceInstantiationException
     {
-        container.instantiateServices();
+        container.instantiate();
 
         EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
 
