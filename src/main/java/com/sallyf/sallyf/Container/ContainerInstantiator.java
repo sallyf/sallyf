@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 class CallDefinitionMeta<T extends ContainerAwareInterface>
 {
@@ -21,13 +22,38 @@ class CallDefinitionMeta<T extends ContainerAwareInterface>
     }
 }
 
+class PutListenerHashMap<K, V> extends HashMap<K, V>
+{
+    private BiConsumer<K, V> consumer;
+
+    public void setConsumer(BiConsumer<K, V> consumer)
+    {
+        this.consumer = consumer;
+    }
+
+    public void removeConsumer()
+    {
+        this.consumer = null;
+    }
+
+    @Override
+    public V put(K k, V v)
+    {
+        if (null != consumer) {
+            consumer.accept(k, v);
+        }
+
+        return super.put(k, v);
+    }
+}
+
 class ContainerInstantiator
 {
-    private Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new HashMap<>();
-
     private Map<Class, ContainerAwareInterface> services;
 
-    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices;
+    private Map<Tag<ContainerAwareInterface>, ArrayList<ContainerAwareInterface>> taggedServices;
+
+    private PutListenerHashMap<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new PutListenerHashMap<>();
 
     private ArrayList<ReferenceResolverInterface> referenceResolvers = new ArrayList<>();
 
@@ -39,13 +65,13 @@ class ContainerInstantiator
 
     private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
 
-    ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
+    ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<Tag<ContainerAwareInterface>, ArrayList<ContainerAwareInterface>> taggedServices)
     {
         this.services = services;
         this.taggedServices = taggedServices;
     }
 
-    public Map<Class, ContainerAwareInterface> boot() throws ServiceInstantiationException
+    public void boot() throws ServiceInstantiationException
     {
         for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : serviceDefinitions.entrySet()) {
             ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
@@ -57,6 +83,8 @@ class ContainerInstantiator
         }
 
         Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitionsPool = new HashMap<>(this.serviceDefinitions);
+
+        this.serviceDefinitions.setConsumer(serviceDefinitionsPool::put);
 
         while (!serviceDefinitionsPool.isEmpty()) {
             boolean hasInstantiated = false;
@@ -92,11 +120,11 @@ class ContainerInstantiator
             }
         }
 
+        this.serviceDefinitions.removeConsumer();
+
         if (!callDefinitionMetas.isEmpty()) {
             throw new ServiceInstantiationException("All calls weren't called");
         }
-
-        return services;
     }
 
     private <T extends ContainerAwareInterface> void autoWire(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
@@ -128,7 +156,7 @@ class ContainerInstantiator
 
         services.put(serviceDefinition.getAlias(), instance);
 
-        for (String tag : serviceDefinition.getTags()) {
+        for (Tag tag : serviceDefinition.getTags()) {
             addTaggedService(tag, instance);
         }
 
@@ -237,7 +265,7 @@ class ContainerInstantiator
         throw new TypeResolutionException("Unable to auto wire reference for " + type);
     }
 
-    private void addTaggedService(String tag, ContainerAwareInterface service)
+    private void addTaggedService(Tag<ContainerAwareInterface> tag, ContainerAwareInterface service)
     {
         if (!taggedServices.containsKey(tag)) {
             taggedServices.put(tag, new ArrayList<>());

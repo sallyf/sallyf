@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class AuthenticationTest extends BaseFrameworkTest
 {
-    public AuthenticationManager newInstance(Configuration configuration)
+    public AuthenticationManager newInstance(Configuration configuration) throws Exception
     {
         Container c = new Container();
         EventDispatcher ed = new EventDispatcher();
@@ -20,7 +20,7 @@ public class AuthenticationTest extends BaseFrameworkTest
     }
 
     @Test(expected = AuthenticationException.class)
-    public void unknownDataSourceTest() throws AuthenticationException
+    public void unknownDataSourceTest() throws Exception
     {
         AuthenticationManager authenticationManager = newInstance(new Configuration());
 
@@ -28,7 +28,7 @@ public class AuthenticationTest extends BaseFrameworkTest
     }
 
     @Test(expected = AuthenticationException.class)
-    public void noDataSourceTest() throws AuthenticationException
+    public void noDataSourceTest() throws Exception
     {
         AuthenticationManager authenticationManager = newInstance(new Configuration());
 
@@ -38,7 +38,7 @@ public class AuthenticationTest extends BaseFrameworkTest
     }
 
     @Test(expected = AuthenticationException.class)
-    public void ambiguousDataSourceTest() throws AuthenticationException
+    public void ambiguousDataSourceTest() throws Exception
     {
         Configuration configuration = new Configuration()
         {

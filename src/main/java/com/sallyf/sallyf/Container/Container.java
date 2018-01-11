@@ -20,7 +20,7 @@ public class Container
 
     private Map<Class, ContainerAwareInterface> services = new HashMap<>();
 
-    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<>();
+    private Map<Tag<ContainerAwareInterface>, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<>();
 
     private boolean instantiated = false;
 
@@ -62,14 +62,20 @@ public class Container
             throw new ContainerInstantiatedException();
         }
 
-        services = containerInstantiator.boot();
+        containerInstantiator.boot();
 
         instantiated = true;
     }
 
-    public ArrayList<ContainerAwareInterface> getByTag(String tag)
+    public <T extends ContainerAwareInterface> ArrayList<T> getByTag(Tag<T> tag)
     {
-        return taggedServices.get(tag);
+        ArrayList<ContainerAwareInterface> services = taggedServices.get(tag);
+
+        if (null == services) {
+            return new ArrayList<>();
+        }
+
+        return (ArrayList<T>) services;
     }
 
     public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
