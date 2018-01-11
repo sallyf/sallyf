@@ -103,7 +103,7 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
     @Test
     public void testParameterVoterFailure() throws Exception
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/secured/foo").openConnection();
+        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/secured/yolo").openConnection();
         http.connect();
         assertThat("Response Code", http.getResponseCode(), is(HttpStatus.FORBIDDEN_403));
     }

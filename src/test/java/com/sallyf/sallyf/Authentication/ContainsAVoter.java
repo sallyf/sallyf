@@ -5,7 +5,7 @@ import com.sallyf.sallyf.Server.RuntimeBag;
 
 import java.util.Arrays;
 
-public class NameVoter implements VoterInterface<String>
+public class ContainsAVoter implements VoterInterface<String>
 {
     public static final String ACCESS = "access";
 
@@ -26,8 +26,6 @@ public class NameVoter implements VoterInterface<String>
     @Override
     public boolean vote(String attribute, String subject, RuntimeBag runtimeBag)
     {
-        subject = subject.toLowerCase();
-
-        return subject.equals("admin") || subject.equals("foo");
+        return subject.toLowerCase().contains("a");
     }
 }

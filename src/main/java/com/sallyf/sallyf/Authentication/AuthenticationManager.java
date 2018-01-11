@@ -30,7 +30,7 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private ArrayList<UserDataSourceInterface> dataSources;
 
-    private HashMap<Route, Voter[]> securedRoutes = new HashMap<>();
+    private HashMap<Route, Voter> securedRoutes = new HashMap<>();
 
     private Container container;
 
@@ -58,10 +58,10 @@ public class AuthenticationManager implements ContainerAwareInterface
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
 
-            Voter[] annotations = method.getAnnotationsByType(Voter.class);
+            Voter annotation = method.getAnnotation(Voter.class);
 
-            if (annotations.length > 0) {
-                securedRoutes.put(routeRegisterEvent.getRoute(), annotations);
+            if (null != annotation) {
+                securedRoutes.put(routeRegisterEvent.getRoute(), annotation);
             }
         });
 
@@ -75,6 +75,26 @@ public class AuthenticationManager implements ContainerAwareInterface
         });
     }
 
+    public <O> boolean vote(String attribute, O subject, RuntimeBag runtimeBag)
+    {
+        return vote(attribute, subject, runtimeBag, DecisionStrategy.AFFIRMATIVE);
+    }
+
+    public <O> boolean vote(String attribute, O subject, RuntimeBag runtimeBag, DecisionStrategy strategy)
+    {
+        ArrayList<Boolean> decisions = new ArrayList<>();
+
+        for (VoterInterface<O> voter : container.<VoterInterface<O>>getByTag(TAG_VOTER)) {
+            if (voter.supports(attribute, subject, runtimeBag)) {
+                boolean d = voter.vote(attribute, subject, runtimeBag);
+
+                decisions.add(d);
+            }
+        }
+
+        return decide(decisions, strategy);
+    }
+
     private boolean vote(Route route, RuntimeBag runtimeBag)
     {
         return vote(route, runtimeBag, DecisionStrategy.AFFIRMATIVE);
@@ -83,26 +103,18 @@ public class AuthenticationManager implements ContainerAwareInterface
     private boolean vote(Route route, RuntimeBag runtimeBag, DecisionStrategy strategy)
     {
         if (securedRoutes.containsKey(route)) {
-            Voter[] annotations = securedRoutes.get(route);
+            Voter annotation = securedRoutes.get(route);
             ArrayList<Boolean> decisions = new ArrayList<>();
 
-            for (Voter annotation : annotations) {
-                Object subject = null;
+            Object subject = null;
 
-                if (!annotation.parameter().equals("")) {
-                    RouteParameters routeParameters = router.getRouteParameters(runtimeBag);
+            if (!annotation.parameter().equals("")) {
+                RouteParameters routeParameters = router.getRouteParameters(runtimeBag);
 
-                    subject = routeParameters.get(annotation.parameter());
-                }
-
-                for (VoterInterface voter : container.<VoterInterface>getByTag(TAG_VOTER)) {
-                    if (voter.supports(annotation.attribute(), subject, runtimeBag)) {
-                        boolean d = voter.vote(annotation.attribute(), subject, runtimeBag);
-
-                        decisions.add(d);
-                    }
-                }
+                subject = routeParameters.get(annotation.parameter());
             }
+
+            decisions.add(vote(annotation.attribute(), subject, runtimeBag));
 
             return decide(decisions, strategy);
         }
@@ -112,6 +124,10 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private boolean decide(ArrayList<Boolean> decisions, DecisionStrategy strategy)
     {
+        if (decisions.isEmpty()) {
+            return true;
+        }
+
         switch (strategy) {
             case AFFIRMATIVE:
                 return decisions.contains(true);
