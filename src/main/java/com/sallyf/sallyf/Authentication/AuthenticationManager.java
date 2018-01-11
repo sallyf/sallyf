@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 public class AuthenticationManager implements ContainerAwareInterface
 {
-    private static final Tag<VoterInterface> TAG_VOTER = new Tag<>("authentication.voter");
+    public static final Tag<VoterInterface> TAG_VOTER = new Tag<>("authentication.voter");
 
     private ArrayList<UserDataSourceInterface> dataSources;
 

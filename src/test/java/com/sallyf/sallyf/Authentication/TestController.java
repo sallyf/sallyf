@@ -30,4 +30,11 @@ public class TestController extends BaseController
     {
         return "Secured";
     }
+
+    @Route(path = "/secured/{name}")
+    @Voter(attribute = NameVoter.ACCESS, parameter = "name")
+    public String securedName()
+    {
+        return "Secured name";
+    }
 }
