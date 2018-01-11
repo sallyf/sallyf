@@ -51,7 +51,7 @@ class ContainerInstantiator
 {
     private Map<Class, ContainerAwareInterface> services;
 
-    private Map<Tag<ContainerAwareInterface>, ArrayList<ContainerAwareInterface>> taggedServices;
+    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices;
 
     private PutListenerHashMap<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new PutListenerHashMap<>();
 
@@ -65,7 +65,7 @@ class ContainerInstantiator
 
     private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
 
-    ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<Tag<ContainerAwareInterface>, ArrayList<ContainerAwareInterface>> taggedServices)
+    ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
     {
         this.services = services;
         this.taggedServices = taggedServices;
@@ -156,7 +156,7 @@ class ContainerInstantiator
 
         services.put(serviceDefinition.getAlias(), instance);
 
-        for (Tag tag : serviceDefinition.getTags()) {
+        for (String tag : serviceDefinition.getTags()) {
             addTaggedService(tag, instance);
         }
 
@@ -265,7 +265,7 @@ class ContainerInstantiator
         throw new TypeResolutionException("Unable to auto wire reference for " + type);
     }
 
-    private void addTaggedService(Tag<ContainerAwareInterface> tag, ContainerAwareInterface service)
+    private void addTaggedService(String tag, ContainerAwareInterface service)
     {
         if (!taggedServices.containsKey(tag)) {
             taggedServices.put(tag, new ArrayList<>());

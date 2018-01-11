@@ -12,7 +12,7 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
 
     private ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
 
-    private ArrayList<Tag> tags = new ArrayList<>();
+    private ArrayList<String> tags = new ArrayList<>();
 
     private ReferenceInterface configurationReference;
 
@@ -130,12 +130,12 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
         return type;
     }
 
-    public ArrayList<Tag> getTags()
+    public ArrayList<String> getTags()
     {
         return tags;
     }
 
-    public ServiceDefinition<T> addTag(Tag tag)
+    public ServiceDefinition<T> addTag(String tag)
     {
         tags.add(tag);
 

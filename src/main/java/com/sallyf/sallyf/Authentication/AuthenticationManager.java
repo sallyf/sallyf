@@ -3,8 +3,11 @@ package com.sallyf.sallyf.Authentication;
 import com.sallyf.sallyf.Authentication.Annotation.Voter;
 import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
 import com.sallyf.sallyf.Authentication.Voter.VoterInterface;
-import com.sallyf.sallyf.Container.*;
+import com.sallyf.sallyf.Container.ConfigurationInterface;
+import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.HttpException;
 import com.sallyf.sallyf.KernelEvents;
@@ -23,7 +26,7 @@ import java.util.HashMap;
 
 public class AuthenticationManager implements ContainerAwareInterface
 {
-    public static final Tag<VoterInterface> TAG_VOTER = new Tag<>("authentication.voter");
+    public static final String TAG_VOTER = "authentication.voter";
 
     private ArrayList<UserDataSourceInterface> dataSources;
 
@@ -77,7 +80,7 @@ public class AuthenticationManager implements ContainerAwareInterface
         if (securedRoutes.containsKey(route)) {
             Voter[] annotations = securedRoutes.get(route);
             for (Voter annotation : annotations) {
-                for (VoterInterface voter : container.getByTag(TAG_VOTER)) {
+                for (VoterInterface voter : container.<VoterInterface>getByTag(TAG_VOTER)) {
                     Object subject = null;
 
                     if (!annotation.parameter().equals("")) {

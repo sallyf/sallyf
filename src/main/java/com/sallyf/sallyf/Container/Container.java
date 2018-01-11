@@ -20,7 +20,7 @@ public class Container
 
     private Map<Class, ContainerAwareInterface> services = new HashMap<>();
 
-    private Map<Tag<ContainerAwareInterface>, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<>();
+    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<String, ArrayList<ContainerAwareInterface>>();
 
     private boolean instantiated = false;
 
@@ -67,7 +67,7 @@ public class Container
         instantiated = true;
     }
 
-    public <T extends ContainerAwareInterface> ArrayList<T> getByTag(Tag<T> tag)
+    public <T extends ContainerAwareInterface> ArrayList<T> getByTag(String tag)
     {
         ArrayList<ContainerAwareInterface> services = taggedServices.get(tag);
 
