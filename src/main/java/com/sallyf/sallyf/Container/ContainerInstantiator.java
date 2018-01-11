@@ -27,6 +27,8 @@ class ContainerInstantiator
 
     private Map<Class, ContainerAwareInterface> services;
 
+    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices;
+
     private ArrayList<ReferenceResolverInterface> referenceResolvers = new ArrayList<>();
 
     private ArrayList<TypeResolverInterface> typeResolvers = new ArrayList<>();
@@ -37,9 +39,10 @@ class ContainerInstantiator
 
     private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
 
-    ContainerInstantiator(Map<Class, ContainerAwareInterface> services)
+    ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
     {
         this.services = services;
+        this.taggedServices = taggedServices;
     }
 
     public Map<Class, ContainerAwareInterface> boot() throws ServiceInstantiationException
@@ -65,14 +68,21 @@ class ContainerInstantiator
 
                 autoWire(serviceDefinition);
 
+                ContainerAwareInterface instance;
                 try {
-                    bootService(serviceDefinition);
+                    instance = bootService(serviceDefinition);
                     hasInstantiated = true;
                 } catch (ServiceInstantiationException e) {
                     continue;
                 }
 
                 invokeCalls();
+
+                try {
+                    instance.initialize();
+                } catch (Exception e) {
+                    throw new ServiceInstantiationException(e);
+                }
 
                 serviceDefinitionsPool.remove(entry.getKey());
             }
@@ -106,7 +116,7 @@ class ContainerInstantiator
         }
     }
 
-    private <T extends ContainerAwareInterface> void bootService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> T bootService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
         Class<T> serviceClass = serviceDefinition.getType();
 
@@ -118,11 +128,11 @@ class ContainerInstantiator
 
         services.put(serviceDefinition.getAlias(), instance);
 
-        try {
-            instance.initialize();
-        } catch (Exception e) {
-            throw new ServiceInstantiationException(e);
+        for (String tag : serviceDefinition.getTags()) {
+            addTaggedService(tag, instance);
         }
+
+        return instance;
     }
 
     private <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
@@ -225,6 +235,15 @@ class ContainerInstantiator
         }
 
         throw new TypeResolutionException("Unable to auto wire reference for " + type);
+    }
+
+    private void addTaggedService(String tag, ContainerAwareInterface service)
+    {
+        if (!taggedServices.containsKey(tag)) {
+            taggedServices.put(tag, new ArrayList<>());
+        }
+
+        taggedServices.get(tag).add(service);
     }
 
     public Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> getServiceDefinitions()
