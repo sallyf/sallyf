@@ -77,28 +77,54 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private boolean vote(Route route, RuntimeBag runtimeBag)
     {
+        return vote(route, runtimeBag, DecisionStrategy.AFFIRMATIVE);
+    }
+
+    private boolean vote(Route route, RuntimeBag runtimeBag, DecisionStrategy strategy)
+    {
         if (securedRoutes.containsKey(route)) {
             Voter[] annotations = securedRoutes.get(route);
+            ArrayList<Boolean> decisions = new ArrayList<>();
+
             for (Voter annotation : annotations) {
+                Object subject = null;
+
+                if (!annotation.parameter().equals("")) {
+                    RouteParameters routeParameters = router.getRouteParameters(runtimeBag);
+
+                    subject = routeParameters.get(annotation.parameter());
+                }
+
                 for (VoterInterface voter : container.<VoterInterface>getByTag(TAG_VOTER)) {
-                    Object subject = null;
-
-                    if (!annotation.parameter().equals("")) {
-                        RouteParameters routeParameters = router.getRouteParameters(runtimeBag);
-
-                        subject = routeParameters.get(annotation.parameter());
-                    }
-
                     if (voter.supports(annotation.attribute(), subject, runtimeBag)) {
-                        if (!voter.vote(annotation.attribute(), subject, runtimeBag)) {
-                            return false;
-                        }
+                        boolean d = voter.vote(annotation.attribute(), subject, runtimeBag);
+
+                        decisions.add(d);
                     }
                 }
             }
+
+            return decide(decisions, strategy);
         }
 
         return true;
+    }
+
+    private boolean decide(ArrayList<Boolean> decisions, DecisionStrategy strategy)
+    {
+        switch (strategy) {
+            case AFFIRMATIVE:
+                return decisions.contains(true);
+            case CONSENSUS:
+                long countTrue = decisions.stream().filter(d -> d == true).count();
+                long countFalse = decisions.stream().filter(d -> d == false).count();
+
+                return countTrue > countFalse;
+            case UNANIMOUS:
+                return !decisions.contains(false);
+        }
+
+        return false; // Should never be reached
     }
 
     public UserInterface authenticate(Request request, String username, String password) throws AuthenticationException
