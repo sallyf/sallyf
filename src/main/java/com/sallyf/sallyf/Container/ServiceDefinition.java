@@ -12,6 +12,8 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
 
     private ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
 
+    private ArrayList<String> tags = new ArrayList<>();
+
     private ReferenceInterface configurationReference;
 
     private boolean autoWire = true;
@@ -126,5 +128,17 @@ public class ServiceDefinition<T extends ContainerAwareInterface>
     public Class<T> getType()
     {
         return type;
+    }
+
+    public ArrayList<String> getTags()
+    {
+        return tags;
+    }
+
+    public ServiceDefinition<T> addTag(String tag)
+    {
+        tags.add(tag);
+
+        return this;
     }
 }

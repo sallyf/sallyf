@@ -8,3 +8,4 @@
     - [ResponseTransformer](response-transformer.md)
 - [Event Dispatcher](event-dispatcher.md)
     - [Kernel Events](events.md)
+- [AccessDecisionManager](access-decision-manager.md)

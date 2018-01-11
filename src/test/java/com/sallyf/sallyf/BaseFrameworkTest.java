@@ -10,21 +10,34 @@ import org.junit.Before;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Random;
 
 class ServerConfiguration extends Configuration
 {
-    int port;
+    private int port = -1;
 
     public ServerConfiguration()
     {
         Random r = new Random();
-        int low = 3000;
-        int high = 5000;
 
-        port = r.nextInt(high - low) + low;
+        int low = 3000;
+        int high = 7000;
+
+        int i = 0;
+        while (port == -1 && i < high - low) {
+            int tmp = r.nextInt(high - low) + low;
+
+            try {
+                ServerSocket serverSocket = new ServerSocket(tmp);
+                serverSocket.close();
+                port = tmp;
+            } catch (IOException ignored) {
+            }
+            i++;
+        }
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.sallyf.sallyf.Container.TypeResolver.ConfigurationResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ContainerResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ServiceResolver;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,14 +18,15 @@ public class Container
 {
     private ContainerInstantiator containerInstantiator;
 
-    private Map<Class, ContainerAwareInterface> services;
+    private Map<Class, ContainerAwareInterface> services = new HashMap<>();
+
+    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<String, ArrayList<ContainerAwareInterface>>();
 
     private boolean instantiated = false;
 
     public Container()
     {
-        services = new HashMap<>();
-        containerInstantiator = new ContainerInstantiator(services);
+        containerInstantiator = new ContainerInstantiator(services, taggedServices);
 
         addReferenceResolver(new ConfigurationReferenceResolver(this));
         addReferenceResolver(new ContainerReferenceResolver(this));
@@ -60,9 +62,20 @@ public class Container
             throw new ContainerInstantiatedException();
         }
 
-        services = containerInstantiator.boot();
+        containerInstantiator.boot();
 
         instantiated = true;
+    }
+
+    public <T extends ContainerAwareInterface> ArrayList<T> getByTag(String tag)
+    {
+        ArrayList<ContainerAwareInterface> services = taggedServices.get(tag);
+
+        if (null == services) {
+            return new ArrayList<>();
+        }
+
+        return (ArrayList<T>) services;
     }
 
     public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
