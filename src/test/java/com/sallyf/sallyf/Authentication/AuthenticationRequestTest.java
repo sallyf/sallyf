@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.Authentication;
 
+import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
@@ -38,7 +39,8 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
     public void preBoot() throws ServiceInstantiationException
     {
         app.getContainer().add(new ServiceDefinition<>(AuthenticationManager.class, new AuthenticationConfiguration()));
-        app.getContainer().add(new ServiceDefinition<>(NameVoter.class)).addTag(AuthenticationManager.TAG_VOTER);
+        app.getContainer().add(new ServiceDefinition<>(AccessDecisionManager.class));
+        app.getContainer().add(new ServiceDefinition<>(NameVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.Authentication.Voter;
+package com.sallyf.sallyf.AccessDecisionManager.Voter;
 
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;

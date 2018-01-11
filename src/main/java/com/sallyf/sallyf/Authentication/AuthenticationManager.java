@@ -1,8 +1,8 @@
 package com.sallyf.sallyf.Authentication;
 
-import com.sallyf.sallyf.Authentication.Annotation.Voter;
+import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
+import com.sallyf.sallyf.AccessDecisionManager.Annotation.Voter;
 import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
-import com.sallyf.sallyf.Authentication.Voter.VoterInterface;
 import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
@@ -26,9 +26,10 @@ import java.util.HashMap;
 
 public class AuthenticationManager implements ContainerAwareInterface
 {
-    public static final String TAG_VOTER = "authentication.voter";
 
     private ArrayList<UserDataSourceInterface> dataSources;
+
+    private AccessDecisionManager decisionManager;
 
     private HashMap<Route, Voter> securedRoutes = new HashMap<>();
 
@@ -38,17 +39,18 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private EventDispatcher eventDispatcher;
 
-    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher) throws ServiceInstantiationException
+    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher, AccessDecisionManager decisionManager) throws ServiceInstantiationException
     {
         this.container = container;
         this.router = router;
         this.eventDispatcher = eventDispatcher;
+        this.decisionManager = decisionManager;
 
         dataSources = configuration.getDataSources();
 
         container
                 .add(new ServiceDefinition<>(AuthenticationVoter.class))
-                .addTag(TAG_VOTER);
+                .addTag(AccessDecisionManager.TAG_VOTER);
     }
 
     public void initialize()
@@ -75,26 +77,6 @@ public class AuthenticationManager implements ContainerAwareInterface
         });
     }
 
-    public <O> boolean vote(String attribute, O subject, RuntimeBag runtimeBag)
-    {
-        return vote(attribute, subject, runtimeBag, DecisionStrategy.AFFIRMATIVE);
-    }
-
-    public <O> boolean vote(String attribute, O subject, RuntimeBag runtimeBag, DecisionStrategy strategy)
-    {
-        ArrayList<Boolean> decisions = new ArrayList<>();
-
-        for (VoterInterface<O> voter : container.<VoterInterface<O>>getByTag(TAG_VOTER)) {
-            if (voter.supports(attribute, subject, runtimeBag)) {
-                boolean d = voter.vote(attribute, subject, runtimeBag);
-
-                decisions.add(d);
-            }
-        }
-
-        return decide(decisions, strategy);
-    }
-
     private boolean vote(Route route, RuntimeBag runtimeBag)
     {
         return vote(route, runtimeBag, DecisionStrategy.AFFIRMATIVE);
@@ -114,33 +96,10 @@ public class AuthenticationManager implements ContainerAwareInterface
                 subject = routeParameters.get(annotation.parameter());
             }
 
-            decisions.add(vote(annotation.attribute(), subject, runtimeBag));
-
-            return decide(decisions, strategy);
+            return this.decisionManager.vote(annotation.attribute(), subject, runtimeBag);
         }
 
         return true;
-    }
-
-    private boolean decide(ArrayList<Boolean> decisions, DecisionStrategy strategy)
-    {
-        if (decisions.isEmpty()) {
-            return true;
-        }
-
-        switch (strategy) {
-            case AFFIRMATIVE:
-                return decisions.contains(true);
-            case CONSENSUS:
-                long countTrue = decisions.stream().filter(d -> d == true).count();
-                long countFalse = decisions.stream().filter(d -> d == false).count();
-
-                return countTrue > countFalse;
-            case UNANIMOUS:
-                return !decisions.contains(false);
-        }
-
-        return false; // Should never be reached
     }
 
     public UserInterface authenticate(Request request, String username, String password) throws AuthenticationException

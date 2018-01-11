@@ -1,5 +1,6 @@
-package com.sallyf.sallyf.Authentication;
+package com.sallyf.sallyf.AccessDecisionManager;
 
+import com.sallyf.sallyf.Authentication.*;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.PlainReference;
@@ -12,31 +13,28 @@ import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
-public class AuthenticationVoterTest extends BaseFrameworkTest
+public class AccessDecisionManagerTest extends BaseFrameworkTest
 {
     private static final String ACCESS = "access";
 
-    public AuthenticationManager newInstance(Configuration configuration) throws Exception
+    public AccessDecisionManager newInstance(Configuration configuration) throws Exception
     {
         Container c = new Container();
-        c.add(new ServiceDefinition<>(NameVoter.class)).addTag(AuthenticationManager.TAG_VOTER);
-        c.add(new ServiceDefinition<>(CapitalLettersVoter.class)).addTag(AuthenticationManager.TAG_VOTER);
-        c.add(new ServiceDefinition<>(ContainsAVoter.class)).addTag(AuthenticationManager.TAG_VOTER);
+        c.add(new ServiceDefinition<>(NameVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
+        c.add(new ServiceDefinition<>(CapitalLettersVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
+        c.add(new ServiceDefinition<>(ContainsAVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
+        c.add(new ServiceDefinition<>(UncalledVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
 
-        c.add(new ServiceDefinition<>(EventDispatcher.class));
-        c.add(new ServiceDefinition<>(Router.class));
-        c
-                .add(new ServiceDefinition<>(AuthenticationManager.class))
-                .setConfigurationReference(new PlainReference<>(configuration));
+        c.add(new ServiceDefinition<>(AccessDecisionManager.class));
 
         c.instantiate();
 
-        return c.get(AuthenticationManager.class);
+        return c.get(AccessDecisionManager.class);
     }
 
     private void run(Object subject, boolean eda, boolean edc, boolean edu) throws Exception
     {
-        AuthenticationManager authenticationManager = newInstance(new Configuration());
+        AccessDecisionManager authenticationManager = newInstance(new Configuration());
 
         boolean da = authenticationManager.vote(ACCESS, subject, null, DecisionStrategy.AFFIRMATIVE);
         boolean dc = authenticationManager.vote(ACCESS, subject, null, DecisionStrategy.CONSENSUS);

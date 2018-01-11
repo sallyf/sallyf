@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.Authentication.Annotation;
+package com.sallyf.sallyf.AccessDecisionManager.Annotation;
 
 import java.lang.annotation.*;
 

@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.Authentication;
 
+import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Container;
@@ -15,8 +16,9 @@ public class AuthenticationTest extends BaseFrameworkTest
     {
         Container c = new Container();
         EventDispatcher ed = new EventDispatcher();
+        AccessDecisionManager dm = new AccessDecisionManager(c);
 
-        return new AuthenticationManager(configuration, c, new Router(c, ed), ed);
+        return new AuthenticationManager(configuration, c, new Router(c, ed), ed, dm);
     }
 
     @Test(expected = AuthenticationException.class)
