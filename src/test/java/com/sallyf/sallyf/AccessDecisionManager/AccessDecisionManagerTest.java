@@ -1,12 +1,9 @@
 package com.sallyf.sallyf.AccessDecisionManager;
 
-import com.sallyf.sallyf.Authentication.*;
+import com.sallyf.sallyf.Authentication.DecisionStrategy;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.PlainReference;
 import com.sallyf.sallyf.Container.ServiceDefinition;
-import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Router.Router;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -17,7 +14,7 @@ public class AccessDecisionManagerTest extends BaseFrameworkTest
 {
     private static final String ACCESS = "access";
 
-    public AccessDecisionManager newInstance(Configuration configuration) throws Exception
+    public AccessDecisionManager newInstance() throws Exception
     {
         Container c = new Container();
         c.add(new ServiceDefinition<>(NameVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
@@ -34,7 +31,7 @@ public class AccessDecisionManagerTest extends BaseFrameworkTest
 
     private void run(Object subject, boolean eda, boolean edc, boolean edu) throws Exception
     {
-        AccessDecisionManager authenticationManager = newInstance(new Configuration());
+        AccessDecisionManager authenticationManager = newInstance();
 
         boolean da = authenticationManager.vote(ACCESS, subject, null, DecisionStrategy.AFFIRMATIVE);
         boolean dc = authenticationManager.vote(ACCESS, subject, null, DecisionStrategy.CONSENSUS);
