@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.Authentication;
+package com.sallyf.sallyf.AccessDecisionManager;
 
 public enum DecisionStrategy
 {

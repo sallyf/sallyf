@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.AccessDecisionManager;
 
 import com.sallyf.sallyf.AccessDecisionManager.Voter.VoterInterface;
-import com.sallyf.sallyf.Authentication.DecisionStrategy;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
