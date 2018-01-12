@@ -9,7 +9,11 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-class Service1 implements ContainerAwareInterface
+interface Service1Interface extends ContainerAwareInterface
+{
+}
+
+class Service1 implements Service1Interface
 {
     public Service1(Service2 service2)
     {
@@ -18,7 +22,7 @@ class Service1 implements ContainerAwareInterface
 
 class Service2 implements ContainerAwareInterface
 {
-    public Service2(Service1 service2)
+    public Service2(Service1Interface service2)
     {
     }
 }
@@ -129,7 +133,7 @@ public class ContainerTest
     {
         Container container = new Container();
 
-        container.add(new ServiceDefinition<>(Service1.class));
+        container.add(new ServiceDefinition<>(Service1Interface.class, Service1.class));
         container.add(new ServiceDefinition<>(Service2.class));
 
         container.instantiate();
