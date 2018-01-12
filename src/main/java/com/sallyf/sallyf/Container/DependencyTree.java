@@ -98,7 +98,7 @@ public class DependencyTree<T extends ContainerAwareInterface>
                 return false;
             }
 
-            if (!recursiveChecker(childNode, containerInstantiator.getServiceDefinitions())) {
+            if (!recursiveChecker(childNode, map)) {
                 return false;
             }
         }
