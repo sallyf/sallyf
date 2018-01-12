@@ -2,7 +2,8 @@ package com.sallyf.sallyf.Container.Exception;
 
 public class CircularReferenceException extends ServiceInstantiationException
 {
-    public CircularReferenceException()
+    public CircularReferenceException(String path)
     {
+        super("Circular reference: " + path);
     }
 }

@@ -84,7 +84,13 @@ class ContainerInstantiator
 
         Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitionsPool = new HashMap<>(this.serviceDefinitions);
 
-        this.serviceDefinitions.setConsumer(serviceDefinitionsPool::put);
+        this.serviceDefinitions.setConsumer((type, serviceDefinition) -> {
+            serviceDefinitionsPool.put(type, serviceDefinition);
+
+            for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
+                callDefinitionMetas.add(new CallDefinitionMeta<>(callDefinition, serviceDefinition));
+            }
+        });
 
         while (!serviceDefinitionsPool.isEmpty()) {
             boolean hasInstantiated = false;
@@ -94,36 +100,86 @@ class ContainerInstantiator
             for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : entries) {
                 ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
 
-                autoWire(serviceDefinition);
+                DependencyTree dependenciesTree = getServiceDependenciesTree(serviceDefinition);
 
-                ContainerAwareInterface instance;
-                try {
-                    instance = bootService(serviceDefinition);
-                    hasInstantiated = true;
-                } catch (ServiceInstantiationException e) {
+                if (!dependenciesTree.isFullyInstantiable()) {
+                    throw new ReferenceResolutionException("Service " + serviceDefinition.getType() + " is not instantiable due to missing dependency");
+                }
+
+                if (dependenciesTree.hasCircularReference()) {
+                    throw new CircularReferenceException(dependenciesTree.getCircularReferencePath());
+                }
+
+                if (!dependenciesTree.isFullyInstantiated()) {
                     continue;
                 }
 
+                bootService(serviceDefinition);
+
                 invokeCalls();
 
-                try {
-                    instance.initialize();
-                } catch (Exception e) {
-                    throw new ServiceInstantiationException(e);
-                }
-
                 serviceDefinitionsPool.remove(entry.getKey());
+
+                hasInstantiated = true;
             }
 
-            if (!entries.isEmpty() && !hasInstantiated) {
-                throw new CircularReferenceException();
+            if (!hasInstantiated && !entries.isEmpty()) {
+                throw new ServiceInstantiationException("Unable to instantiate all services");
             }
         }
 
         this.serviceDefinitions.removeConsumer();
 
+        invokeCalls();
+
         if (!callDefinitionMetas.isEmpty()) {
             throw new ServiceInstantiationException("All calls weren't called");
+        }
+
+        for (Map.Entry<Class, ContainerAwareInterface> entry : this.services.entrySet()) {
+            try {
+                entry.getValue().initialize();
+            } catch (Exception e) {
+                throw new ServiceInstantiationException(e);
+            }
+        }
+    }
+
+    private <T extends ContainerAwareInterface> DependencyTree getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    {
+        DependencyTree tree = new DependencyTree(this, serviceDefinition.getType());
+        DependencyNode root = tree.getRoot();
+
+        addServiceDefinitionToTree(tree, serviceDefinition, root);
+
+        return tree;
+    }
+
+    private void addServiceDefinitionToTree(DependencyTree tree, ServiceDefinition<?> serviceDefinition, DependencyNode currentNode) throws ServiceInstantiationException
+    {
+        autoWire(serviceDefinition);
+
+        ArrayList<ConstructorDefinition> constructorDefinitions = serviceDefinition.getConstructorDefinitions();
+
+        for (ConstructorDefinition constructorDefinition : constructorDefinitions) {
+            for (ReferenceInterface childReference : constructorDefinition.getArgs()) {
+                if (childReference instanceof ServiceReference) {
+                    ServiceReference<?> childServiceReference = (ServiceReference) childReference;
+
+                    DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference.getType()));
+
+                    if (childDependencyNode.isInTree()) {
+                        tree.setCircularReferenceNode(childDependencyNode);
+                        return;
+                    }
+
+                    ServiceDefinition<?> childServiceDefinition = serviceDefinitions.get(childServiceReference.getType());
+
+                    if (null != childServiceDefinition) {
+                        addServiceDefinitionToTree(tree, childServiceDefinition, childDependencyNode);
+                    }
+                }
+            }
         }
     }
 
@@ -171,7 +227,7 @@ class ContainerInstantiator
 
         for (ConstructorDefinition constructorDefinition : serviceDefinition.getConstructorDefinitions()) {
             try {
-                Object[] args = resolveReferences(serviceDefinition, constructorDefinition.args);
+                Object[] args = resolveReferences(serviceDefinition, constructorDefinition.getArgs());
                 Constructor<T> constructor = Utils.getConstructorForArgs(serviceClass, Utils.getClasses(args));
                 if (constructor != null) {
                     instance = constructor.newInstance(args);
@@ -292,5 +348,10 @@ class ContainerInstantiator
     public Map<Class, ConfigurationInterface> getConfigurations()
     {
         return configurations;
+    }
+
+    public Map<Class, ContainerAwareInterface> getServices()
+    {
+        return services;
     }
 }
