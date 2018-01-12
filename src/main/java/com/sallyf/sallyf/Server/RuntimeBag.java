@@ -6,6 +6,7 @@ import org.eclipse.jetty.server.Request;
 public class RuntimeBag
 {
     private Request request;
+
     private Route route;
 
     public RuntimeBag()

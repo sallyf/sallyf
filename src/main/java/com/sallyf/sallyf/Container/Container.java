@@ -1,6 +1,5 @@
 package com.sallyf.sallyf.Container;
 
-import com.sallyf.sallyf.ContainerInstantiator.ContainerInstantiator;
 import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ReferenceResolver.ConfigurationReferenceResolver;
@@ -10,6 +9,7 @@ import com.sallyf.sallyf.Container.ReferenceResolver.ServiceReferenceResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ConfigurationResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ContainerResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ServiceResolver;
+import com.sallyf.sallyf.ContainerInstantiator.ContainerInstantiator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
