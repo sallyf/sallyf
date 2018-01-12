@@ -53,6 +53,8 @@ public class Container
 
         containerInstantiator.getServiceDefinitions().put(serviceDefinition.getAlias(), serviceDefinition);
 
+        containerInstantiator.autoWire(serviceDefinition);
+
         return serviceDefinition;
     }
 

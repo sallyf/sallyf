@@ -49,6 +49,8 @@ class PutListenerHashMap<K, V> extends HashMap<K, V>
 
 class ContainerInstantiator
 {
+    private DependencyTreeFactory dependencyTreeFactory = new DependencyTreeFactory(this);
+
     private Map<Class, ContainerAwareInterface> services;
 
     private Map<String, ArrayList<ContainerAwareInterface>> taggedServices;
@@ -145,45 +147,12 @@ class ContainerInstantiator
         }
     }
 
-    private <T extends ContainerAwareInterface> DependencyTree getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
-        DependencyTree tree = new DependencyTree(this, serviceDefinition);
-        DependencyNode root = tree.getRoot();
-
-        addServiceDefinitionToTree(tree, serviceDefinition, root);
-
-        return tree;
+        return dependencyTreeFactory.generate(serviceDefinition);
     }
 
-    private void addServiceDefinitionToTree(DependencyTree tree, ServiceDefinition<?> serviceDefinition, DependencyNode currentNode) throws ServiceInstantiationException
-    {
-        autoWire(serviceDefinition);
-
-        ArrayList<ConstructorDefinition> constructorDefinitions = serviceDefinition.getConstructorDefinitions();
-
-        for (ConstructorDefinition constructorDefinition : constructorDefinitions) {
-            for (ReferenceInterface childReference : constructorDefinition.getArgs()) {
-                if (childReference instanceof ServiceReference) {
-                    ServiceReference<?> childServiceReference = (ServiceReference) childReference;
-
-                    DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference));
-
-                    if (childDependencyNode.isInTree()) {
-                        tree.setCircularReferenceNode(childDependencyNode);
-                        return;
-                    }
-
-                    ServiceDefinition<?> childServiceDefinition = serviceDefinitions.get(childServiceReference.getAlias());
-
-                    if (null != childServiceDefinition) {
-                        addServiceDefinitionToTree(tree, childServiceDefinition, childDependencyNode);
-                    }
-                }
-            }
-        }
-    }
-
-    private <T extends ContainerAwareInterface> void autoWire(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    public <T extends ContainerAwareInterface> void autoWire(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
         if (serviceDefinition.isAutoWire() && !autoWiredDefinitions.contains(serviceDefinition)) {
             Constructor<?>[] constructors = serviceDefinition.getType().getConstructors();
