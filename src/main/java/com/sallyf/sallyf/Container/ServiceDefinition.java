@@ -2,7 +2,7 @@ package com.sallyf.sallyf.Container;
 
 import java.util.ArrayList;
 
-public class ServiceDefinition<T extends ContainerAwareInterface> implements ServiceAliasAwareInterface
+public class ServiceDefinition<T extends ContainerAwareInterface> implements ServiceRepresentationInterface
 {
     private Class alias;
 

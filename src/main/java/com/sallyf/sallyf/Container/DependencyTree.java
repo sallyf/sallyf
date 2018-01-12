@@ -56,11 +56,11 @@ public class DependencyTree<T extends ContainerAwareInterface>
         DependencyNode current = getCircularReferenceNode();
 
         while (current != null) {
-            ServiceAliasAwareInterface serviceAliasAware = current.getServiceAliasAware();
-            if (serviceAliasAware instanceof ServiceDefinition) {
-                path.add(((ServiceDefinition) serviceAliasAware).getType().getName());
+            ServiceRepresentationInterface serviceRepresentation = current.getServiceRepresentation();
+            if (serviceRepresentation instanceof ServiceDefinition) {
+                path.add(((ServiceDefinition) serviceRepresentation).getType().getName());
             } else {
-                path.add(serviceAliasAware.getAlias().getName());
+                path.add(serviceRepresentation.getAlias().getName());
             }
 
             current = current.getParent();
@@ -94,7 +94,7 @@ public class DependencyTree<T extends ContainerAwareInterface>
     private boolean recursiveChecker(DependencyNode current, Map map)
     {
         for (DependencyNode childNode : current.getChildren()) {
-            if (!map.containsKey(childNode.getServiceAliasAware().getAlias())) {
+            if (!map.containsKey(childNode.getServiceRepresentation().getAlias())) {
                 return false;
             }
 
