@@ -147,7 +147,7 @@ class ContainerInstantiator
 
     private <T extends ContainerAwareInterface> DependencyTree getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
     {
-        DependencyTree tree = new DependencyTree(this, serviceDefinition.getType());
+        DependencyTree tree = new DependencyTree(this, serviceDefinition);
         DependencyNode root = tree.getRoot();
 
         addServiceDefinitionToTree(tree, serviceDefinition, root);
@@ -166,14 +166,14 @@ class ContainerInstantiator
                 if (childReference instanceof ServiceReference) {
                     ServiceReference<?> childServiceReference = (ServiceReference) childReference;
 
-                    DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference.getType()));
+                    DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference));
 
                     if (childDependencyNode.isInTree()) {
                         tree.setCircularReferenceNode(childDependencyNode);
                         return;
                     }
 
-                    ServiceDefinition<?> childServiceDefinition = serviceDefinitions.get(childServiceReference.getType());
+                    ServiceDefinition<?> childServiceDefinition = serviceDefinitions.get(childServiceReference.getAlias());
 
                     if (null != childServiceDefinition) {
                         addServiceDefinitionToTree(tree, childServiceDefinition, childDependencyNode);

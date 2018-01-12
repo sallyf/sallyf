@@ -3,7 +3,7 @@ package com.sallyf.sallyf.Container;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class DependencyTree
+public class DependencyTree<T extends ContainerAwareInterface>
 {
     private ContainerInstantiator containerInstantiator;
 
@@ -11,11 +11,11 @@ public class DependencyTree
 
     private DependencyNode circularReferenceNode = null;
 
-    public DependencyTree(ContainerInstantiator containerInstantiator, Class<? extends ContainerAwareInterface> type)
+    public DependencyTree(ContainerInstantiator containerInstantiator, ServiceDefinition<T> serviceDefinition)
     {
         this.containerInstantiator = containerInstantiator;
 
-        setRoot(new DependencyNode(type));
+        setRoot(new DependencyNode(serviceDefinition));
     }
 
     public DependencyNode getRoot()
@@ -56,7 +56,12 @@ public class DependencyTree
         DependencyNode current = getCircularReferenceNode();
 
         while (current != null) {
-            path.add(current.getType().getName());
+            ServiceAliasAwareInterface serviceAliasAware = current.getServiceAliasAware();
+            if (serviceAliasAware instanceof ServiceDefinition) {
+                path.add(((ServiceDefinition) serviceAliasAware).getType().getName());
+            } else {
+                path.add(serviceAliasAware.getAlias().getName());
+            }
 
             current = current.getParent();
         }
@@ -89,7 +94,7 @@ public class DependencyTree
     private boolean recursiveChecker(DependencyNode current, Map map)
     {
         for (DependencyNode childNode : current.getChildren()) {
-            if (!map.containsKey(childNode.getType())) {
+            if (!map.containsKey(childNode.getServiceAliasAware().getAlias())) {
                 return false;
             }
 

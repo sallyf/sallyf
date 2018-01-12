@@ -6,13 +6,13 @@ public class DependencyNode
 {
     private DependencyNode parent;
 
-    private Class<? extends ContainerAwareInterface> value;
+    private ServiceAliasAwareInterface serviceAliasAware;
 
     private ArrayList<DependencyNode> children;
 
-    public DependencyNode(Class<? extends ContainerAwareInterface> type)
+    public DependencyNode(ServiceAliasAwareInterface serviceAliasAware)
     {
-        this.value = type;
+        this.serviceAliasAware = serviceAliasAware;
         this.children = new ArrayList<>();
     }
 
@@ -42,15 +42,14 @@ public class DependencyNode
         return children;
     }
 
-    public Class<? extends ContainerAwareInterface> getType()
+    public ServiceAliasAwareInterface getServiceAliasAware()
     {
-        return value;
+        return serviceAliasAware;
     }
 
-    public DependencyNode setType(Class<? extends ContainerAwareInterface> value)
+    public void setServiceAliasAware(ServiceAliasAwareInterface serviceDefinition)
     {
-        this.value = value;
-        return this;
+        this.serviceAliasAware = serviceDefinition;
     }
 
     public boolean isInTree()
@@ -58,7 +57,7 @@ public class DependencyNode
         DependencyNode current = this.getParent();
 
         while (current != null) {
-            if (current.getType() == this.getType()) {
+            if (current.getServiceAliasAware().getAlias() == this.getServiceAliasAware().getAlias()) {
                 return true;
             }
 
