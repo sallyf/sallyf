@@ -51,9 +51,7 @@ public class Container
             throw new ContainerInstantiatedException();
         }
 
-        containerInstantiator.getServiceDefinitions().put(serviceDefinition.getAlias(), serviceDefinition);
-
-        containerInstantiator.autoWire(serviceDefinition);
+        containerInstantiator.addServiceDefinition(serviceDefinition);
 
         return serviceDefinition;
     }

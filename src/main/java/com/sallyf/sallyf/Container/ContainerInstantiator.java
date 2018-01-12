@@ -299,6 +299,13 @@ class ContainerInstantiator
         taggedServices.get(tag).add(service);
     }
 
+    public <T extends ContainerAwareInterface> void addServiceDefinition(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    {
+        serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
+
+        autoWire(serviceDefinition);
+    }
+
     public Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> getServiceDefinitions()
     {
         return serviceDefinitions;

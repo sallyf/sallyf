@@ -173,8 +173,6 @@ public class ContainerTest
                 .addCallDefinitions(new CallDefinition("setContainer", new ServiceReference<>(Service1.class)));
 
         container.instantiate();
-
-        assertEquals(container, container.get(ServiceWithCall.class).getContainer());
     }
 
     @Test
