@@ -1,5 +1,6 @@
-package com.sallyf.sallyf.Container;
+package com.sallyf.sallyf.ContainerInstantiator;
 
+import com.sallyf.sallyf.Container.*;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 
 import java.util.ArrayList;

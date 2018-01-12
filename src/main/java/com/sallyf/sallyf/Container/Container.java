@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.Container;
 
+import com.sallyf.sallyf.ContainerInstantiator.ContainerInstantiator;
 import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ReferenceResolver.ConfigurationReferenceResolver;
@@ -20,7 +21,7 @@ public class Container
 
     private Map<Class, ContainerAwareInterface> services = new HashMap<>();
 
-    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<String, ArrayList<ContainerAwareInterface>>();
+    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<>();
 
     private boolean instantiated = false;
 
@@ -69,23 +70,18 @@ public class Container
 
     public <T extends ContainerAwareInterface> ArrayList<T> getByTag(String tag)
     {
-        ArrayList<ContainerAwareInterface> services = taggedServices.get(tag);
+        ArrayList<T> services = (ArrayList<T>) taggedServices.get(tag);
 
         if (null == services) {
             return new ArrayList<>();
         }
 
-        return (ArrayList<T>) services;
+        return services;
     }
 
     public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
     {
         return (T) services.get(serviceClass);
-    }
-
-    public <T extends ContainerAwareInterface, C> C get(Class<T> serviceClass, Class<C> castType)
-    {
-        return (C) get(serviceClass);
     }
 
     public boolean has(Class serviceClass)

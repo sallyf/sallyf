@@ -9,43 +9,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-interface Service1Interface extends ContainerAwareInterface
-{
-}
-
-class Service1 implements Service1Interface
-{
-    public Service1(Service2 service2)
-    {
-    }
-}
-
-class Service2 implements ContainerAwareInterface
-{
-    public Service2(Service1Interface service2)
-    {
-    }
-}
-
-class ServiceWithCall implements ContainerAwareInterface
-{
-    public ServiceWithCall()
-    {
-    }
-
-    Container container;
-
-    public Container getContainer()
-    {
-        return container;
-    }
-
-    public void setContainer(Container container)
-    {
-        this.container = container;
-    }
-}
-
 public class ContainerTest
 {
     @Test

@@ -1,5 +1,6 @@
-package com.sallyf.sallyf.Container;
+package com.sallyf.sallyf.ContainerInstantiator;
 
+import com.sallyf.sallyf.Container.*;
 import com.sallyf.sallyf.Container.Exception.*;
 import com.sallyf.sallyf.Utils;
 
@@ -10,96 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class CallDefinitionMeta
-{
-    private ServiceDefinitionMeta serviceDefinitionMeta;
-
-    public CallDefinition callDefinition;
-
-    private boolean called = false;
-
-    public CallDefinitionMeta(ServiceDefinitionMeta serviceDefinitionMeta, CallDefinition callDefinition)
-    {
-        this.serviceDefinitionMeta = serviceDefinitionMeta;
-        this.callDefinition = callDefinition;
-    }
-
-    public CallDefinition getCallDefinition()
-    {
-        return callDefinition;
-    }
-
-    public boolean isCalled()
-    {
-        return called;
-    }
-
-    public void setCalled(boolean called)
-    {
-        this.called = called;
-    }
-
-    public ServiceDefinitionMeta getServiceDefinitionMeta()
-    {
-        return serviceDefinitionMeta;
-    }
-}
-
-class ServiceDefinitionMeta<T extends ContainerAwareInterface>
-{
-    private ServiceDefinition<T> serviceDefinition;
-
-    private boolean instantiated = false;
-
-    private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
-
-    private HashSet<CallDefinition> callDefinitionsWithMeta = new HashSet<>();
-
-    public ServiceDefinitionMeta(ServiceDefinition<T> serviceDefinition)
-    {
-        this.serviceDefinition = serviceDefinition;
-
-        updateCallDefinitionMetas();
-    }
-
-    public boolean updateCallDefinitionMetas()
-    {
-        boolean hasChanged = false;
-
-        for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
-            if (!callDefinitionsWithMeta.contains(callDefinition)) {
-                hasChanged = true;
-
-                callDefinitionMetas.add(new CallDefinitionMeta(this, callDefinition));
-                callDefinitionsWithMeta.add(callDefinition);
-            }
-        }
-
-        return hasChanged;
-    }
-
-    public ServiceDefinition<T> getServiceDefinition()
-    {
-        return serviceDefinition;
-    }
-
-    public boolean isInstantiated()
-    {
-        return instantiated;
-    }
-
-    public void setInstantiated(boolean instantiated)
-    {
-        this.instantiated = instantiated;
-    }
-
-    public List<CallDefinitionMeta> getCallDefinitionMetas()
-    {
-        return callDefinitionMetas;
-    }
-}
-
-class ContainerInstantiator
+public class ContainerInstantiator
 {
     private DependencyTreeFactory dependencyTreeFactory = new DependencyTreeFactory(this);
 
@@ -119,7 +31,7 @@ class ContainerInstantiator
 
     private ArrayList<ServiceDefinitionMeta> serviceDefinitionMetas = new ArrayList<>();
 
-    ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
+    public ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
     {
         this.services = services;
         this.taggedServices = taggedServices;
@@ -278,14 +190,14 @@ class ContainerInstantiator
         for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMeta()) {
             ServiceDefinition<?> serviceDefinition = callDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
 
-            CallDefinition callDefinition = callDefinitionMeta.callDefinition;
+            CallDefinition callDefinition = callDefinitionMeta.getCallDefinition();
 
             ContainerAwareInterface instance = services.get(serviceDefinition.getAlias());
 
             try {
-                Object[] args = resolveReferences(serviceDefinition, callDefinition.args);
+                Object[] args = resolveReferences(serviceDefinition, callDefinition.getArgs());
 
-                Method method = serviceDefinition.getType().getMethod(callDefinition.name, Utils.getClasses(args));
+                Method method = serviceDefinition.getType().getMethod(callDefinition.getName(), Utils.getClasses(args));
 
                 method.invoke(instance, args);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

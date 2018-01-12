@@ -1,6 +1,7 @@
 package com.sallyf.sallyf.Container.TypeResolver;
 
 import com.sallyf.sallyf.Container.*;
+import com.sallyf.sallyf.Container.TypeResolverInterface;
 
 public class ConfigurationResolver<T extends ContainerAwareInterface> implements TypeResolverInterface<T, ConfigurationInterface>
 {
