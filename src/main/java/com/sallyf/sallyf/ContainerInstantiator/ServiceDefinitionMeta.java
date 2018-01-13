@@ -16,6 +16,8 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
 
     private boolean wired = false;
 
+    private boolean initialized = false;
+
     private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
 
     private HashSet<CallDefinition> callDefinitionsWithMeta = new HashSet<>();
@@ -29,18 +31,18 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
 
     public boolean updateCallDefinitionMetas()
     {
-        boolean hasChanged = false;
+        ActivityTracker at = new ActivityTracker();
 
         for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
             if (!callDefinitionsWithMeta.contains(callDefinition)) {
-                hasChanged = true;
-
                 callDefinitionMetas.add(new CallDefinitionMeta(this, callDefinition));
                 callDefinitionsWithMeta.add(callDefinition);
+
+                at.apply(true);
             }
         }
 
-        return hasChanged;
+        return at.isChanged();
     }
 
     public ServiceDefinition<T> getServiceDefinition()
@@ -71,5 +73,36 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
     public void setWired(boolean wired)
     {
         this.wired = wired;
+    }
+
+    public boolean isInitialized()
+    {
+        return initialized;
+    }
+
+    public void setInitialized(boolean initialized)
+    {
+        this.initialized = initialized;
+    }
+
+    public boolean isFullyCalled()
+    {
+        for (CallDefinitionMeta callDefinitionMeta : getCallDefinitionMetas()) {
+            if (!callDefinitionMeta.isCalled()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean isFullyInstantiated()
+    {
+        return isInstantiated() && isFullyCalled();
+    }
+
+    public boolean isReady()
+    {
+        return isInitialized() && isFullyInstantiated();
     }
 }
