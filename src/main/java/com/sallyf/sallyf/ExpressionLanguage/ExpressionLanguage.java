@@ -4,12 +4,10 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.ExpressionLanguage.Exception.EvaluationException;
-import com.sallyf.sallyf.Router.RouteParameters;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
 import javax.script.*;
-import java.util.Map;
 import java.util.function.Function;
 
 public class ExpressionLanguage implements ContainerAwareInterface
@@ -67,11 +65,7 @@ public class ExpressionLanguage implements ContainerAwareInterface
         bindings.put("$", runtimeBag);
 
         if (null != runtimeBag) {
-            RouteParameters routeParameters = router.getRouteParameters(runtimeBag);
-
-            for (Map.Entry<String, Object> entry : routeParameters.entrySet()) {
-                bindings.put(entry.getKey(), entry.getValue());
-            }
+            bindings.putAll(router.getRouteParameters(runtimeBag));
         }
 
         try {
