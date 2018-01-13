@@ -17,13 +17,13 @@ public class DependencyTreeFactory
         this.containerInstantiator = containerInstantiator;
     }
 
-    public DependencyTree generate(ServiceDefinition<?> serviceDefinition)
+    public <T extends ContainerAwareInterface> DependencyTree<T> generate(ServiceDefinition<T> serviceDefinition)
     {
         if (getTrees().containsKey(serviceDefinition.getAlias())) {
-            return getTrees().get(serviceDefinition.getAlias());
+            return (DependencyTree<T>) getTrees().get(serviceDefinition.getAlias());
         }
 
-        DependencyTree<?> tree = new DependencyTree<>(containerInstantiator, serviceDefinition);
+        DependencyTree<T> tree = new DependencyTree<>(containerInstantiator, serviceDefinition);
         DependencyNode root = tree.getRoot();
 
         addServiceDefinitionToTree(tree, serviceDefinition, root);

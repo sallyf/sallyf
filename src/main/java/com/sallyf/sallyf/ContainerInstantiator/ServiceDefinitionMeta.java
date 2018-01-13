@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
-import com.sallyf.sallyf.Container.CallDefinition;
+import com.sallyf.sallyf.Container.MethodCallDefinition;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 
@@ -16,31 +16,33 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
 
     private boolean wired = false;
 
-    private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
+    private boolean initialized = false;
 
-    private HashSet<CallDefinition> callDefinitionsWithMeta = new HashSet<>();
+    private ArrayList<MethodCallDefinitionMeta> methodCallDefinitionMetas = new ArrayList<>();
+
+    private HashSet<MethodCallDefinition> methodCallDefinitionsWithMeta = new HashSet<>();
 
     public ServiceDefinitionMeta(ServiceDefinition<T> serviceDefinition)
     {
         this.serviceDefinition = serviceDefinition;
 
-        updateCallDefinitionMetas();
+        updateMethodCallDefinitionMetas();
     }
 
-    public boolean updateCallDefinitionMetas()
+    public boolean updateMethodCallDefinitionMetas()
     {
-        boolean hasChanged = false;
+        ChangeTracker ct = new ChangeTracker();
 
-        for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
-            if (!callDefinitionsWithMeta.contains(callDefinition)) {
-                hasChanged = true;
+        for (MethodCallDefinition methodCallDefinition : serviceDefinition.getMethodCallDefinitions()) {
+            if (!methodCallDefinitionsWithMeta.contains(methodCallDefinition)) {
+                methodCallDefinitionMetas.add(new MethodCallDefinitionMeta(this, methodCallDefinition));
+                methodCallDefinitionsWithMeta.add(methodCallDefinition);
 
-                callDefinitionMetas.add(new CallDefinitionMeta(this, callDefinition));
-                callDefinitionsWithMeta.add(callDefinition);
+                ct.apply(true);
             }
         }
 
-        return hasChanged;
+        return ct.isChanged();
     }
 
     public ServiceDefinition<T> getServiceDefinition()
@@ -58,9 +60,9 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
         this.instantiated = instantiated;
     }
 
-    public List<CallDefinitionMeta> getCallDefinitionMetas()
+    public List<MethodCallDefinitionMeta> getMethodCallDefinitionMetas()
     {
-        return callDefinitionMetas;
+        return methodCallDefinitionMetas;
     }
 
     public boolean isWired()
@@ -71,5 +73,36 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
     public void setWired(boolean wired)
     {
         this.wired = wired;
+    }
+
+    public boolean isInitialized()
+    {
+        return initialized;
+    }
+
+    public void setInitialized(boolean initialized)
+    {
+        this.initialized = initialized;
+    }
+
+    public boolean isFullyCalled()
+    {
+        for (MethodCallDefinitionMeta methodCallDefinitionMeta : getMethodCallDefinitionMetas()) {
+            if (!methodCallDefinitionMeta.isCalled()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean isFullyInstantiated()
+    {
+        return isInstantiated() && isFullyCalled();
+    }
+
+    public boolean isReady()
+    {
+        return isInitialized() && isFullyInstantiated();
     }
 }

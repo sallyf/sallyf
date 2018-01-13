@@ -10,7 +10,7 @@ public class ServiceDefinition<T extends ContainerAwareInterface> implements Ser
 
     private ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
 
-    private ArrayList<CallDefinition> callDefinitions = new ArrayList<>();
+    private ArrayList<MethodCallDefinition> methodCallDefinitions = new ArrayList<>();
 
     private ArrayList<String> tags = new ArrayList<>();
 
@@ -43,19 +43,19 @@ public class ServiceDefinition<T extends ContainerAwareInterface> implements Ser
         setAutoWire(true);
     }
 
-    public ServiceDefinition(Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
+    public ServiceDefinition(Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<MethodCallDefinition> methodCallDefinitions)
     {
-        this(type, type, configuration, constructorDefinitions, callDefinitions);
+        this(type, type, configuration, constructorDefinitions, methodCallDefinitions);
     }
 
-    public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<CallDefinition> callDefinitions)
+    public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<MethodCallDefinition> methodCallDefinitions)
     {
         this(alias, type, configuration);
 
         setAutoWire(false);
 
         setConstructorDefinitions(constructorDefinitions);
-        setCallDefinitions(callDefinitions);
+        setMethodCallDefinitions(methodCallDefinitions);
     }
 
     public boolean isAutoWire()
@@ -101,21 +101,21 @@ public class ServiceDefinition<T extends ContainerAwareInterface> implements Ser
         return this;
     }
 
-    public ArrayList<CallDefinition> getCallDefinitions()
+    public ArrayList<MethodCallDefinition> getMethodCallDefinitions()
     {
-        return callDefinitions;
+        return methodCallDefinitions;
     }
 
-    public ServiceDefinition<T> setCallDefinitions(ArrayList<CallDefinition> callDefinitions)
+    public ServiceDefinition<T> setMethodCallDefinitions(ArrayList<MethodCallDefinition> methodCallDefinitions)
     {
-        this.callDefinitions = callDefinitions;
+        this.methodCallDefinitions = methodCallDefinitions;
 
         return this;
     }
 
-    public ServiceDefinition<T> addCallDefinitions(CallDefinition callDefinition)
+    public ServiceDefinition<T> addMethodCallDefinitions(MethodCallDefinition methodCallDefinition)
     {
-        this.callDefinitions.add(callDefinition);
+        this.methodCallDefinitions.add(methodCallDefinition);
 
         return this;
     }

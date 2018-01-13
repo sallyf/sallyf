@@ -1,12 +1,12 @@
 package com.sallyf.sallyf.Container;
 
-public class CallDefinition
+public class MethodCallDefinition
 {
     private String name;
 
     private ReferenceInterface[] args;
 
-    public CallDefinition(String name, ReferenceInterface... args)
+    public MethodCallDefinition(String name, ReferenceInterface... args)
     {
         this.name = name;
         this.args = args;

@@ -14,16 +14,17 @@ public class AccessDecisionManager implements ContainerAwareInterface
 
     private Container container;
 
-    public AccessDecisionManager(Container container)
+    private ExpressionLanguage expressionLanguage;
+
+    public AccessDecisionManager(Container container, ExpressionLanguage expressionLanguage)
     {
         this.container = container;
+        this.expressionLanguage = expressionLanguage;
     }
 
     @Override
     public void initialize()
     {
-        ExpressionLanguage expressionLanguage = container.get(ExpressionLanguage.class);
-
         expressionLanguage.addBinding("is_granted", (PredicateIsGrantedHandler) this::vote);
     }
 
