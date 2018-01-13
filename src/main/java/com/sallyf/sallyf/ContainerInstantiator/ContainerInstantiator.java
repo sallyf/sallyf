@@ -77,7 +77,7 @@ public class ContainerInstantiator
         invokeCalls();
 
         if (!allCallDefinitionsCalled()) {
-            throw new ServiceInstantiationException("All calls weren't called");
+            throw new ServiceInstantiationException("All method calls weren't called, probably because of a missing dependency");
         }
 
         for (Map.Entry<Class, ContainerAwareInterface> entry : this.services.entrySet()) {
@@ -196,12 +196,16 @@ public class ContainerInstantiator
         return instance;
     }
 
-    private void invokeCalls() throws CallException
+    private void invokeCalls() throws MethodCallException
     {
         for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMetas()) {
             ServiceDefinition<?> serviceDefinition = callDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
 
             CallDefinition callDefinition = callDefinitionMeta.getCallDefinition();
+
+            if (!isReady(callDefinition)) {
+                continue;
+            }
 
             ContainerAwareInterface instance = services.get(serviceDefinition.getAlias());
 
@@ -211,14 +215,29 @@ public class ContainerInstantiator
                 Method method = serviceDefinition.getType().getMethod(callDefinition.getName(), ClassUtils.getClasses(args));
 
                 method.invoke(instance, args);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                throw new CallException(e);
-            } catch (ReferenceResolutionException ignored) {
-                continue;
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | ReferenceResolutionException e) {
+                throw new MethodCallException(e);
             }
 
             callDefinitionMeta.setCalled(true);
         }
+    }
+
+    private boolean isReady(CallDefinition callDefinition)
+    {
+        ReferenceInterface[] references = callDefinition.getArgs();
+
+        for (ReferenceInterface reference : references) {
+            if (reference instanceof ServiceReference) {
+                ServiceReference<?> serviceReference = (ServiceReference<?>) reference;
+
+                if (!services.containsKey(serviceReference.getAlias())) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private Object[] resolveReferences(ServiceDefinition serviceDefinition, ReferenceInterface[] references) throws ReferenceResolutionException
