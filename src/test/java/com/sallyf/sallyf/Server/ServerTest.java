@@ -1,36 +1,42 @@
 package com.sallyf.sallyf.Server;
 
 import com.sallyf.sallyf.BaseFrameworkTest;
-import org.eclipse.jetty.http.HttpStatus;
+import okhttp3.Headers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.junit.Test;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class ServerTest extends BaseFrameworkTest
 {
+    private OkHttpClient client;
+
     @Override
     public void setUp() throws Exception
     {
         setUp(TestController.class);
+
+        client = new OkHttpClient();
     }
 
     @Test
     public void responseTest() throws Exception
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/test1").openConnection();
-        http.connect();
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http), is("OK"));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/test1")
+                .build();
 
-        Map<String, List<String>> headerFields = http.getHeaderFields();
+        Response response = client.newCall(request).execute();
 
-        assertThat("Header", headerFields.get("test1").get(0), is("hello1"));
-        assertThat("Cookie", headerFields.get("Set-Cookie").get(0), is("cookie1=hello1"));
+        assertThat("Response Code", response.code(), is(200));
+        assertThat("Content", response.body().string(), is("OK"));
+
+        Headers headers = response.headers();
+
+        assertThat("Header", headers.get("test1"), is("hello1"));
+        assertThat("Cookie", headers.get("Set-Cookie"), is("cookie1=hello1"));
     }
 }
