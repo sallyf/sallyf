@@ -194,7 +194,8 @@ public class ContainerTest
     }
 
     @Test(expected = AmbiguousServiceException.class)
-    public void testAmbiguous() {
+    public void testFindAmbiguous()
+    {
         Container container = new Container();
 
         container.add(new ServiceDefinition<>(Service1Ambiguous.class));
@@ -203,5 +204,20 @@ public class ContainerTest
         container.instantiate();
 
         container.find("Ambiguous");
+    }
+
+    @Test
+    public void testFind()
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(Service1Ambiguous.class));
+        container.add(new ServiceDefinition<>(Service2Ambiguous.class));
+
+        container.instantiate();
+
+        ContainerAwareInterface service = container.find("Service2Ambiguous");
+
+        assertEquals(container.get(Service2Ambiguous.class), service);
     }
 }
