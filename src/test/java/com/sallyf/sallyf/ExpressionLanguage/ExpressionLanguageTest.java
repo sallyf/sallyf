@@ -77,6 +77,14 @@ public class ExpressionLanguageTest
         assertEquals(Status.OK, result.get("statuses").get(0));
     }
 
+    @Test
+    public void evalFullHashMapTest()
+    {
+        Status result = expressionLanguage.evaluate("service('TestService').returnHashMapOfArrayListOfStatus().get('statuses').get(0)");
+
+        assertEquals(Status.OK, result);
+    }
+
     @Test(expected = FrameworkException.class)
     public void evalNonExistentServiceTest()
     {
