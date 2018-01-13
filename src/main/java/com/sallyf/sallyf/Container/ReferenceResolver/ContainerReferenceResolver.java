@@ -18,7 +18,7 @@ public class ContainerReferenceResolver<T extends ContainerAwareInterface> imple
     }
 
     @Override
-    public Container resolve(ServiceDefinition<T> serviceDefinition, ContainerReference reference) throws Exception
+    public Container resolve(ServiceDefinition<T> serviceDefinition, ContainerReference reference)
     {
         return container;
     }

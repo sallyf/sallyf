@@ -10,7 +10,7 @@ import org.eclipse.jetty.server.Request;
 public class TestController extends BaseController
 {
     @Route(path = "/authenticate")
-    public String authenticate(Request request, AuthenticationManager authenticationManager) throws AuthenticationException
+    public String authenticate(Request request, AuthenticationManager authenticationManager)
     {
         UserInterface u1 = authenticationManager.authenticate(request, "admin", "password");
         UserInterface u2 = authenticationManager.authenticate(request, "admin", "password", InMemoryDataSource.class);

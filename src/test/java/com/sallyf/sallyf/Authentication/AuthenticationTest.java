@@ -2,6 +2,7 @@ package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
+import com.sallyf.sallyf.Authentication.Exception.AuthenticationException;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;

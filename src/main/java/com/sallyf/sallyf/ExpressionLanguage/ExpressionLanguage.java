@@ -2,10 +2,12 @@ package com.sallyf.sallyf.ExpressionLanguage;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.NonExistentServiceException;
 import com.sallyf.sallyf.ExpressionLanguage.Exception.EvaluationException;
 
 import javax.script.*;
+import java.util.function.Function;
 
 public class ExpressionLanguage implements ContainerAwareInterface
 {
@@ -24,10 +26,10 @@ public class ExpressionLanguage implements ContainerAwareInterface
     }
 
     @Override
-    public void initialize() throws Exception
+    public void initialize()
     {
         addBinding("container", container);
-        addBinding("service", (ThrowingFunction<String, ContainerAwareInterface>) className -> {
+        addBinding("service", (Function<String, ContainerAwareInterface>) className -> {
             Class<? extends ContainerAwareInterface> type = null;
 
             try {
@@ -40,20 +42,16 @@ public class ExpressionLanguage implements ContainerAwareInterface
             }
 
             if (null == type) {
-                throw new Exception("No service matching \"" + className + "\"");
+                throw new FrameworkException("No service alias matching \"" + className + "\"");
             }
 
             ContainerAwareInterface service = container.get(type);
-
-            if (null == service) {
-                throw new NonExistentServiceException(type);
-            }
 
             return service;
         });
     }
 
-    public <R> R evaluate(String s) throws EvaluationException
+    public <R> R evaluate(String s)
     {
         try {
             return (R) engine.eval(s, bindings);

@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.Authentication;
+package com.sallyf.sallyf.Authentication.Exception;
 
 import com.sallyf.sallyf.Exception.FrameworkException;
 

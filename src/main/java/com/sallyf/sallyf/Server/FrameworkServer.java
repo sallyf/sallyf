@@ -4,6 +4,7 @@ import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
+import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.KernelEvents;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -46,9 +47,13 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
     }
 
     @Override
-    protected void doStart() throws Exception
+    protected void doStart()
     {
-        super.doStart();
+        try {
+            super.doStart();
+        } catch (Exception e) {
+            throw new FrameworkException(e);
+        }
 
         getContainer().get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, (eventType, responseEvent) -> {
             Request request = responseEvent.getRuntimeBag().getRequest();

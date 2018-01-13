@@ -2,6 +2,8 @@ package com.sallyf.sallyf.ExpressionLanguage;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.Exception.NonExistentServiceException;
 import com.sallyf.sallyf.Server.Status;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +73,7 @@ public class ExpressionLanguageTest
         assertEquals(Status.OK, result.get("statuses").get(0));
     }
 
-    @Test(expected = RuntimeException.class) // @TODO: Switch to `NonExistentServiceException.class`
+    @Test(expected = FrameworkException.class)
     public void evalNonExistentServiceTest() throws Exception
     {
         expressionLanguage.evaluate("service('YOLO')");

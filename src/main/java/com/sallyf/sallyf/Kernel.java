@@ -15,14 +15,14 @@ public class Kernel
 {
     private Container container;
 
-    public Kernel(Container container) throws ServiceInstantiationException
+    public Kernel(Container container)
     {
         this.container = container;
 
         container.addAll(getDefaultServices());
     }
 
-    public static Kernel newInstance() throws ServiceInstantiationException
+    public static Kernel newInstance()
     {
         return new Kernel(new Container());
     }
@@ -42,7 +42,7 @@ public class Kernel
         return container;
     }
 
-    public void boot() throws ServiceInstantiationException
+    public void boot()
     {
         container.instantiate();
 

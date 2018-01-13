@@ -2,7 +2,6 @@ package com.sallyf.sallyf.Container;
 
 import com.sallyf.sallyf.Container.Exception.AmbiguousServiceException;
 import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ReferenceResolver.ConfigurationReferenceResolver;
 import com.sallyf.sallyf.Container.ReferenceResolver.ContainerReferenceResolver;
 import com.sallyf.sallyf.Container.ReferenceResolver.PlainReferenceResolver;
@@ -11,6 +10,7 @@ import com.sallyf.sallyf.Container.TypeResolver.ConfigurationResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ContainerResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ServiceResolver;
 import com.sallyf.sallyf.ContainerInstantiator.ContainerInstantiator;
+import com.sallyf.sallyf.Exception.NonExistentServiceException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,14 +42,14 @@ public class Container
         addTypeResolver(new ServiceResolver());
     }
 
-    public void addAll(ServiceDefinition<? extends ContainerAwareInterface>[] serviceDefinitions) throws ServiceInstantiationException
+    public void addAll(ServiceDefinition<? extends ContainerAwareInterface>[] serviceDefinitions)
     {
         for (ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition : serviceDefinitions) {
             add(serviceDefinition);
         }
     }
 
-    public <T extends ContainerAwareInterface> ServiceDefinition<T> add(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    public <T extends ContainerAwareInterface> ServiceDefinition<T> add(ServiceDefinition<T> serviceDefinition)
     {
         if (instantiated) {
             throw new ContainerInstantiatedException();
@@ -65,7 +65,7 @@ public class Container
         return containerInstantiator.getServiceDefinitions().get(type);
     }
 
-    public void instantiate() throws ServiceInstantiationException
+    public void instantiate()
     {
         if (instantiated) {
             throw new ContainerInstantiatedException();
@@ -89,15 +89,21 @@ public class Container
 
     public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
     {
-        return (T) services.get(serviceClass);
+        T service = (T) services.get(serviceClass);
+
+        if (null == service) {
+            throw new NonExistentServiceException(serviceClass);
+        }
+
+        return service;
     }
 
-    public <T extends ContainerAwareInterface> T find(String name) throws AmbiguousServiceException
+    public <T extends ContainerAwareInterface> T find(String name)
     {
         return get(findAlias(name));
     }
 
-    public <T extends ContainerAwareInterface> Class<T> findAlias(String name) throws AmbiguousServiceException
+    public <T extends ContainerAwareInterface> Class<T> findAlias(String name)
     {
         List<Class> serviceClasses = this.services.entrySet().stream()
                 .filter(e -> {

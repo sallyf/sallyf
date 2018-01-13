@@ -11,7 +11,7 @@ public class ServiceResolver<T extends ContainerAwareInterface> implements TypeR
     }
 
     @Override
-    public ReferenceInterface resolve(ServiceDefinition<T> serviceDefinition, Class<ContainerAwareInterface> type) throws Exception
+    public ReferenceInterface resolve(ServiceDefinition<T> serviceDefinition, Class<ContainerAwareInterface> type)
     {
         return new ServiceReference<>(type);
     }

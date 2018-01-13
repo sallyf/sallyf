@@ -20,17 +20,17 @@ public class URLGenerator implements ContainerAwareInterface
         this.router = router;
     }
 
-    public String url(String actionName, HashMap<String, String> parameters) throws UnableToGenerateURLException
+    public String url(String actionName, HashMap<String, String> parameters)
     {
         return server.getRootURL() + path(actionName, parameters);
     }
 
-    public String url(String actionName) throws UnableToGenerateURLException
+    public String url(String actionName)
     {
         return url(actionName, new HashMap<>());
     }
 
-    public String path(String actionName, HashMap<String, String> parameters) throws UnableToGenerateURLException
+    public String path(String actionName, HashMap<String, String> parameters)
     {
         Route route = router.getRoutes().get(actionName);
 
@@ -57,7 +57,7 @@ public class URLGenerator implements ContainerAwareInterface
         return path;
     }
 
-    public String path(String actionName) throws UnableToGenerateURLException
+    public String path(String actionName)
     {
         return path(actionName, new HashMap<>());
     }

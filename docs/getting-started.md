@@ -3,7 +3,7 @@
 ```java
 public class Main
 {
-    public static void main(String[] args) throws FrameworkException
+    public static void main(String[] args) 
     {
         Kernel app = Kernel.newInstance();
 

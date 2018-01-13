@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Exception;
 
-public class NonExistentServiceException extends Exception
+public class NonExistentServiceException extends FrameworkException
 {
     public NonExistentServiceException(Class type)
     {

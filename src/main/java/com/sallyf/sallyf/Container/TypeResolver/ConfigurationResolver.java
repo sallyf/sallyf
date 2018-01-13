@@ -11,7 +11,7 @@ public class ConfigurationResolver<T extends ContainerAwareInterface> implements
     }
 
     @Override
-    public ReferenceInterface resolve(ServiceDefinition<T> serviceDefinition, Class<ConfigurationInterface> type) throws Exception
+    public ReferenceInterface resolve(ServiceDefinition<T> serviceDefinition, Class<ConfigurationInterface> type)
     {
         return serviceDefinition.getConfigurationReference();
     }

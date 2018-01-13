@@ -17,7 +17,7 @@ public class DependencyTreeFactory
         this.containerInstantiator = containerInstantiator;
     }
 
-    public DependencyTree generate(ServiceDefinition<?> serviceDefinition) throws ServiceInstantiationException
+    public DependencyTree generate(ServiceDefinition<?> serviceDefinition)
     {
         if (getTrees().containsKey(serviceDefinition.getAlias())) {
             return getTrees().get(serviceDefinition.getAlias());
@@ -33,7 +33,7 @@ public class DependencyTreeFactory
         return tree;
     }
 
-    private void addServiceDefinitionToTree(DependencyTree tree, ServiceDefinition<?> serviceDefinition, DependencyNode currentNode) throws ServiceInstantiationException
+    private void addServiceDefinitionToTree(DependencyTree tree, ServiceDefinition<?> serviceDefinition, DependencyNode currentNode)
     {
         ArrayList<ConstructorDefinition> constructorDefinitions = serviceDefinition.getConstructorDefinitions();
 

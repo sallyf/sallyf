@@ -3,6 +3,7 @@ package com.sallyf.sallyf.Authentication;
 import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
 import com.sallyf.sallyf.AccessDecisionManager.Annotation.Voter;
 import com.sallyf.sallyf.AccessDecisionManager.DecisionStrategy;
+import com.sallyf.sallyf.Authentication.Exception.AuthenticationException;
 import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
 import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
@@ -40,7 +41,7 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private EventDispatcher eventDispatcher;
 
-    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher, AccessDecisionManager decisionManager) throws ServiceInstantiationException
+    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher, AccessDecisionManager decisionManager)
     {
         this.container = container;
         this.router = router;
@@ -87,7 +88,6 @@ public class AuthenticationManager implements ContainerAwareInterface
     {
         if (securedRoutes.containsKey(route)) {
             Voter annotation = securedRoutes.get(route);
-            ArrayList<Boolean> decisions = new ArrayList<>();
 
             Object subject = null;
 
@@ -97,18 +97,18 @@ public class AuthenticationManager implements ContainerAwareInterface
                 subject = routeParameters.get(annotation.parameter());
             }
 
-            return this.decisionManager.vote(annotation.attribute(), subject, runtimeBag);
+            return this.decisionManager.vote(annotation.attribute(), subject, runtimeBag, strategy);
         }
 
         return true;
     }
 
-    public UserInterface authenticate(Request request, String username, String password) throws AuthenticationException
+    public UserInterface authenticate(Request request, String username, String password)
     {
         return authenticate(request, username, password, null);
     }
 
-    public UserInterface authenticate(Request request, String username, String password, Class<? extends UserDataSourceInterface> dataSourceClass) throws AuthenticationException
+    public UserInterface authenticate(Request request, String username, String password, Class<? extends UserDataSourceInterface> dataSourceClass)
     {
         if (dataSources.size() == 0) {
             throw new AuthenticationException("No datasource provided");
@@ -138,7 +138,7 @@ public class AuthenticationManager implements ContainerAwareInterface
         return dataSources;
     }
 
-    public UserDataSourceInterface getDataSource(Class<? extends UserDataSourceInterface> dataSourceClass) throws AuthenticationException
+    public UserDataSourceInterface getDataSource(Class<? extends UserDataSourceInterface> dataSourceClass)
     {
         for (UserDataSourceInterface dataSource : dataSources) {
             if (dataSource.getClass().equals(dataSourceClass)) {

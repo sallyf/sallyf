@@ -1,6 +1,8 @@
 package com.sallyf.sallyf.Container.Exception;
 
-public class AmbiguousServiceException extends Exception
+import com.sallyf.sallyf.Exception.FrameworkException;
+
+public class AmbiguousServiceException extends FrameworkException
 {
     public AmbiguousServiceException(String s)
     {

@@ -58,7 +58,7 @@ public class Router implements ContainerAwareInterface
         addResponseTransformer(new HttpExceptionTransformer());
     }
 
-    public <C extends ControllerInterface> C registerController(Class<C> controllerClass) throws FrameworkException
+    public <C extends ControllerInterface> C registerController(Class<C> controllerClass)
     {
         EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
 
@@ -108,7 +108,7 @@ public class Router implements ContainerAwareInterface
         return controller;
     }
 
-    public Object[] resolveActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag) throws UnhandledParameterException
+    public Object[] resolveActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag)
     {
         Object[] parameters = new Object[parameterTypes.length];
         int i = 0;
@@ -119,7 +119,7 @@ public class Router implements ContainerAwareInterface
         return parameters;
     }
 
-    public Object resolveActionParameter(Class parameterType, RuntimeBag runtimeBag) throws UnhandledParameterException
+    public Object resolveActionParameter(Class parameterType, RuntimeBag runtimeBag)
     {
         for (ActionParameterResolverInterface resolver : actionParameterResolvers) {
             if (resolver.supports(parameterType, runtimeBag)) {
@@ -130,7 +130,7 @@ public class Router implements ContainerAwareInterface
         throw new UnhandledParameterException(parameterType);
     }
 
-    public Route registerRoute(String name, Route route) throws RouteDuplicateException
+    public Route registerRoute(String name, Route route)
     {
         String signature = route.getMethod() + " " + route.getPath().getPattern();
         if (routeSignatures.contains(signature)) {
@@ -145,12 +145,12 @@ public class Router implements ContainerAwareInterface
         return route;
     }
 
-    public Route registerAction(String name, Method method, String path, ActionWrapperInterface handler) throws RouteDuplicateException
+    public Route registerAction(String name, Method method, String path, ActionWrapperInterface handler)
     {
         return registerRoute(name, new Route(name, method, path, handler));
     }
 
-    private <T extends ControllerInterface> T instantiateController(Class<T> controllerClass) throws ControllerInstantiationException
+    private <T extends ControllerInterface> T instantiateController(Class<T> controllerClass)
     {
         try {
             T controller = controllerClass.newInstance();
@@ -216,7 +216,7 @@ public class Router implements ContainerAwareInterface
         return value;
     }
 
-    public Response transformResponse(RuntimeBag runtimeBag, Object response) throws FrameworkException
+    public Response transformResponse(RuntimeBag runtimeBag, Object response)
     {
         while (true) {
             boolean transformed = false;

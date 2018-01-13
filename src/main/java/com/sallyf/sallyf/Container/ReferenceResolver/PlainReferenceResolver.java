@@ -11,7 +11,7 @@ public class PlainReferenceResolver<T extends ContainerAwareInterface, V> implem
     }
 
     @Override
-    public V resolve(ServiceDefinition<T> serviceDefinition, PlainReference<V> reference) throws Exception
+    public V resolve(ServiceDefinition<T> serviceDefinition, PlainReference<V> reference)
     {
         return reference.value;
     }

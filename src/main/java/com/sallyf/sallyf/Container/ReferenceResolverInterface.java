@@ -4,5 +4,5 @@ public interface ReferenceResolverInterface<T extends ContainerAwareInterface, R
 {
     boolean supports(ServiceDefinition serviceDefinition, ReferenceInterface reference);
 
-    R resolve(ServiceDefinition<T> serviceDefinition, REF reference) throws Exception;
+    R resolve(ServiceDefinition<T> serviceDefinition, REF reference);
 }
