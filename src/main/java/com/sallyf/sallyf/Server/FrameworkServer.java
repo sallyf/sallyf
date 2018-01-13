@@ -66,12 +66,16 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
     {
         ServerConnector connector = (ServerConnector) getConnectors()[0];
 
-        String hostname = connector.getName();
+        String hostname = "";
 
         try {
             InetAddress addr = InetAddress.getLocalHost();
             hostname = addr.getHostName();
         } catch (UnknownHostException ignored) {
+        }
+
+        if (hostname.isEmpty()) {
+            hostname = connector.getName();
         }
 
         if (hostname.isEmpty()) {

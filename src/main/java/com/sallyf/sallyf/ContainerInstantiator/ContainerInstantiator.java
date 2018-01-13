@@ -38,7 +38,7 @@ public class ContainerInstantiator
         this.taggedServices = taggedServices;
     }
 
-    public void boot() throws ServiceInstantiationException
+    public void boot()
     {
         while (!allServiceDefinitionsInstantiated()) {
             boolean hasInstantiated = false;
@@ -123,12 +123,12 @@ public class ContainerInstantiator
         return getUncalledCallDefinitionMetas().isEmpty();
     }
 
-    private <T extends ContainerAwareInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition)
     {
         return dependencyTreeFactory.generate(serviceDefinition);
     }
 
-    public <T extends ContainerAwareInterface> void autoWire(ServiceDefinitionMeta<T> serviceDefinitionMeta) throws ServiceInstantiationException
+    public <T extends ContainerAwareInterface> void autoWire(ServiceDefinitionMeta<T> serviceDefinitionMeta)
     {
         ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
@@ -151,7 +151,7 @@ public class ContainerInstantiator
         }
     }
 
-    private <T extends ContainerAwareInterface> T bootService(ServiceDefinitionMeta<T> serviceDefinitionMeta) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> T bootService(ServiceDefinitionMeta<T> serviceDefinitionMeta)
     {
         ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
@@ -174,7 +174,7 @@ public class ContainerInstantiator
         return instance;
     }
 
-    private <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition)
     {
         Class<T> serviceClass = serviceDefinition.getType();
 
@@ -196,7 +196,7 @@ public class ContainerInstantiator
         return instance;
     }
 
-    private void invokeCalls() throws MethodCallException
+    private void invokeCalls()
     {
         for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMetas()) {
             ServiceDefinition<?> serviceDefinition = callDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
@@ -240,7 +240,7 @@ public class ContainerInstantiator
         return true;
     }
 
-    private Object[] resolveReferences(ServiceDefinition serviceDefinition, ReferenceInterface[] references) throws ReferenceResolutionException
+    private Object[] resolveReferences(ServiceDefinition serviceDefinition, ReferenceInterface[] references)
     {
         Object[] args = new Object[references.length];
 
@@ -252,7 +252,7 @@ public class ContainerInstantiator
         return args;
     }
 
-    private Object resolveReference(ServiceDefinition serviceDefinition, ReferenceInterface reference) throws ReferenceResolutionException
+    private Object resolveReference(ServiceDefinition serviceDefinition, ReferenceInterface reference)
     {
         for (ReferenceResolverInterface resolver : referenceResolvers) {
             if (resolver.supports(serviceDefinition, reference)) {
@@ -267,7 +267,7 @@ public class ContainerInstantiator
         throw new ReferenceResolutionException("Unhandled reference type: " + reference);
     }
 
-    private ReferenceInterface[] resolveTypes(ServiceDefinition serviceDefinition, Class[] types) throws TypeResolutionException
+    private ReferenceInterface[] resolveTypes(ServiceDefinition serviceDefinition, Class[] types)
     {
         ReferenceInterface[] references = new ReferenceInterface[types.length];
 
@@ -279,7 +279,7 @@ public class ContainerInstantiator
         return references;
     }
 
-    private ReferenceInterface resolveType(ServiceDefinition serviceDefinition, Class type) throws TypeResolutionException
+    private ReferenceInterface resolveType(ServiceDefinition serviceDefinition, Class type)
     {
         for (TypeResolverInterface resolver : typeResolvers) {
             if (resolver.supports(serviceDefinition, type)) {
@@ -303,7 +303,7 @@ public class ContainerInstantiator
         taggedServices.get(tag).add(service);
     }
 
-    public <T extends ContainerAwareInterface> void addServiceDefinition(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    public <T extends ContainerAwareInterface> void addServiceDefinition(ServiceDefinition<T> serviceDefinition)
     {
         serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
 

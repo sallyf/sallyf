@@ -29,12 +29,12 @@ abstract public class BaseController implements ControllerInterface
         return new RedirectResponse(url, Status.REDIRECT);
     }
 
-    public Response redirectToRoute(String actionName) throws UnableToGenerateURLException
+    public Response redirectToRoute(String actionName)
     {
         return redirectToRoute(actionName, new HashMap<>());
     }
 
-    public Response redirectToRoute(String actionName, HashMap<String, String> parameters) throws UnableToGenerateURLException
+    public Response redirectToRoute(String actionName, HashMap<String, String> parameters)
     {
         return redirect(getContainer().get(URLGenerator.class).url(actionName, parameters));
     }

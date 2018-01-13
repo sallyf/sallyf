@@ -1,8 +1,7 @@
 package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Annotation.Route;
-import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
-import com.sallyf.sallyf.AccessDecisionManager.Annotation.Voter;
+import com.sallyf.sallyf.Authentication.Annotation.Security;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.Controller.BaseController;
 import org.eclipse.jetty.server.Request;
@@ -10,7 +9,7 @@ import org.eclipse.jetty.server.Request;
 public class TestController extends BaseController
 {
     @Route(path = "/authenticate")
-    public String authenticate(Request request, AuthenticationManager authenticationManager) throws AuthenticationException
+    public String authenticate(Request request, AuthenticationManager authenticationManager)
     {
         UserInterface u1 = authenticationManager.authenticate(request, "admin", "password");
         UserInterface u2 = authenticationManager.authenticate(request, "admin", "password", InMemoryDataSource.class);
@@ -25,16 +24,23 @@ public class TestController extends BaseController
     }
 
     @Route(path = "/secured")
-    @Voter(attribute = AuthenticationVoter.AUTHENTICATED)
+    @Security("is_granted($, 'authenticated')")
     public String secured()
     {
         return "Secured";
     }
 
     @Route(path = "/secured/{name}")
-    @Voter(attribute = NameVoter.ACCESS, parameter = "name")
+    @Security("is_granted($, 'access', name)")
     public String securedName()
     {
         return "Secured name";
+    }
+
+    @Route(path = "/secured/authenticated/{name}")
+    @Security("is_granted($, 'access', name) && is_granted($, 'authenticated')")
+    public String securedAuthenticatedName()
+    {
+        return "Secured name authenticated";
     }
 }

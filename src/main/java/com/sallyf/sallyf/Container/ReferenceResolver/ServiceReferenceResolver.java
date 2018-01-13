@@ -18,7 +18,7 @@ public class ServiceReferenceResolver<T extends ContainerAwareInterface> impleme
     }
 
     @Override
-    public T resolve(ServiceDefinition<T> serviceDefinition, ServiceReference<T> reference) throws Exception
+    public T resolve(ServiceDefinition<T> serviceDefinition, ServiceReference<T> reference)
     {
         return container.get(reference.getAlias());
     }

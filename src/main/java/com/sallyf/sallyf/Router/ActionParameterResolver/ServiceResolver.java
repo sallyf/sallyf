@@ -17,9 +17,12 @@ public class ServiceResolver implements ActionParameterResolverInterface
     @Override
     public boolean supports(Class parameterType, RuntimeBag runtimeBag)
     {
-        if (ContainerAwareInterface.class.isAssignableFrom(parameterType))
-            if (container.has(parameterType))
+        if (ContainerAwareInterface.class.isAssignableFrom(parameterType)) {
+            if (container.has(parameterType)) {
                 return true;
+            }
+        }
+
         return false;
     }
 

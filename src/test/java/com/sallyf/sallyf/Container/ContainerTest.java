@@ -1,9 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-import com.sallyf.sallyf.Container.Exception.CircularReferenceException;
-import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
-import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.Exception.*;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import org.junit.Test;
 
@@ -194,5 +191,33 @@ public class ContainerTest
         ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
 
         assertEquals(2, service.configuration.getNumber());
+    }
+
+    @Test(expected = AmbiguousServiceException.class)
+    public void testFindAmbiguous()
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(Service1Ambiguous.class));
+        container.add(new ServiceDefinition<>(Service2Ambiguous.class));
+
+        container.instantiate();
+
+        container.find("Ambiguous");
+    }
+
+    @Test
+    public void testFind()
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(Service1Ambiguous.class));
+        container.add(new ServiceDefinition<>(Service2Ambiguous.class));
+
+        container.instantiate();
+
+        ContainerAwareInterface service = container.find("Service2Ambiguous");
+
+        assertEquals(container.get(Service2Ambiguous.class), service);
     }
 }

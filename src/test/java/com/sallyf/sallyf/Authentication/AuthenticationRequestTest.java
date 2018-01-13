@@ -5,6 +5,7 @@ import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import okhttp3.*;
 import org.junit.Test;
 
@@ -42,6 +43,7 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
     {
         app.getContainer().add(new ServiceDefinition<>(AuthenticationManager.class, new AuthenticationConfiguration()));
         app.getContainer().add(new ServiceDefinition<>(AccessDecisionManager.class));
+        app.getContainer().add(new ServiceDefinition<>(ExpressionLanguage.class));
         app.getContainer().add(new ServiceDefinition<>(NameVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
     }
 
@@ -157,4 +159,46 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
 
         assertThat("Response Code", response.code(), is(403));
     }
+
+    @Test
+    public void testAuthenticatedParameterVoter() throws Exception
+    {
+        Request request1 = new Request.Builder()
+                .url(getRootURL() + "/authenticate")
+                .build();
+
+        Response response1 = client.newCall(request1).execute();
+
+        assertThat("Response Code", response1.code(), is(200));
+
+        Request request2 = new Request.Builder()
+                .url(getRootURL() + "/secured/authenticated/admin")
+                .build();
+
+        Response response2 = client.newCall(request2).execute();
+
+        assertThat("Response Code", response2.code(), is(200));
+        assertThat("Content", response2.body().string(), is("Secured name authenticated"));
+    }
+
+    @Test
+    public void testAuthenticatedParameterVoterFailure() throws Exception
+    {
+        Request request1 = new Request.Builder()
+                .url(getRootURL() + "/authenticate")
+                .build();
+
+        Response response1 = client.newCall(request1).execute();
+
+        assertThat("Response Code", response1.code(), is(200));
+
+        Request request2 = new Request.Builder()
+                .url(getRootURL() + "/secured/authenticated/YOLO")
+                .build();
+
+        Response response2 = client.newCall(request2).execute();
+
+        assertThat("Response Code", response2.code(), is(403));
+    }
+
 }

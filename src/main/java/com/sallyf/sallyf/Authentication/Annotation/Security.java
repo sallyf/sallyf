@@ -1,4 +1,4 @@
-package com.sallyf.sallyf.AccessDecisionManager.Annotation;
+package com.sallyf.sallyf.Authentication.Annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,9 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-public @interface Voter
+public @interface Security
 {
-    String attribute();
-
-    String parameter() default "";
+    String value();
 }
