@@ -1,8 +1,7 @@
 package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.Annotation.Route;
-import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
-import com.sallyf.sallyf.AccessDecisionManager.Annotation.Voter;
+import com.sallyf.sallyf.Authentication.Annotation.Security;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.Controller.BaseController;
 import org.eclipse.jetty.server.Request;
@@ -25,14 +24,14 @@ public class TestController extends BaseController
     }
 
     @Route(path = "/secured")
-    @Voter(attribute = AuthenticationVoter.AUTHENTICATED)
+    @Security("is_granted($, 'authenticated')")
     public String secured()
     {
         return "Secured";
     }
 
     @Route(path = "/secured/{name}")
-    @Voter(attribute = NameVoter.ACCESS, parameter = "name")
+    @Security("is_granted($, 'access', name)")
     public String securedName()
     {
         return "Secured name";

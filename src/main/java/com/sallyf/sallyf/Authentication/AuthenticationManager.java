@@ -1,21 +1,19 @@
 package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
-import com.sallyf.sallyf.AccessDecisionManager.Annotation.Voter;
-import com.sallyf.sallyf.AccessDecisionManager.DecisionStrategy;
+import com.sallyf.sallyf.Authentication.Annotation.Security;
 import com.sallyf.sallyf.Authentication.Exception.AuthenticationException;
 import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
 import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.HttpException;
+import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.ActionParameterResolver.UserInterfaceResolver;
 import com.sallyf.sallyf.Router.Route;
-import com.sallyf.sallyf.Router.RouteParameters;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
 import com.sallyf.sallyf.Server.Status;
@@ -28,25 +26,21 @@ import java.util.HashMap;
 
 public class AuthenticationManager implements ContainerAwareInterface
 {
-
     private ArrayList<UserDataSourceInterface> dataSources;
 
-    private AccessDecisionManager decisionManager;
-
-    private HashMap<Route, Voter> securedRoutes = new HashMap<>();
-
-    private Container container;
+    private HashMap<Route, Security> securedRoutes = new HashMap<>();
 
     private Router router;
 
     private EventDispatcher eventDispatcher;
 
-    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher, AccessDecisionManager decisionManager)
+    private final ExpressionLanguage expressionLanguage;
+
+    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher, ExpressionLanguage expressionLanguage)
     {
-        this.container = container;
         this.router = router;
         this.eventDispatcher = eventDispatcher;
-        this.decisionManager = decisionManager;
+        this.expressionLanguage = expressionLanguage;
 
         dataSources = configuration.getDataSources();
 
@@ -62,7 +56,7 @@ public class AuthenticationManager implements ContainerAwareInterface
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
 
-            Voter annotation = method.getAnnotation(Voter.class);
+            Security annotation = method.getAnnotation(Security.class);
 
             if (null != annotation) {
                 securedRoutes.put(routeRegisterEvent.getRoute(), annotation);
@@ -81,23 +75,10 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private boolean vote(Route route, RuntimeBag runtimeBag)
     {
-        return vote(route, runtimeBag, DecisionStrategy.AFFIRMATIVE);
-    }
-
-    private boolean vote(Route route, RuntimeBag runtimeBag, DecisionStrategy strategy)
-    {
         if (securedRoutes.containsKey(route)) {
-            Voter annotation = securedRoutes.get(route);
+            Security annotation = securedRoutes.get(route);
 
-            Object subject = null;
-
-            if (!annotation.parameter().equals("")) {
-                RouteParameters routeParameters = router.getRouteParameters(runtimeBag);
-
-                subject = routeParameters.get(annotation.parameter());
-            }
-
-            return this.decisionManager.vote(annotation.attribute(), subject, runtimeBag, strategy);
+            return this.expressionLanguage.evaluate(annotation.value(), runtimeBag);
         }
 
         return true;

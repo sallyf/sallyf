@@ -3,23 +3,29 @@ package com.sallyf.sallyf.ExpressionLanguage;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.NonExistentServiceException;
 import com.sallyf.sallyf.ExpressionLanguage.Exception.EvaluationException;
+import com.sallyf.sallyf.Router.RouteParameters;
+import com.sallyf.sallyf.Router.Router;
+import com.sallyf.sallyf.Server.RuntimeBag;
 
 import javax.script.*;
+import java.util.Map;
 import java.util.function.Function;
 
 public class ExpressionLanguage implements ContainerAwareInterface
 {
     private Container container;
 
+    private Router router;
+
     private ScriptEngine engine;
 
     private Bindings bindings = new SimpleBindings();
 
-    public ExpressionLanguage(Container container)
+    public ExpressionLanguage(Container container, Router router)
     {
         this.container = container;
+        this.router = router;
 
         ScriptEngineManager manager = new ScriptEngineManager();
         engine = manager.getEngineByName("js");
@@ -45,14 +51,29 @@ public class ExpressionLanguage implements ContainerAwareInterface
                 throw new FrameworkException("No service alias matching \"" + className + "\"");
             }
 
-            ContainerAwareInterface service = container.get(type);
-
-            return service;
+            return container.get(type);
         });
     }
 
     public <R> R evaluate(String s)
     {
+        return evaluate(s, null);
+    }
+
+    public <R> R evaluate(String s, RuntimeBag runtimeBag)
+    {
+        Bindings bindings = new SimpleBindings();
+        bindings.putAll(this.bindings);
+        bindings.put("$", runtimeBag);
+
+        if (null != runtimeBag) {
+            RouteParameters routeParameters = router.getRouteParameters(runtimeBag);
+
+            for (Map.Entry<String, Object> entry : routeParameters.entrySet()) {
+                bindings.put(entry.getKey(), entry.getValue());
+            }
+        }
+
         try {
             return (R) engine.eval(s, bindings);
         } catch (ScriptException e) {

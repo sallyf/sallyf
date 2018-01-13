@@ -5,6 +5,7 @@ import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import okhttp3.*;
 import org.junit.Test;
 
@@ -42,6 +43,7 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
     {
         app.getContainer().add(new ServiceDefinition<>(AuthenticationManager.class, new AuthenticationConfiguration()));
         app.getContainer().add(new ServiceDefinition<>(AccessDecisionManager.class));
+        app.getContainer().add(new ServiceDefinition<>(ExpressionLanguage.class));
         app.getContainer().add(new ServiceDefinition<>(NameVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
     }
 

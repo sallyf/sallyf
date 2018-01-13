@@ -3,6 +3,7 @@ package com.sallyf.sallyf.AccessDecisionManager;
 import com.sallyf.sallyf.AccessDecisionManager.Voter.VoterInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
 import java.util.ArrayList;
@@ -18,12 +19,20 @@ public class AccessDecisionManager implements ContainerAwareInterface
         this.container = container;
     }
 
-    public <O> boolean vote(String attribute, O subject, RuntimeBag runtimeBag)
+    @Override
+    public void initialize()
     {
-        return vote(attribute, subject, runtimeBag, DecisionStrategy.AFFIRMATIVE);
+        ExpressionLanguage expressionLanguage = container.get(ExpressionLanguage.class);
+
+        expressionLanguage.addBinding("is_granted", (PredicateIsGrantedHandler) this::vote);
     }
 
-    public <O> boolean vote(String attribute, O subject, RuntimeBag runtimeBag, DecisionStrategy strategy)
+    public <O> boolean vote(RuntimeBag runtimeBag, String attribute, O subject)
+    {
+        return vote(runtimeBag, attribute, subject, DecisionStrategy.AFFIRMATIVE);
+    }
+
+    public <O> boolean vote(RuntimeBag runtimeBag, String attribute, O subject, DecisionStrategy strategy)
     {
         ArrayList<Boolean> decisions = new ArrayList<>();
 

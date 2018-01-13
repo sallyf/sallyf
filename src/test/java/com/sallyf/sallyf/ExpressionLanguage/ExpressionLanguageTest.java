@@ -2,8 +2,10 @@ package com.sallyf.sallyf.ExpressionLanguage;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Exception.NonExistentServiceException;
+import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Status;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,11 +23,13 @@ public class ExpressionLanguageTest
     private Container container;
 
     @Before
-    public void setUp() throws Exception
+    public void setUp()
     {
         container = new Container();
 
         container.add(new ServiceDefinition<>(TestService.class));
+        container.add(new ServiceDefinition<>(EventDispatcher.class));
+        container.add(new ServiceDefinition<>(Router.class));
         container.add(new ServiceDefinition<>(ExpressionLanguage.class));
 
         container.instantiate();
@@ -34,7 +38,7 @@ public class ExpressionLanguageTest
     }
 
     @Test
-    public void evalSimpleTest() throws Exception
+    public void evalSimpleTest()
     {
         Integer result = expressionLanguage.<Integer>evaluate("1 + 1");
 
@@ -42,7 +46,7 @@ public class ExpressionLanguageTest
     }
 
     @Test
-    public void evalServiceTest() throws Exception
+    public void evalServiceTest()
     {
         TestService result = expressionLanguage.evaluate("service('com.sallyf.sallyf.ExpressionLanguage.TestService')");
 
@@ -50,7 +54,7 @@ public class ExpressionLanguageTest
     }
 
     @Test
-    public void evalShortServiceTest() throws Exception
+    public void evalShortServiceTest()
     {
         TestService result = expressionLanguage.evaluate("service('TestService')");
 
@@ -58,7 +62,7 @@ public class ExpressionLanguageTest
     }
 
     @Test
-    public void evalBooleanTest() throws Exception
+    public void evalBooleanTest()
     {
         Boolean result = expressionLanguage.evaluate("service('TestService').returnTrue()");
 
@@ -66,7 +70,7 @@ public class ExpressionLanguageTest
     }
 
     @Test
-    public void evalHashMapTest() throws Exception
+    public void evalHashMapTest()
     {
         HashMap<String, ArrayList<Status>> result = expressionLanguage.evaluate("service('TestService').returnHashMapOfArrayListOfStatus()");
 
@@ -74,7 +78,7 @@ public class ExpressionLanguageTest
     }
 
     @Test(expected = FrameworkException.class)
-    public void evalNonExistentServiceTest() throws Exception
+    public void evalNonExistentServiceTest()
     {
         expressionLanguage.evaluate("service('YOLO')");
     }
