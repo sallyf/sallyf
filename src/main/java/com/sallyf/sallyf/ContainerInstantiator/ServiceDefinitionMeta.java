@@ -31,18 +31,18 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
 
     public boolean updateCallDefinitionMetas()
     {
-        ActivityTracker at = new ActivityTracker();
+        ChangeTracker ct = new ChangeTracker();
 
         for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
             if (!callDefinitionsWithMeta.contains(callDefinition)) {
                 callDefinitionMetas.add(new CallDefinitionMeta(this, callDefinition));
                 callDefinitionsWithMeta.add(callDefinition);
 
-                at.apply(true);
+                ct.apply(true);
             }
         }
 
-        return at.isChanged();
+        return ct.isChanged();
     }
 
     public ServiceDefinition<T> getServiceDefinition()

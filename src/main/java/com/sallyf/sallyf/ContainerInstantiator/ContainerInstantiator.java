@@ -41,7 +41,7 @@ public class ContainerInstantiator
     public void boot()
     {
         while (!allServiceDefinitionMetasReady()) {
-            ActivityTracker at = new ActivityTracker();
+            ChangeTracker ct = new ChangeTracker();
 
             for (ServiceDefinitionMeta<?> serviceDefinitionMeta : getNotReadyServiceDefinitionMetas()) {
                 ServiceDefinition<?> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
@@ -65,16 +65,16 @@ public class ContainerInstantiator
 
                     instance = bootService(serviceDefinitionMeta);
 
-                    at.apply(true);
+                    ct.apply(true);
                 } else {
                     instance = services.get(serviceDefinition.getAlias());
                 }
 
-                at.apply(updateServiceDefinitionMetasCallDefinitionMetas());
+                ct.apply(updateServiceDefinitionMetasCallDefinitionMetas());
 
-                at.apply(invokeCalls());
+                ct.apply(invokeCalls());
 
-                at.apply(updateServiceDefinitionMetasCallDefinitionMetas());
+                ct.apply(updateServiceDefinitionMetasCallDefinitionMetas());
 
                 if (serviceDefinitionMeta.isFullyInstantiated() && !serviceDefinitionMeta.isInitialized()) {
                     try {
@@ -86,11 +86,11 @@ public class ContainerInstantiator
                     updateServiceDefinitionMetasCallDefinitionMetas();
 
                     serviceDefinitionMeta.setInitialized(true);
-                    at.apply(true);
+                    ct.apply(true);
                 }
             }
 
-            if (!at.isChanged() && !allServiceDefinitionMetasReady()) {
+            if (!ct.isChanged() && !allServiceDefinitionMetasReady()) {
                 throw new ServiceInstantiationException("Unable to instantiate all services");
             }
         }
@@ -102,13 +102,13 @@ public class ContainerInstantiator
 
     private boolean updateServiceDefinitionMetasCallDefinitionMetas()
     {
-        ActivityTracker at = new ActivityTracker();
+        ChangeTracker ct = new ChangeTracker();
 
         for (Map.Entry<Class, ServiceDefinitionMeta> entry : serviceDefinitionMetas.entrySet()) {
-            at.apply(entry.getValue().updateCallDefinitionMetas());
+            ct.apply(entry.getValue().updateCallDefinitionMetas());
         }
 
-        return at.isChanged();
+        return ct.isChanged();
     }
 
     private List<ServiceDefinitionMeta> getNotReadyServiceDefinitionMetas()
@@ -213,7 +213,7 @@ public class ContainerInstantiator
 
     private boolean invokeCalls()
     {
-        ActivityTracker at = new ActivityTracker();
+        ChangeTracker ct = new ChangeTracker();
 
         for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMetas()) {
             ServiceDefinition<?> serviceDefinition = callDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
@@ -237,10 +237,10 @@ public class ContainerInstantiator
             }
 
             callDefinitionMeta.setCalled(true);
-            at.apply(true);
+            ct.apply(true);
         }
 
-        return at.isChanged();
+        return ct.isChanged();
     }
 
     private boolean isReadyToBeCalled(CallDefinition callDefinition)

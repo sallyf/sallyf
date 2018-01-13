@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
-public class ActivityTracker
+public class ChangeTracker
 {
     private boolean changed = false;
 
