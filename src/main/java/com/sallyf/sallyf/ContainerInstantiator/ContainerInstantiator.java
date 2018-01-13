@@ -109,7 +109,7 @@ public class ContainerInstantiator
         return getUninstantiatedServiceDefinitionMetas().isEmpty();
     }
 
-    private List<CallDefinitionMeta> getUncalledCallDefinitionMeta()
+    private List<CallDefinitionMeta> getUncalledCallDefinitionMetas()
     {
         return serviceDefinitionMetas.entrySet().stream()
                 .map(Map.Entry::getValue)
@@ -120,7 +120,7 @@ public class ContainerInstantiator
 
     private boolean allCallDefinitionsCalled()
     {
-        return getUncalledCallDefinitionMeta().isEmpty();
+        return getUncalledCallDefinitionMetas().isEmpty();
     }
 
     private <T extends ContainerAwareInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
@@ -198,7 +198,7 @@ public class ContainerInstantiator
 
     private void invokeCalls() throws CallException
     {
-        for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMeta()) {
+        for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMetas()) {
             ServiceDefinition<?> serviceDefinition = callDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
 
             CallDefinition callDefinition = callDefinitionMeta.getCallDefinition();
