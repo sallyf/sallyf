@@ -48,9 +48,17 @@ public class ExpressionLanguageTest
     }
 
     @Test
+    public void evalShortServiceTest() throws Exception
+    {
+        TestService result = expressionLanguage.evaluate("service('TestService')");
+
+        assertEquals(container.get(TestService.class), result);
+    }
+
+    @Test
     public void evalBooleanTest() throws Exception
     {
-        Boolean result = expressionLanguage.evaluate("service('com.sallyf.sallyf.ExpressionLanguage.TestService').returnTrue()");
+        Boolean result = expressionLanguage.evaluate("service('TestService').returnTrue()");
 
         assertTrue(result);
     }
@@ -58,8 +66,14 @@ public class ExpressionLanguageTest
     @Test
     public void evalHashMapTest() throws Exception
     {
-        HashMap<String, ArrayList<Status>> result = expressionLanguage.evaluate("service('com.sallyf.sallyf.ExpressionLanguage.TestService').returnHashMapOfArrayListOfStatus()");
+        HashMap<String, ArrayList<Status>> result = expressionLanguage.evaluate("service('TestService').returnHashMapOfArrayListOfStatus()");
 
         assertEquals(Status.OK, result.get("statuses").get(0));
+    }
+
+    @Test(expected = RuntimeException.class) // @TODO: Switch to `NonExistentServiceException.class`
+    public void evalNonExistentServiceTest() throws Exception
+    {
+        expressionLanguage.evaluate("service('YOLO')");
     }
 }

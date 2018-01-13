@@ -2,16 +2,18 @@ package com.sallyf.sallyf.ExpressionLanguage;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Exception.NonExistentServiceException;
 import com.sallyf.sallyf.ExpressionLanguage.Exception.EvaluationException;
 
 import javax.script.*;
-import java.util.function.Function;
 
 public class ExpressionLanguage implements ContainerAwareInterface
 {
-    ScriptEngine engine;
-
     private Container container;
+
+    private ScriptEngine engine;
+
+    private Bindings bindings = new SimpleBindings();
 
     public ExpressionLanguage(Container container)
     {
@@ -21,27 +23,47 @@ public class ExpressionLanguage implements ContainerAwareInterface
         engine = manager.getEngineByName("js");
     }
 
-    public <R> R evaluate(String s) throws EvaluationException
+    @Override
+    public void initialize() throws Exception
     {
-        Bindings bindings = new SimpleBindings();
-        bindings.put("container", container);
-
-        bindings.put("service", (Function<String, Object>) className -> {
-            Class<? extends ContainerAwareInterface> type;
+        addBinding("container", container);
+        addBinding("service", (ThrowingFunction<String, ContainerAwareInterface>) className -> {
+            Class<? extends ContainerAwareInterface> type = null;
 
             try {
                 type = Class.forName(className).asSubclass(ContainerAwareInterface.class);
-            } catch (ClassNotFoundException e) {
-                return null;
+            } catch (ClassNotFoundException ignored) {
             }
 
-            return container.get(type);
-        });
+            if (null == type) {
+                type = container.findAlias(className);
+            }
 
+            if (null == type) {
+                throw new Exception("No service matching \"" + className + "\"");
+            }
+
+            ContainerAwareInterface service = container.get(type);
+
+            if (null == service) {
+                throw new NonExistentServiceException(type);
+            }
+
+            return service;
+        });
+    }
+
+    public <R> R evaluate(String s) throws EvaluationException
+    {
         try {
             return (R) engine.eval(s, bindings);
         } catch (ScriptException e) {
             throw new EvaluationException(e);
         }
+    }
+
+    public void addBinding(String name, Object value)
+    {
+        bindings.put(name, value);
     }
 }
