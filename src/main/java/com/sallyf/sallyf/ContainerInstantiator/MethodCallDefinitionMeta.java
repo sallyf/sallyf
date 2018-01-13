@@ -1,24 +1,24 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
-import com.sallyf.sallyf.Container.CallDefinition;
+import com.sallyf.sallyf.Container.MethodCallDefinition;
 
-public class CallDefinitionMeta
+public class MethodCallDefinitionMeta
 {
     private ServiceDefinitionMeta serviceDefinitionMeta;
 
-    public CallDefinition callDefinition;
+    public MethodCallDefinition methodCallDefinition;
 
     private boolean called = false;
 
-    public CallDefinitionMeta(ServiceDefinitionMeta serviceDefinitionMeta, CallDefinition callDefinition)
+    public MethodCallDefinitionMeta(ServiceDefinitionMeta serviceDefinitionMeta, MethodCallDefinition methodCallDefinition)
     {
         this.serviceDefinitionMeta = serviceDefinitionMeta;
-        this.callDefinition = callDefinition;
+        this.methodCallDefinition = methodCallDefinition;
     }
 
-    public CallDefinition getCallDefinition()
+    public MethodCallDefinition getMethodCallDefinition()
     {
-        return callDefinition;
+        return methodCallDefinition;
     }
 
     public boolean isCalled()

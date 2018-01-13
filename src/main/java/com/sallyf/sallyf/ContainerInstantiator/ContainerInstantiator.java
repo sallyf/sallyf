@@ -70,11 +70,11 @@ public class ContainerInstantiator
                     instance = services.get(serviceDefinition.getAlias());
                 }
 
-                ct.apply(updateServiceDefinitionMetasCallDefinitionMetas());
+                ct.apply(updateServiceDefinitionMetasMethodCallDefinitionMetas());
 
                 ct.apply(invokeCalls());
 
-                ct.apply(updateServiceDefinitionMetasCallDefinitionMetas());
+                ct.apply(updateServiceDefinitionMetasMethodCallDefinitionMetas());
 
                 if (serviceDefinitionMeta.isFullyInstantiated() && !serviceDefinitionMeta.isInitialized()) {
                     try {
@@ -83,7 +83,7 @@ public class ContainerInstantiator
                         throw new ServiceInstantiationException(e);
                     }
 
-                    updateServiceDefinitionMetasCallDefinitionMetas();
+                    updateServiceDefinitionMetasMethodCallDefinitionMetas();
 
                     serviceDefinitionMeta.setInitialized(true);
                     ct.apply(true);
@@ -95,17 +95,17 @@ public class ContainerInstantiator
             }
         }
 
-        if (!allCallDefinitionsCalled()) {
+        if (!allMethodCallDefinitionsCalled()) {
             throw new ServiceInstantiationException("All method calls weren't called, probably because of a missing dependency");
         }
     }
 
-    private boolean updateServiceDefinitionMetasCallDefinitionMetas()
+    private boolean updateServiceDefinitionMetasMethodCallDefinitionMetas()
     {
         ChangeTracker ct = new ChangeTracker();
 
         for (Map.Entry<Class, ServiceDefinitionMeta> entry : serviceDefinitionMetas.entrySet()) {
-            ct.apply(entry.getValue().updateCallDefinitionMetas());
+            ct.apply(entry.getValue().updateMethodCallDefinitionMetas());
         }
 
         return ct.isChanged();
@@ -124,18 +124,18 @@ public class ContainerInstantiator
         return getNotReadyServiceDefinitionMetas().isEmpty();
     }
 
-    private List<CallDefinitionMeta> getUncalledCallDefinitionMetas()
+    private List<MethodCallDefinitionMeta> getUncalledMethodCallDefinitionMetas()
     {
         return serviceDefinitionMetas.entrySet().stream()
                 .map(Map.Entry::getValue)
-                .flatMap(m -> (Stream<CallDefinitionMeta>) m.getCallDefinitionMetas().stream())
-                .filter(o -> !o.isCalled())
+                .flatMap(m -> (Stream<MethodCallDefinitionMeta>) m.getMethodCallDefinitionMetas().stream())
+                .filter(m -> !m.isCalled())
                 .collect(Collectors.toList());
     }
 
-    private boolean allCallDefinitionsCalled()
+    private boolean allMethodCallDefinitionsCalled()
     {
-        return getUncalledCallDefinitionMetas().isEmpty();
+        return getUncalledMethodCallDefinitionMetas().isEmpty();
     }
 
     private <T extends ContainerAwareInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition)
@@ -215,37 +215,37 @@ public class ContainerInstantiator
     {
         ChangeTracker ct = new ChangeTracker();
 
-        for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMetas()) {
-            ServiceDefinition<?> serviceDefinition = callDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
+        for (MethodCallDefinitionMeta methodCallDefinitionMeta : getUncalledMethodCallDefinitionMetas()) {
+            ServiceDefinition<?> serviceDefinition = methodCallDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
 
-            CallDefinition callDefinition = callDefinitionMeta.getCallDefinition();
+            MethodCallDefinition methodCallDefinition = methodCallDefinitionMeta.getMethodCallDefinition();
 
-            if (!isReadyToBeCalled(callDefinition)) {
+            if (!isReadyToBeCalled(methodCallDefinition)) {
                 continue;
             }
 
             ContainerAwareInterface instance = services.get(serviceDefinition.getAlias());
 
             try {
-                Object[] args = resolveReferences(serviceDefinition, callDefinition.getArgs());
+                Object[] args = resolveReferences(serviceDefinition, methodCallDefinition.getArgs());
 
-                Method method = serviceDefinition.getType().getMethod(callDefinition.getName(), ClassUtils.getClasses(args));
+                Method method = serviceDefinition.getType().getMethod(methodCallDefinition.getName(), ClassUtils.getClasses(args));
 
                 method.invoke(instance, args);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new MethodCallException(e);
             }
 
-            callDefinitionMeta.setCalled(true);
+            methodCallDefinitionMeta.setCalled(true);
             ct.apply(true);
         }
 
         return ct.isChanged();
     }
 
-    private boolean isReadyToBeCalled(CallDefinition callDefinition)
+    private boolean isReadyToBeCalled(MethodCallDefinition methodCallDefinition)
     {
-        ReferenceInterface[] references = callDefinition.getArgs();
+        ReferenceInterface[] references = methodCallDefinition.getArgs();
 
         for (ReferenceInterface reference : references) {
             if (reference instanceof ServiceReference) {

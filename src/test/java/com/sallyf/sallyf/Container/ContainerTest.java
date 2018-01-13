@@ -116,7 +116,7 @@ public class ContainerTest
 
         container
                 .add(new ServiceDefinition<>(ServiceWithCall.class))
-                .addCallDefinitions(new CallDefinition("setContainer", new ContainerReference()));
+                .addMethodCallDefinitions(new MethodCallDefinition("setContainer", new ContainerReference()));
 
         container.instantiate();
 
@@ -130,7 +130,7 @@ public class ContainerTest
 
         container
                 .add(new ServiceDefinition<>(ServiceWithCall.class))
-                .addCallDefinitions(new CallDefinition("setContainer", new ServiceReference<>(Service1.class)));
+                .addMethodCallDefinitions(new MethodCallDefinition("setContainer", new ServiceReference<>(Service1.class)));
 
         container.instantiate();
     }

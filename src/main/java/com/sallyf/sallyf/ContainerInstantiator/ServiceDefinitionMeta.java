@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
-import com.sallyf.sallyf.Container.CallDefinition;
+import com.sallyf.sallyf.Container.MethodCallDefinition;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 
@@ -18,25 +18,25 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
 
     private boolean initialized = false;
 
-    private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
+    private ArrayList<MethodCallDefinitionMeta> methodCallDefinitionMetas = new ArrayList<>();
 
-    private HashSet<CallDefinition> callDefinitionsWithMeta = new HashSet<>();
+    private HashSet<MethodCallDefinition> methodCallDefinitionsWithMeta = new HashSet<>();
 
     public ServiceDefinitionMeta(ServiceDefinition<T> serviceDefinition)
     {
         this.serviceDefinition = serviceDefinition;
 
-        updateCallDefinitionMetas();
+        updateMethodCallDefinitionMetas();
     }
 
-    public boolean updateCallDefinitionMetas()
+    public boolean updateMethodCallDefinitionMetas()
     {
         ChangeTracker ct = new ChangeTracker();
 
-        for (CallDefinition callDefinition : serviceDefinition.getCallDefinitions()) {
-            if (!callDefinitionsWithMeta.contains(callDefinition)) {
-                callDefinitionMetas.add(new CallDefinitionMeta(this, callDefinition));
-                callDefinitionsWithMeta.add(callDefinition);
+        for (MethodCallDefinition methodCallDefinition : serviceDefinition.getMethodCallDefinitions()) {
+            if (!methodCallDefinitionsWithMeta.contains(methodCallDefinition)) {
+                methodCallDefinitionMetas.add(new MethodCallDefinitionMeta(this, methodCallDefinition));
+                methodCallDefinitionsWithMeta.add(methodCallDefinition);
 
                 ct.apply(true);
             }
@@ -60,9 +60,9 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
         this.instantiated = instantiated;
     }
 
-    public List<CallDefinitionMeta> getCallDefinitionMetas()
+    public List<MethodCallDefinitionMeta> getMethodCallDefinitionMetas()
     {
-        return callDefinitionMetas;
+        return methodCallDefinitionMetas;
     }
 
     public boolean isWired()
@@ -87,8 +87,8 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
 
     public boolean isFullyCalled()
     {
-        for (CallDefinitionMeta callDefinitionMeta : getCallDefinitionMetas()) {
-            if (!callDefinitionMeta.isCalled()) {
+        for (MethodCallDefinitionMeta methodCallDefinitionMeta : getMethodCallDefinitionMetas()) {
+            if (!methodCallDefinitionMeta.isCalled()) {
                 return false;
             }
         }

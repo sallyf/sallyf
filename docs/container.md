@@ -22,13 +22,13 @@ The constructor signature is free since the services are dynamically resolved.
 - `Class<T>` **type** : The actual Service class
 - `ConfigurationInterface` **configuration** : A `ConfigurationInterface`
 - `ArrayList<ConstructorDefinition>` **constructorDefinitions** : See [ConstructorDefinition](#constructordefinition)
-- `ArrayList<CallDefinition>` **callDefinitions** : See [CallDefinition](#calldefinition)
+- `ArrayList<MethodCallDefinition>` **methodCallDefinitions** : See [MethodCallDefinition](#methodCallDefinition)
 
 #### ConstructorDefinition
 
 It represents a constructor signature; it accepts [`ReferenceInterface`](#referenceinterface)'s
 
-#### CallDefinition
+#### MethodCallDefinition
 
 It represents a method signature; it accepts a method name and [`ReferenceInterface`](#referenceinterface)'s
 
