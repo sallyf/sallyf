@@ -14,6 +14,8 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
 
     private boolean instantiated = false;
 
+    private boolean wired = false;
+
     private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
 
     private HashSet<CallDefinition> callDefinitionsWithMeta = new HashSet<>();
@@ -59,5 +61,15 @@ public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
     public List<CallDefinitionMeta> getCallDefinitionMetas()
     {
         return callDefinitionMetas;
+    }
+
+    public boolean isWired()
+    {
+        return wired;
+    }
+
+    public void setWired(boolean wired)
+    {
+        this.wired = wired;
     }
 }

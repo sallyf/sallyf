@@ -30,8 +30,6 @@ public class ContainerInstantiator
 
     private Map<Class, ConfigurationInterface> configurations = new HashMap<>();
 
-    private ArrayList<ServiceDefinition> autoWiredDefinitions = new ArrayList<>(); // @TODO: migrate in `ServiceDefinitionMeta`
-
     private HashMap<Class, ServiceDefinitionMeta> serviceDefinitionMetas = new HashMap<>();
 
     public ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
@@ -130,9 +128,15 @@ public class ContainerInstantiator
         return dependencyTreeFactory.generate(serviceDefinition);
     }
 
-    public <T extends ContainerAwareInterface> void autoWire(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    public <T extends ContainerAwareInterface> void autoWire(ServiceDefinitionMeta<T> serviceDefinitionMeta) throws ServiceInstantiationException
     {
-        if (serviceDefinition.isAutoWire() && !autoWiredDefinitions.contains(serviceDefinition)) {
+        ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
+
+        if (!serviceDefinition.isAutoWire()) {
+            serviceDefinitionMeta.setWired(true);
+        }
+
+        if (!serviceDefinitionMeta.isWired()) {
             Constructor<?>[] constructors = serviceDefinition.getType().getConstructors();
 
             for (Constructor<?> constructor : constructors) {
@@ -143,7 +147,7 @@ public class ContainerInstantiator
                 serviceDefinition.addConstructorDefinition(new ConstructorDefinition(references));
             }
 
-            autoWiredDefinitions.add(serviceDefinition);
+            serviceDefinitionMeta.setWired(true);
         }
     }
 
@@ -284,9 +288,10 @@ public class ContainerInstantiator
     {
         serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
 
-        serviceDefinitionMetas.put(serviceDefinition.getAlias(), new ServiceDefinitionMeta<>(serviceDefinition));
+        ServiceDefinitionMeta<T> serviceDefinitionMeta = new ServiceDefinitionMeta<>(serviceDefinition);
+        serviceDefinitionMetas.put(serviceDefinition.getAlias(), serviceDefinitionMeta);
 
-        autoWire(serviceDefinition);
+        autoWire(serviceDefinitionMeta);
     }
 
     public Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> getServiceDefinitions()
