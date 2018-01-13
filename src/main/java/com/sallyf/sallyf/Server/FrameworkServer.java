@@ -4,7 +4,6 @@ import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.KernelEvents;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -47,13 +46,9 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
     }
 
     @Override
-    protected void doStart()
+    protected void doStart() throws Exception
     {
-        try {
-            super.doStart();
-        } catch (Exception e) {
-            throw new FrameworkException(e);
-        }
+        super.doStart();
 
         getContainer().get(EventDispatcher.class).register(KernelEvents.PRE_SEND_RESPONSE, (eventType, responseEvent) -> {
             Request request = responseEvent.getRuntimeBag().getRequest();
@@ -71,12 +66,16 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
     {
         ServerConnector connector = (ServerConnector) getConnectors()[0];
 
-        String hostname = connector.getName();
+        String hostname = "";
 
         try {
             InetAddress addr = InetAddress.getLocalHost();
             hostname = addr.getHostName();
         } catch (UnknownHostException ignored) {
+        }
+
+        if (hostname.isEmpty()) {
+            hostname = connector.getName();
         }
 
         if (hostname.isEmpty()) {
