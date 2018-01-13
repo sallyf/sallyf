@@ -5,12 +5,12 @@ import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
-import org.eclipse.jetty.http.HttpStatus;
+import okhttp3.*;
 import org.junit.Test;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -35,6 +35,8 @@ class AuthenticationConfiguration extends Configuration
 
 public class AuthenticationRequestTest extends BaseFrameworkTest
 {
+    private OkHttpClient client;
+
     @Override
     public void preBoot() throws ServiceInstantiationException
     {
@@ -47,6 +49,26 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
     public void setUp() throws Exception
     {
         setUp(TestController.class);
+
+        client = new OkHttpClient.Builder()
+                .cookieJar(new CookieJar()
+                {
+                    private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
+
+                    @Override
+                    public void saveFromResponse(HttpUrl url, List<Cookie> cookies)
+                    {
+                        cookieStore.put(url.host(), cookies);
+                    }
+
+                    @Override
+                    public List<Cookie> loadForRequest(HttpUrl url)
+                    {
+                        List<Cookie> cookies = cookieStore.get(url.host());
+                        return cookies != null ? cookies : new ArrayList<>();
+                    }
+                })
+                .build();
     }
 
     @Test
@@ -60,53 +82,79 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
     @Test
     public void testAuthenticateThenRetrieve() throws Exception
     {
-        HttpURLConnection http1 = (HttpURLConnection) new URL(getRootURL() + "/authenticate").openConnection();
-        http1.connect();
-        assertThat("Response Code", http1.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http1), is("adminadmin"));
+        Request request1 = new Request.Builder()
+                .url(getRootURL() + "/authenticate")
+                .build();
 
-        HttpURLConnection http2 = (HttpURLConnection) new URL(getRootURL() + "/user").openConnection();
-        http2.setRequestProperty("Cookie", http1.getHeaderField("Set-Cookie"));
-        http2.connect();
-        assertThat("Response Code", http2.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http2), is("admin"));
+        Response response1 = client.newCall(request1).execute();
+
+        assertThat("Response Code", response1.code(), is(200));
+        assertThat("Content", response1.body().string(), is("adminadmin"));
+
+        Request request2 = new Request.Builder()
+                .url(getRootURL() + "/user")
+                .build();
+
+        Response response2 = client.newCall(request2).execute();
+
+        assertThat("Response Code", response2.code(), is(200));
+        assertThat("Content", response2.body().string(), is("admin"));
     }
 
     @Test
     public void testAnonymousAccess() throws Exception
     {
-        HttpURLConnection http1 = (HttpURLConnection) new URL(getRootURL() + "/secured").openConnection();
-        http1.connect();
-        assertThat("Response Code", http1.getResponseCode(), is(HttpStatus.FORBIDDEN_403));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/secured")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(403));
     }
 
     @Test
     public void testAuthenticatedAccess() throws Exception
     {
-        HttpURLConnection http1 = (HttpURLConnection) new URL(getRootURL() + "/authenticate").openConnection();
-        http1.connect();
-        assertThat("Response Code", http1.getResponseCode(), is(HttpStatus.OK_200));
+        Request request1 = new Request.Builder()
+                .url(getRootURL() + "/authenticate")
+                .build();
 
-        HttpURLConnection http2 = (HttpURLConnection) new URL(getRootURL() + "/secured").openConnection();
-        http2.setRequestProperty("Cookie", http1.getHeaderField("Set-Cookie"));
-        http2.connect();
-        assertThat("Response Code", http2.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http2), is("Secured"));
+        Response response1 = client.newCall(request1).execute();
+
+        assertThat("Response Code", response1.code(), is(200));
+
+        Request request2 = new Request.Builder()
+                .url(getRootURL() + "/secured")
+                .build();
+
+        Response response2 = client.newCall(request2).execute();
+
+        assertThat("Response Code", response2.code(), is(200));
+        assertThat("Content", response2.body().string(), is("Secured"));
     }
 
     @Test
     public void testParameterVoterSuccess() throws Exception
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/secured/admin").openConnection();
-        http.connect();
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/secured/admin")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(200));
     }
 
     @Test
     public void testParameterVoterFailure() throws Exception
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/secured/yolo").openConnection();
-        http.connect();
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.FORBIDDEN_403));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/secured/yolo")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(403));
     }
 }
