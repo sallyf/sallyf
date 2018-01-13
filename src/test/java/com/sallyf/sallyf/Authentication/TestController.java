@@ -36,4 +36,11 @@ public class TestController extends BaseController
     {
         return "Secured name";
     }
+
+    @Route(path = "/secured/authenticated/{name}")
+    @Security("is_granted($, 'access', name) && is_granted($, 'authenticated')")
+    public String securedAuthenticatedName()
+    {
+        return "Secured name authenticated";
+    }
 }
