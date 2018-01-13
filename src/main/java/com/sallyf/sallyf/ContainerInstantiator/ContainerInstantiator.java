@@ -2,7 +2,7 @@ package com.sallyf.sallyf.ContainerInstantiator;
 
 import com.sallyf.sallyf.Container.*;
 import com.sallyf.sallyf.Container.Exception.*;
-import com.sallyf.sallyf.Utils;
+import com.sallyf.sallyf.Utils.ClassUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -183,7 +183,7 @@ public class ContainerInstantiator
         for (ConstructorDefinition constructorDefinition : serviceDefinition.getConstructorDefinitions()) {
             try {
                 Object[] args = resolveReferences(serviceDefinition, constructorDefinition.getArgs());
-                Constructor<T> constructor = Utils.getConstructorForArgs(serviceClass, Utils.getClasses(args));
+                Constructor<T> constructor = ClassUtils.getConstructorForArgs(serviceClass, ClassUtils.getClasses(args));
                 if (constructor != null) {
                     instance = constructor.newInstance(args);
                     break;
@@ -208,7 +208,7 @@ public class ContainerInstantiator
             try {
                 Object[] args = resolveReferences(serviceDefinition, callDefinition.getArgs());
 
-                Method method = serviceDefinition.getType().getMethod(callDefinition.getName(), Utils.getClasses(args));
+                Method method = serviceDefinition.getType().getMethod(callDefinition.getName(), ClassUtils.getClasses(args));
 
                 method.invoke(instance, args);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

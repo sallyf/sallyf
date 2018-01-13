@@ -1,8 +1,8 @@
-package com.sallyf.sallyf;
+package com.sallyf.sallyf.Utils;
 
 import java.lang.reflect.Constructor;
 
-public class Utils
+public class ClassUtils
 {
     public static Class[] getClasses(Object[] args)
     {
