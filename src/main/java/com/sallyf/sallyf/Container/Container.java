@@ -57,6 +57,11 @@ public class Container
         return serviceDefinition;
     }
 
+    public ServiceDefinition<?> getServiceDefinition(Class type)
+    {
+        return containerInstantiator.getServiceDefinitions().get(type);
+    }
+
     public void instantiate() throws ServiceInstantiationException
     {
         if (instantiated) {

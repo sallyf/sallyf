@@ -30,9 +30,9 @@ public class ContainerInstantiator
 
     private Map<Class, ConfigurationInterface> configurations = new HashMap<>();
 
-    private ArrayList<ServiceDefinition> autoWiredDefinitions = new ArrayList<>();
+    private ArrayList<ServiceDefinition> autoWiredDefinitions = new ArrayList<>(); // @TODO: migrate in `ServiceDefinitionMeta`
 
-    private ArrayList<ServiceDefinitionMeta> serviceDefinitionMetas = new ArrayList<>();
+    private HashMap<Class, ServiceDefinitionMeta> serviceDefinitionMetas = new HashMap<>();
 
     public ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
     {
@@ -93,14 +93,17 @@ public class ContainerInstantiator
 
     private void updateServiceDefinitionMetasCallDefinitionMetas()
     {
-        for (ServiceDefinitionMeta serviceDefinitionMeta : serviceDefinitionMetas) {
-            serviceDefinitionMeta.updateCallDefinitionMetas();
+        for (Map.Entry<Class, ServiceDefinitionMeta> entry : serviceDefinitionMetas.entrySet()) {
+            entry.getValue().updateCallDefinitionMetas();
         }
     }
 
     private List<ServiceDefinitionMeta> getUninstantiatedServiceDefinitionMetas()
     {
-        return serviceDefinitionMetas.stream().filter(m -> !m.isInstantiated()).collect(Collectors.toList());
+        return serviceDefinitionMetas.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(m -> !m.isInstantiated())
+                .collect(Collectors.toList());
     }
 
     private boolean allServiceDefinitionsInstantiated()
@@ -110,7 +113,8 @@ public class ContainerInstantiator
 
     private List<CallDefinitionMeta> getUncalledCallDefinitionMeta()
     {
-        return serviceDefinitionMetas.stream()
+        return serviceDefinitionMetas.entrySet().stream()
+                .map(Map.Entry::getValue)
                 .flatMap(m -> (Stream<CallDefinitionMeta>) m.getCallDefinitionMetas().stream())
                 .filter(o -> !o.isCalled())
                 .collect(Collectors.toList());
@@ -280,7 +284,7 @@ public class ContainerInstantiator
     {
         serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
 
-        serviceDefinitionMetas.add(new ServiceDefinitionMeta<>(serviceDefinition));
+        serviceDefinitionMetas.put(serviceDefinition.getAlias(), new ServiceDefinitionMeta<>(serviceDefinition));
 
         autoWire(serviceDefinition);
     }

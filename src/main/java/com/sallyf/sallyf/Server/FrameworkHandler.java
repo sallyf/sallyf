@@ -103,8 +103,9 @@ public class FrameworkHandler extends AbstractHandler
                 Response error = new Response("Internal Error", Status.INTERNAL_ERROR, "text/plain");
 
                 applyResponse(servletResponse, error);
-                return;
             }
+
+            return;
         }
 
         for (Map.Entry<String, ArrayList<String>> entry : response.getHeaders().entrySet()) {

@@ -1,6 +1,6 @@
 package com.sallyf.sallyf;
 
-import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.Container.PlainReference;
 import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Configuration;
@@ -152,7 +152,9 @@ public abstract class BaseFrameworkTest
     {
         app = Kernel.newInstance();
 
-        app.getContainer().add(new ServiceDefinition<>(FrameworkServer.class, new ServerConfiguration()));
+        app.getContainer()
+                .getServiceDefinition(FrameworkServer.class)
+                .setConfigurationReference(new PlainReference<>(new ServerConfiguration()));
 
         preBoot();
 

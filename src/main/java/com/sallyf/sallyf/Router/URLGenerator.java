@@ -1,6 +1,5 @@
 package com.sallyf.sallyf.Router;
 
-import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
 import com.sallyf.sallyf.Server.FrameworkServer;
@@ -11,15 +10,12 @@ import java.util.Map;
 
 public class URLGenerator implements ContainerAwareInterface
 {
-    private final Container container;
-
     private final FrameworkServer server;
 
     private final Router router;
 
-    public URLGenerator(Container container, FrameworkServer server, Router router)
+    public URLGenerator(FrameworkServer server, Router router)
     {
-        this.container = container;
         this.server = server;
         this.router = router;
     }

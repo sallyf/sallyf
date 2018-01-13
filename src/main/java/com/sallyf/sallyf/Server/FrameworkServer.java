@@ -78,7 +78,7 @@ public class FrameworkServer extends Server implements ContainerAwareInterface
             hostname = "localhost";
         }
 
-        return "http://" + hostname + ":" + connector.getLocalPort();
+        return "http://" + hostname + ":" + connector.getPort();
     }
 
     public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
