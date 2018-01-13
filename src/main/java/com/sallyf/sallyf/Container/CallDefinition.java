@@ -2,9 +2,9 @@ package com.sallyf.sallyf.Container;
 
 public class CallDefinition
 {
-    String name;
+    private String name;
 
-    ReferenceInterface[] args;
+    private ReferenceInterface[] args;
 
     public CallDefinition(String name, ReferenceInterface... args)
     {
@@ -12,4 +12,13 @@ public class CallDefinition
         this.args = args;
     }
 
+    public String getName()
+    {
+        return name;
+    }
+
+    public ReferenceInterface[] getArgs()
+    {
+        return args;
+    }
 }

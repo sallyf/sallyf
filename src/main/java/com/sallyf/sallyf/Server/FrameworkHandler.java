@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Server;
 
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
 import com.sallyf.sallyf.Event.RequestEvent;
 import com.sallyf.sallyf.Event.ResponseEvent;
 import com.sallyf.sallyf.Event.RouteMatchEvent;
@@ -104,8 +103,9 @@ public class FrameworkHandler extends AbstractHandler
                 Response error = new Response("Internal Error", Status.INTERNAL_ERROR, "text/plain");
 
                 applyResponse(servletResponse, error);
-                return;
             }
+
+            return;
         }
 
         for (Map.Entry<String, ArrayList<String>> entry : response.getHeaders().entrySet()) {

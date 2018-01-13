@@ -1,8 +1,8 @@
 package com.sallyf.sallyf.Authentication.Voter;
 
+import com.sallyf.sallyf.AccessDecisionManager.Voter.VoterInterface;
 import com.sallyf.sallyf.Authentication.AuthenticationManager;
 import com.sallyf.sallyf.Container.ContainerAwareInterface;
-import com.sallyf.sallyf.AccessDecisionManager.Voter.VoterInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
 import java.util.Arrays;

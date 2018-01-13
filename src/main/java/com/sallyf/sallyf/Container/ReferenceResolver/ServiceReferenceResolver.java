@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Container.ReferenceResolver;
 
 import com.sallyf.sallyf.Container.*;
-import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
 
 public class ServiceReferenceResolver<T extends ContainerAwareInterface> implements ReferenceResolverInterface<T, ServiceReference<T>, T>
 {
@@ -21,12 +20,6 @@ public class ServiceReferenceResolver<T extends ContainerAwareInterface> impleme
     @Override
     public T resolve(ServiceDefinition<T> serviceDefinition, ServiceReference<T> reference) throws Exception
     {
-        Class<T> type = reference.type;
-
-        if (!container.has(type)) {
-            throw new ReferenceResolutionException("Unable to resolve service " + type.getName());
-        }
-
-        return container.get(type);
+        return container.get(reference.getAlias());
     }
 }

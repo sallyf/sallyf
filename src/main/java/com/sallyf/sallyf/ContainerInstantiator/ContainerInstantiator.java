@@ -1,59 +1,28 @@
-package com.sallyf.sallyf.Container;
+package com.sallyf.sallyf.ContainerInstantiator;
 
+import com.sallyf.sallyf.Container.*;
 import com.sallyf.sallyf.Container.Exception.*;
 import com.sallyf.sallyf.Utils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-class CallDefinitionMeta<T extends ContainerAwareInterface>
+public class ContainerInstantiator
 {
-    public CallDefinition callDefinition;
+    private DependencyTreeFactory dependencyTreeFactory = new DependencyTreeFactory(this);
 
-    public ServiceDefinition<T> serviceDefinition;
-
-    public CallDefinitionMeta(CallDefinition callDefinition, ServiceDefinition<T> serviceDefinition)
-    {
-        this.callDefinition = callDefinition;
-        this.serviceDefinition = serviceDefinition;
-    }
-}
-
-class PutListenerHashMap<K, V> extends HashMap<K, V>
-{
-    private BiConsumer<K, V> consumer;
-
-    public void setConsumer(BiConsumer<K, V> consumer)
-    {
-        this.consumer = consumer;
-    }
-
-    public void removeConsumer()
-    {
-        this.consumer = null;
-    }
-
-    @Override
-    public V put(K k, V v)
-    {
-        if (null != consumer) {
-            consumer.accept(k, v);
-        }
-
-        return super.put(k, v);
-    }
-}
-
-class ContainerInstantiator
-{
     private Map<Class, ContainerAwareInterface> services;
 
     private Map<String, ArrayList<ContainerAwareInterface>> taggedServices;
 
-    private PutListenerHashMap<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new PutListenerHashMap<>();
+    private HashMap<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new HashMap<>();
 
     private ArrayList<ReferenceResolverInterface> referenceResolvers = new ArrayList<>();
 
@@ -61,11 +30,9 @@ class ContainerInstantiator
 
     private Map<Class, ConfigurationInterface> configurations = new HashMap<>();
 
-    private ArrayList<ServiceDefinition> autoWiredDefinitions = new ArrayList<>();
+    private HashMap<Class, ServiceDefinitionMeta> serviceDefinitionMetas = new HashMap<>();
 
-    private ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>();
-
-    ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
+    public ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
     {
         this.services = services;
         this.taggedServices = taggedServices;
@@ -73,63 +40,103 @@ class ContainerInstantiator
 
     public void boot() throws ServiceInstantiationException
     {
-        for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : serviceDefinitions.entrySet()) {
-            ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
-            ArrayList<CallDefinition> callDefinitions = serviceDefinition.getCallDefinitions();
-
-            for (CallDefinition callDefinition : callDefinitions) {
-                callDefinitionMetas.add(new CallDefinitionMeta<>(callDefinition, serviceDefinition));
-            }
-        }
-
-        Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitionsPool = new HashMap<>(this.serviceDefinitions);
-
-        this.serviceDefinitions.setConsumer(serviceDefinitionsPool::put);
-
-        while (!serviceDefinitionsPool.isEmpty()) {
+        while (!allServiceDefinitionsInstantiated()) {
             boolean hasInstantiated = false;
 
-            Set<Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>>> entries = new HashSet<>(serviceDefinitionsPool.entrySet());
+            for (ServiceDefinitionMeta<?> serviceDefinitionMeta : getUninstantiatedServiceDefinitionMetas()) {
+                ServiceDefinition<?> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
-            for (Map.Entry<Class, ServiceDefinition<? extends ContainerAwareInterface>> entry : entries) {
-                ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition = entry.getValue();
+                DependencyTree dependenciesTree = getServiceDependenciesTree(serviceDefinition);
 
-                autoWire(serviceDefinition);
+                if (!dependenciesTree.isFullyInstantiable()) {
+                    throw new ReferenceResolutionException("Service " + serviceDefinition.getType() + " is not instantiable due to missing dependency");
+                }
 
-                ContainerAwareInterface instance;
-                try {
-                    instance = bootService(serviceDefinition);
-                    hasInstantiated = true;
-                } catch (ServiceInstantiationException e) {
+                if (dependenciesTree.hasCircularReference()) {
+                    throw new CircularReferenceException(dependenciesTree.getCircularReferencePath());
+                }
+
+                if (!dependenciesTree.isFullyInstantiated()) {
                     continue;
                 }
 
+                bootService(serviceDefinitionMeta);
+
+                updateServiceDefinitionMetasCallDefinitionMetas();
+
                 invokeCalls();
 
-                try {
-                    instance.initialize();
-                } catch (Exception e) {
-                    throw new ServiceInstantiationException(e);
-                }
-
-                serviceDefinitionsPool.remove(entry.getKey());
+                hasInstantiated = true;
             }
 
-            if (!entries.isEmpty() && !hasInstantiated) {
-                throw new CircularReferenceException();
+            if (!hasInstantiated && !allServiceDefinitionsInstantiated()) {
+                throw new ServiceInstantiationException("Unable to instantiate all services");
             }
         }
 
-        this.serviceDefinitions.removeConsumer();
+        invokeCalls();
 
-        if (!callDefinitionMetas.isEmpty()) {
+        if (!allCallDefinitionsCalled()) {
             throw new ServiceInstantiationException("All calls weren't called");
+        }
+
+        for (Map.Entry<Class, ContainerAwareInterface> entry : this.services.entrySet()) {
+            try {
+                entry.getValue().initialize();
+            } catch (Exception e) {
+                throw new ServiceInstantiationException(e);
+            }
         }
     }
 
-    private <T extends ContainerAwareInterface> void autoWire(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    private void updateServiceDefinitionMetasCallDefinitionMetas()
     {
-        if (serviceDefinition.isAutoWire() && !autoWiredDefinitions.contains(serviceDefinition)) {
+        for (Map.Entry<Class, ServiceDefinitionMeta> entry : serviceDefinitionMetas.entrySet()) {
+            entry.getValue().updateCallDefinitionMetas();
+        }
+    }
+
+    private List<ServiceDefinitionMeta> getUninstantiatedServiceDefinitionMetas()
+    {
+        return serviceDefinitionMetas.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(m -> !m.isInstantiated())
+                .collect(Collectors.toList());
+    }
+
+    private boolean allServiceDefinitionsInstantiated()
+    {
+        return getUninstantiatedServiceDefinitionMetas().isEmpty();
+    }
+
+    private List<CallDefinitionMeta> getUncalledCallDefinitionMeta()
+    {
+        return serviceDefinitionMetas.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .flatMap(m -> (Stream<CallDefinitionMeta>) m.getCallDefinitionMetas().stream())
+                .filter(o -> !o.isCalled())
+                .collect(Collectors.toList());
+    }
+
+    private boolean allCallDefinitionsCalled()
+    {
+        return getUncalledCallDefinitionMeta().isEmpty();
+    }
+
+    private <T extends ContainerAwareInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    {
+        return dependencyTreeFactory.generate(serviceDefinition);
+    }
+
+    public <T extends ContainerAwareInterface> void autoWire(ServiceDefinitionMeta<T> serviceDefinitionMeta) throws ServiceInstantiationException
+    {
+        ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
+
+        if (!serviceDefinition.isAutoWire()) {
+            serviceDefinitionMeta.setWired(true);
+        }
+
+        if (!serviceDefinitionMeta.isWired()) {
             Constructor<?>[] constructors = serviceDefinition.getType().getConstructors();
 
             for (Constructor<?> constructor : constructors) {
@@ -140,12 +147,14 @@ class ContainerInstantiator
                 serviceDefinition.addConstructorDefinition(new ConstructorDefinition(references));
             }
 
-            autoWiredDefinitions.add(serviceDefinition);
+            serviceDefinitionMeta.setWired(true);
         }
     }
 
-    private <T extends ContainerAwareInterface> T bootService(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    private <T extends ContainerAwareInterface> T bootService(ServiceDefinitionMeta<T> serviceDefinitionMeta) throws ServiceInstantiationException
     {
+        ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
+
         Class<T> serviceClass = serviceDefinition.getType();
 
         T instance = instantiateService(serviceDefinition);
@@ -160,6 +169,8 @@ class ContainerInstantiator
             addTaggedService(tag, instance);
         }
 
+        serviceDefinitionMeta.setInstantiated(true);
+
         return instance;
     }
 
@@ -171,7 +182,7 @@ class ContainerInstantiator
 
         for (ConstructorDefinition constructorDefinition : serviceDefinition.getConstructorDefinitions()) {
             try {
-                Object[] args = resolveReferences(serviceDefinition, constructorDefinition.args);
+                Object[] args = resolveReferences(serviceDefinition, constructorDefinition.getArgs());
                 Constructor<T> constructor = Utils.getConstructorForArgs(serviceClass, Utils.getClasses(args));
                 if (constructor != null) {
                     instance = constructor.newInstance(args);
@@ -187,18 +198,17 @@ class ContainerInstantiator
 
     private void invokeCalls() throws CallException
     {
-        ArrayList<CallDefinitionMeta> callDefinitionMetas = new ArrayList<>(this.callDefinitionMetas);
+        for (CallDefinitionMeta callDefinitionMeta : getUncalledCallDefinitionMeta()) {
+            ServiceDefinition<?> serviceDefinition = callDefinitionMeta.getServiceDefinitionMeta().getServiceDefinition();
 
-        for (CallDefinitionMeta callDefinitionMeta : callDefinitionMetas) {
-            ServiceDefinition<?> serviceDefinition = callDefinitionMeta.serviceDefinition;
-            CallDefinition callDefinition = callDefinitionMeta.callDefinition;
+            CallDefinition callDefinition = callDefinitionMeta.getCallDefinition();
 
             ContainerAwareInterface instance = services.get(serviceDefinition.getAlias());
 
             try {
-                Object[] args = resolveReferences(serviceDefinition, callDefinition.args);
+                Object[] args = resolveReferences(serviceDefinition, callDefinition.getArgs());
 
-                Method method = serviceDefinition.getType().getMethod(callDefinition.name, Utils.getClasses(args));
+                Method method = serviceDefinition.getType().getMethod(callDefinition.getName(), Utils.getClasses(args));
 
                 method.invoke(instance, args);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -207,7 +217,7 @@ class ContainerInstantiator
                 continue;
             }
 
-            this.callDefinitionMetas.remove(callDefinitionMeta);
+            callDefinitionMeta.setCalled(true);
         }
     }
 
@@ -274,6 +284,16 @@ class ContainerInstantiator
         taggedServices.get(tag).add(service);
     }
 
+    public <T extends ContainerAwareInterface> void addServiceDefinition(ServiceDefinition<T> serviceDefinition) throws ServiceInstantiationException
+    {
+        serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
+
+        ServiceDefinitionMeta<T> serviceDefinitionMeta = new ServiceDefinitionMeta<>(serviceDefinition);
+        serviceDefinitionMetas.put(serviceDefinition.getAlias(), serviceDefinitionMeta);
+
+        autoWire(serviceDefinitionMeta);
+    }
+
     public Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> getServiceDefinitions()
     {
         return serviceDefinitions;
@@ -292,5 +312,10 @@ class ContainerInstantiator
     public Map<Class, ConfigurationInterface> getConfigurations()
     {
         return configurations;
+    }
+
+    public Map<Class, ContainerAwareInterface> getServices()
+    {
+        return services;
     }
 }

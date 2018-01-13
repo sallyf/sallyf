@@ -26,7 +26,13 @@ public class TestController extends BaseController
     @Route(path = "/redirect", name = "redirect")
     public Response redirect() throws UnableToGenerateURLException
     {
-        return redirectToRoute("test_hello_named");
+        return redirectToRoute("test_redirect_target");
+    }
+
+    @Route(path = "/redirect-target", name = "redirect_target")
+    public String redirectTarget()
+    {
+        return "Redirect target";
     }
 
     @Route(path = "/hello/{name}")

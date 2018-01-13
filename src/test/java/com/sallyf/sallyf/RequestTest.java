@@ -3,15 +3,16 @@ package com.sallyf.sallyf;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.EventDispatcher.EventType;
 import com.sallyf.sallyf.Router.URLGenerator;
-import org.eclipse.jetty.http.HttpStatus;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -21,11 +22,15 @@ public class RequestTest extends BaseFrameworkTest
 {
     private ArrayList<EventType> dispatchedEvents = new ArrayList<>();
 
+    private OkHttpClient client;
+
     @Override
     @Before
     public void setUp() throws Exception
     {
         setUp(TestController.class);
+
+        client = new OkHttpClient();
     }
 
     @Override
@@ -51,9 +56,13 @@ public class RequestTest extends BaseFrameworkTest
     @Test
     public void testHello() throws IOException
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/hello").openConnection();
-        http.connect();
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/prefixed/hello")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(200));
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
@@ -69,9 +78,13 @@ public class RequestTest extends BaseFrameworkTest
     @Test
     public void test404() throws IOException
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/notfound").openConnection();
-        http.connect();
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.NOT_FOUND_404));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/notfound")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(404));
 
         EventType[] expectedEvents = {
                 KernelEvents.REQUEST,
@@ -84,10 +97,14 @@ public class RequestTest extends BaseFrameworkTest
     @Test
     public void testHelloParameter() throws IOException
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/hello/YOLO").openConnection();
-        http.connect();
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http), is("hello, YOLO fallback"));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/prefixed/hello/YOLO")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(200));
+        assertThat("Content", response.body().string(), is("hello, YOLO fallback"));
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
@@ -104,10 +121,14 @@ public class RequestTest extends BaseFrameworkTest
     @Test
     public void testTransform() throws IOException
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/resolve/YOLO").openConnection();
-        http.connect();
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.OK_200));
-        assertThat("Content", streamToString(http), is("hello, YOLO"));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/prefixed/resolve/YOLO")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(200));
+        assertThat("Content", response.body().string(), is("hello, YOLO"));
 
         EventType[] expectedEvents = {
                 KernelEvents.PRE_SEND_RESPONSE,
@@ -124,20 +145,38 @@ public class RequestTest extends BaseFrameworkTest
     @Test
     public void testRedirect() throws Exception
     {
-        String target = app.getContainer().get(URLGenerator.class).url("test_hello_named");
+        String target = app.getContainer().get(URLGenerator.class).url("test_redirect_target");
 
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/redirect").openConnection();
-        http.connect();
-        http = followRedirects(http);
-        assertThat("Target URL", http.getURL().toString(), is(target));
+        AtomicReference<String> lastUrl = new AtomicReference<>("");
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addNetworkInterceptor(chain -> {
+                    String next = chain.request().url().toString();
+
+                    lastUrl.set(next);
+
+                    return chain.proceed(chain.request());
+                })
+                .build();
+
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/prefixed/redirect")
+                .build();
+
+        client.newCall(request).execute();
+
+        assertThat("Target URL", lastUrl.get(), is(target));
     }
 
     @Test
     public void testInvalidResponse() throws Exception
     {
-        HttpURLConnection http = (HttpURLConnection) new URL(getRootURL() + "/prefixed/invalidresponse").openConnection();
-        http.connect();
-        http = followRedirects(http);
-        assertThat("Response Code", http.getResponseCode(), is(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/prefixed/invalidresponse")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(500));
     }
 }

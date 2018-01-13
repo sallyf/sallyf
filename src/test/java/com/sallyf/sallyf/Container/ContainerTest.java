@@ -2,46 +2,12 @@ package com.sallyf.sallyf.Container;
 
 import com.sallyf.sallyf.Container.Exception.CircularReferenceException;
 import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
+import com.sallyf.sallyf.Container.Exception.ReferenceResolutionException;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-class Service1 implements ContainerAwareInterface
-{
-    public Service1(Service2 service2)
-    {
-    }
-}
-
-class Service2 implements ContainerAwareInterface
-{
-    public Service2(Service1 service2)
-    {
-    }
-}
-
-class ServiceWithCall implements ContainerAwareInterface
-{
-    public ServiceWithCall()
-    {
-    }
-
-    Container container;
-
-    public Container getContainer()
-    {
-        return container;
-    }
-
-    public void setContainer(Container container)
-    {
-        this.container = container;
-    }
-}
+import static org.junit.Assert.*;
 
 public class ContainerTest
 {
@@ -130,8 +96,18 @@ public class ContainerTest
     {
         Container container = new Container();
 
-        container.add(new ServiceDefinition<>(Service1.class));
+        container.add(new ServiceDefinition<>(Service1Interface.class, Service1.class));
         container.add(new ServiceDefinition<>(Service2.class));
+
+        container.instantiate();
+    }
+
+    @Test(expected = ReferenceResolutionException.class)
+    public void testMissingReference() throws FrameworkException
+    {
+        Container container = new Container();
+
+        container.add(new ServiceDefinition<>(Service1.class));
 
         container.instantiate();
     }
@@ -160,8 +136,6 @@ public class ContainerTest
                 .addCallDefinitions(new CallDefinition("setContainer", new ServiceReference<>(Service1.class)));
 
         container.instantiate();
-
-        assertEquals(container, container.get(ServiceWithCall.class).getContainer());
     }
 
     @Test

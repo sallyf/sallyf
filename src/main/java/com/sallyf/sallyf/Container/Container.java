@@ -9,6 +9,7 @@ import com.sallyf.sallyf.Container.ReferenceResolver.ServiceReferenceResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ConfigurationResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ContainerResolver;
 import com.sallyf.sallyf.Container.TypeResolver.ServiceResolver;
+import com.sallyf.sallyf.ContainerInstantiator.ContainerInstantiator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public class Container
 
     private Map<Class, ContainerAwareInterface> services = new HashMap<>();
 
-    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<String, ArrayList<ContainerAwareInterface>>();
+    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<>();
 
     private boolean instantiated = false;
 
@@ -51,9 +52,14 @@ public class Container
             throw new ContainerInstantiatedException();
         }
 
-        containerInstantiator.getServiceDefinitions().put(serviceDefinition.getAlias(), serviceDefinition);
+        containerInstantiator.addServiceDefinition(serviceDefinition);
 
         return serviceDefinition;
+    }
+
+    public ServiceDefinition<?> getServiceDefinition(Class type)
+    {
+        return containerInstantiator.getServiceDefinitions().get(type);
     }
 
     public void instantiate() throws ServiceInstantiationException
@@ -69,23 +75,18 @@ public class Container
 
     public <T extends ContainerAwareInterface> ArrayList<T> getByTag(String tag)
     {
-        ArrayList<ContainerAwareInterface> services = taggedServices.get(tag);
+        ArrayList<T> services = (ArrayList<T>) taggedServices.get(tag);
 
         if (null == services) {
             return new ArrayList<>();
         }
 
-        return (ArrayList<T>) services;
+        return services;
     }
 
     public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
     {
         return (T) services.get(serviceClass);
-    }
-
-    public <T extends ContainerAwareInterface, C> C get(Class<T> serviceClass, Class<C> castType)
-    {
-        return (C) get(serviceClass);
     }
 
     public boolean has(Class serviceClass)

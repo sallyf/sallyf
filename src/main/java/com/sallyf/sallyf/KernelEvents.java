@@ -26,5 +26,6 @@ public class KernelEvents
     public static final EventType BOOTED = new EventType<>("kernel.booted");
 
     public static final EventType START = new EventType<>("kernel.start");
+
     public static final EventType STARTED = new EventType<>("kernel.started");
 }

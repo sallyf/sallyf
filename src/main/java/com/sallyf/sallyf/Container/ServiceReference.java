@@ -1,11 +1,16 @@
 package com.sallyf.sallyf.Container;
 
-public class ServiceReference<T extends ContainerAwareInterface> implements ReferenceInterface
+public class ServiceReference<T extends ContainerAwareInterface> implements ReferenceInterface, ServiceRepresentationInterface
 {
-    public Class<T> type;
+    private Class<T> alias;
 
-    public ServiceReference(Class<T> type)
+    public ServiceReference(Class<T> alias)
     {
-        this.type = type;
+        this.alias = alias;
+    }
+
+    public Class<T> getAlias()
+    {
+        return alias;
     }
 }
