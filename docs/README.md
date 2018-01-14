@@ -9,3 +9,5 @@
 - [Event Dispatcher](event-dispatcher.md)
     - [Kernel Events](events.md)
 - [AccessDecisionManager](access-decision-manager.md)
+- [ExpressionLanguage](expression-language.md)
+- [Security](security.md)

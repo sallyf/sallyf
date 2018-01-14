@@ -16,8 +16,16 @@ Is an enum in `DecisionStrategy` :
 
 ## Usage
 
-    decisionManager.vote(<attribute>, <subject>, <runtimeBag>)
+    decisionManager.vote(<runtimeBag>, <attribute>, <subject>)
 
+- `<runtimeBag>` the runtimeBag
 - `<attribute>` is a string. It is advised to store it as a `public static final` to improve reusability.
 - `<subject>` the object to vote on
-- `<runtimeBag>` the runtimeBag
+
+## Adding a Voter
+
+Each `Voter` is a `Service`, tagged as `AccessDecisionManager.TAG_VOTER`
+
+    container
+            .add(new ServiceDefinition<>(AuthenticationVoter.class))
+            .addTag(AccessDecisionManager.TAG_VOTER);
