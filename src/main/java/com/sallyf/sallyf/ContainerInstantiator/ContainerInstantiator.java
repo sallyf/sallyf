@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ContainerInstantiator
 {
@@ -30,7 +29,7 @@ public class ContainerInstantiator
 
     private Map<Class, ConfigurationInterface> configurations = new HashMap<>();
 
-    private HashMap<Class, ServiceDefinitionMeta> serviceDefinitionMetas = new HashMap<>();
+    private HashMap<Class, ServiceDefinitionMeta<?>> serviceDefinitionMetas = new HashMap<>();
 
     public ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
     {
@@ -44,59 +43,64 @@ public class ContainerInstantiator
             ChangeTracker ct = new ChangeTracker();
 
             for (ServiceDefinitionMeta<?> serviceDefinitionMeta : getNotReadyServiceDefinitionMetas()) {
-                ServiceDefinition<?> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
-
-                ContainerAwareInterface instance;
-
-                if (!serviceDefinitionMeta.isInstantiated()) {
-                    DependencyTree dependenciesTree = getServiceDependenciesTree(serviceDefinition);
-
-                    if (!dependenciesTree.isFullyInstantiable()) {
-                        throw new ReferenceResolutionException("Service " + serviceDefinition.getType() + " is not instantiable due to missing dependency");
-                    }
-
-                    if (dependenciesTree.hasCircularReference()) {
-                        throw new CircularReferenceException(dependenciesTree.getCircularReferencePath());
-                    }
-
-                    if (!dependenciesTree.isFullyInstantiated()) {
-                        continue;
-                    }
-
-                    instance = bootService(serviceDefinitionMeta);
-
-                    ct.apply(true);
-                } else {
-                    instance = services.get(serviceDefinition.getAlias());
-                }
-
-                ct.apply(updateServiceDefinitionMetasMethodCallDefinitionMetas());
-
-                ct.apply(invokeCalls());
-
-                ct.apply(updateServiceDefinitionMetasMethodCallDefinitionMetas());
-
-                if (serviceDefinitionMeta.isFullyInstantiated() && !serviceDefinitionMeta.isInitialized()) {
-                    try {
-                        instance.initialize();
-                    } catch (Exception e) {
-                        throw new ServiceInstantiationException(e);
-                    }
-
-                    updateServiceDefinitionMetasMethodCallDefinitionMetas();
-
-                    serviceDefinitionMeta.setInitialized(true);
-                    ct.apply(true);
-                }
+                boot(ct, serviceDefinitionMeta);
             }
 
             if (!ct.isChanged() && !allServiceDefinitionMetasReady()) {
                 throw new ServiceInstantiationException("Unable to instantiate all services");
             }
         }
+    }
 
-        if (!allMethodCallDefinitionsCalled()) {
-            throw new ServiceInstantiationException("All method calls weren't called, probably because of a missing dependency");
+    private <T extends ContainerAwareInterface> void boot(ChangeTracker ct, ServiceDefinitionMeta<T> serviceDefinitionMeta)
+    {
+        ServiceDefinition<?> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
+
+        ContainerAwareInterface instance;
+
+        if (!serviceDefinitionMeta.isInstantiated()) {
+            if (!serviceDefinitionMeta.isWired()) {
+                autoWire(serviceDefinitionMeta);
+            }
+
+            DependencyTree dependenciesTree = getServiceDependenciesTree(serviceDefinition);
+
+            if (!dependenciesTree.isFullyInstantiable()) {
+                throw new ReferenceResolutionException("Service " + serviceDefinition.getType() + " is not instantiable due to missing dependency");
+            }
+
+            if (dependenciesTree.hasCircularReference()) {
+                throw new CircularReferenceException(dependenciesTree.getCircularReferencePath());
+            }
+
+            if (!dependenciesTree.isFullyInstantiated()) {
+                return;
+            }
+
+            instance = bootService(serviceDefinitionMeta);
+
+            ct.apply(true);
+        } else {
+            instance = services.get(serviceDefinition.getAlias());
+        }
+
+        ct.apply(updateServiceDefinitionMetasMethodCallDefinitionMetas());
+
+        ct.apply(invokeCalls());
+
+        ct.apply(updateServiceDefinitionMetasMethodCallDefinitionMetas());
+
+        if (serviceDefinitionMeta.isFullyInstantiated() && !serviceDefinitionMeta.isInitialized()) {
+            try {
+                instance.initialize();
+            } catch (Exception e) {
+                throw new ServiceInstantiationException(e);
+            }
+
+            updateServiceDefinitionMetasMethodCallDefinitionMetas();
+
+            serviceDefinitionMeta.setInitialized(true);
+            ct.apply(true);
         }
     }
 
@@ -104,8 +108,8 @@ public class ContainerInstantiator
     {
         ChangeTracker ct = new ChangeTracker();
 
-        for (Map.Entry<Class, ServiceDefinitionMeta> entry : serviceDefinitionMetas.entrySet()) {
-            ct.apply(entry.getValue().updateMethodCallDefinitionMetas());
+        for (ServiceDefinitionMeta serviceDefinitionMeta : serviceDefinitionMetas.values()) {
+            ct.apply(serviceDefinitionMeta.updateMethodCallDefinitionMetas());
         }
 
         return ct.isChanged();
@@ -113,8 +117,7 @@ public class ContainerInstantiator
 
     private List<ServiceDefinitionMeta> getNotReadyServiceDefinitionMetas()
     {
-        return serviceDefinitionMetas.entrySet().stream()
-                .map(Map.Entry::getValue)
+        return serviceDefinitionMetas.values().stream()
                 .filter(m -> !m.isReady())
                 .collect(Collectors.toList());
     }
@@ -126,9 +129,8 @@ public class ContainerInstantiator
 
     private List<MethodCallDefinitionMeta> getUncalledMethodCallDefinitionMetas()
     {
-        return serviceDefinitionMetas.entrySet().stream()
-                .map(Map.Entry::getValue)
-                .flatMap(m -> (Stream<MethodCallDefinitionMeta>) m.getMethodCallDefinitionMetas().stream())
+        return serviceDefinitionMetas.values().stream()
+                .flatMap(m -> m.getMethodCallDefinitionMetas().stream())
                 .filter(m -> !m.isCalled())
                 .collect(Collectors.toList());
     }
@@ -154,13 +156,17 @@ public class ContainerInstantiator
         if (!serviceDefinitionMeta.isWired()) {
             Constructor<?>[] constructors = serviceDefinition.getType().getConstructors();
 
-            for (Constructor<?> constructor : constructors) {
-                Class<?>[] parameterTypes = constructor.getParameterTypes();
-
-                ReferenceInterface[] references = resolveTypes(serviceDefinition, parameterTypes);
-
-                serviceDefinition.addConstructorDefinition(new ConstructorDefinition(references));
+            if (constructors.length != 1) {
+                throw new ServiceInstantiationException("Ambiguous constructor in: " + serviceDefinition.getAlias().getName());
             }
+
+            Constructor<?> constructor = constructors[0];
+
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+
+            ReferenceInterface[] references = resolveTypes(serviceDefinition, parameterTypes);
+
+            serviceDefinition.setConstructorDefinition(new ConstructorDefinition(references));
 
             serviceDefinitionMeta.setWired(true);
         }
@@ -170,13 +176,7 @@ public class ContainerInstantiator
     {
         ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
-        Class<T> serviceClass = serviceDefinition.getType();
-
         T instance = instantiateService(serviceDefinition);
-
-        if (null == instance) {
-            throw new ServiceInstantiationException("Unable to boot service " + serviceClass);
-        }
 
         services.put(serviceDefinition.getAlias(), instance);
 
@@ -193,22 +193,23 @@ public class ContainerInstantiator
     {
         Class<T> serviceClass = serviceDefinition.getType();
 
-        T instance = null;
+        ConstructorDefinition constructorDefinition = serviceDefinition.getConstructorDefinition();
 
-        for (ConstructorDefinition constructorDefinition : serviceDefinition.getConstructorDefinitions()) {
-            try {
-                Object[] args = resolveReferences(serviceDefinition, constructorDefinition.getArgs());
-                Constructor<T> constructor = ClassUtils.getConstructorForArgs(serviceClass, ClassUtils.getClasses(args));
-                if (constructor != null) {
-                    instance = constructor.newInstance(args);
-                    break;
-                }
-            } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-                throw new ServiceInstantiationException(e);
-            }
+        if (null == constructorDefinition) {
+            throw new ServiceInstantiationException("No constructor available");
         }
 
-        return instance;
+        try {
+            Object[] args = resolveReferences(serviceDefinition, constructorDefinition.getArgs());
+            Constructor<T> constructor = ClassUtils.getConstructorForArgs(serviceClass, ClassUtils.getClasses(args));
+            if (constructor != null) {
+                return constructor.newInstance(args);
+            }
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new ServiceInstantiationException(e);
+        }
+
+        throw new ServiceInstantiationException("Unable to instantiate service " + serviceClass);
     }
 
     private boolean invokeCalls()
@@ -278,7 +279,7 @@ public class ContainerInstantiator
         return args;
     }
 
-    private Object resolveReference(ServiceDefinition serviceDefinition, ReferenceInterface reference)
+    private Object resolveReference(ServiceDefinition<?> serviceDefinition, ReferenceInterface reference)
     {
         for (ReferenceResolverInterface resolver : referenceResolvers) {
             if (resolver.supports(serviceDefinition, reference)) {

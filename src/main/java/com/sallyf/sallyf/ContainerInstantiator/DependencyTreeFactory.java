@@ -1,9 +1,7 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
 import com.sallyf.sallyf.Container.*;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DependencyTreeFactory
@@ -35,25 +33,23 @@ public class DependencyTreeFactory
 
     private void addServiceDefinitionToTree(DependencyTree tree, ServiceDefinition<?> serviceDefinition, DependencyNode currentNode)
     {
-        ArrayList<ConstructorDefinition> constructorDefinitions = serviceDefinition.getConstructorDefinitions();
+        ConstructorDefinition constructorDefinition = serviceDefinition.getConstructorDefinition();
 
-        for (ConstructorDefinition constructorDefinition : constructorDefinitions) {
-            for (ReferenceInterface childReference : constructorDefinition.getArgs()) {
-                if (childReference instanceof ServiceReference) {
-                    ServiceReference<?> childServiceReference = (ServiceReference) childReference;
+        for (ReferenceInterface childReference : constructorDefinition.getArgs()) {
+            if (childReference instanceof ServiceReference) {
+                ServiceReference<?> childServiceReference = (ServiceReference) childReference;
 
-                    DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference));
+                DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference));
 
-                    if (childDependencyNode.isInTree()) {
-                        tree.setCircularReferenceNode(childDependencyNode);
-                        return;
-                    }
+                if (childDependencyNode.isInTree()) {
+                    tree.setCircularReferenceNode(childDependencyNode);
+                    return;
+                }
 
-                    ServiceDefinition<?> childServiceDefinition = containerInstantiator.getServiceDefinitions().get(childServiceReference.getAlias());
+                ServiceDefinition<?> childServiceDefinition = containerInstantiator.getServiceDefinitions().get(childServiceReference.getAlias());
 
-                    if (null != childServiceDefinition) {
-                        addServiceDefinitionToTree(tree, childServiceDefinition, childDependencyNode);
-                    }
+                if (null != childServiceDefinition) {
+                    addServiceDefinitionToTree(tree, childServiceDefinition, childDependencyNode);
                 }
             }
         }
