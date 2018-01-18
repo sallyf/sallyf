@@ -112,7 +112,7 @@ public class FlashManager implements ServiceInterface
         return flashes;
     }
 
-    public void persistNext(RuntimeBag runtimeBag)
+    private void persistNext(RuntimeBag runtimeBag)
     {
         Set<FlashEntry<?>> sessionFlashes = getSessionFlashes(runtimeBag);
         Set<FlashEntry<?>> nextFlashes = getNextFlashes(runtimeBag);
@@ -122,7 +122,7 @@ public class FlashManager implements ServiceInterface
         nextFlashes.clear();
     }
 
-    public void forwardCurrent(RuntimeBag runtimeBag)
+    private void forwardCurrent(RuntimeBag runtimeBag)
     {
         Set<FlashEntry<?>> sessionFlashes = getSessionFlashes(runtimeBag);
         Set<FlashEntry<?>> currentFlashes = getCurrentFlashes(runtimeBag);
@@ -132,7 +132,7 @@ public class FlashManager implements ServiceInterface
         currentFlashes.clear();
     }
 
-    public void hydrateCurrent(RuntimeBag runtimeBag)
+    private void hydrateCurrent(RuntimeBag runtimeBag)
     {
         Set<FlashEntry<?>> sessionFlashes = getSessionFlashes(runtimeBag);
         Set<FlashEntry<?>> currentFlashes = getCurrentFlashes(runtimeBag);
