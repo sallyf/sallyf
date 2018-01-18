@@ -30,7 +30,7 @@ public class Container
 
     public Container()
     {
-        containerInstantiator = new ContainerInstantiator(services, taggedServices);
+        containerInstantiator = new ContainerInstantiator(this, services, taggedServices);
 
         addReferenceResolver(new ConfigurationReferenceResolver(this));
         addReferenceResolver(new ContainerReferenceResolver(this));

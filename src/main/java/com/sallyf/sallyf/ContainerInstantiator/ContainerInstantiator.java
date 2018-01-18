@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 public class ContainerInstantiator
 {
+    private Container container;
+
     private DependencyTreeFactory dependencyTreeFactory = new DependencyTreeFactory(this);
 
     private Map<Class, ContainerAwareInterface> services;
@@ -31,8 +33,9 @@ public class ContainerInstantiator
 
     private HashMap<Class, ServiceDefinitionMeta<?>> serviceDefinitionMetas = new HashMap<>();
 
-    public ContainerInstantiator(Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
+    public ContainerInstantiator(Container container, Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
     {
+        this.container = container;
         this.services = services;
         this.taggedServices = taggedServices;
     }
@@ -92,7 +95,7 @@ public class ContainerInstantiator
 
         if (serviceDefinitionMeta.isFullyInstantiated() && !serviceDefinitionMeta.isInitialized()) {
             try {
-                instance.initialize();
+                instance.initialize(container);
             } catch (Exception e) {
                 throw new ServiceInstantiationException(e);
             }

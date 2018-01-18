@@ -23,7 +23,7 @@ public class AccessDecisionManager implements ContainerAwareInterface
     }
 
     @Override
-    public void initialize()
+    public void initialize(Container container)
     {
         expressionLanguage.addBinding("is_granted", (PredicateIsGrantedHandler) this::vote);
     }

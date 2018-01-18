@@ -48,7 +48,7 @@ public class Router implements ContainerAwareInterface
         this.eventDispatcher = eventDispatcher;
     }
 
-    public void initialize()
+    public void initialize(Container container)
     {
         addActionParameterResolver(new RequestResolver());
         addActionParameterResolver(new RouteParameterResolver(container));
@@ -60,8 +60,6 @@ public class Router implements ContainerAwareInterface
 
     public <C extends ControllerInterface> C registerController(Class<C> controllerClass)
     {
-        EventDispatcher eventDispatcher = container.get(EventDispatcher.class);
-
         C controller = instantiateController(controllerClass);
 
         controllers.put(controllerClass, controller);

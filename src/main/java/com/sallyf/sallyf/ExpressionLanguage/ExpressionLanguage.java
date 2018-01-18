@@ -12,17 +12,14 @@ import java.util.function.Function;
 
 public class ExpressionLanguage implements ContainerAwareInterface
 {
-    private Container container;
-
     private Router router;
 
     private ScriptEngine engine;
 
     private Bindings bindings = new SimpleBindings();
 
-    public ExpressionLanguage(Container container, Router router)
+    public ExpressionLanguage(Router router)
     {
-        this.container = container;
         this.router = router;
 
         ScriptEngineManager manager = new ScriptEngineManager();
@@ -30,7 +27,7 @@ public class ExpressionLanguage implements ContainerAwareInterface
     }
 
     @Override
-    public void initialize()
+    public void initialize(Container container)
     {
         addBinding("container", container);
         addBinding("service", (Function<String, ContainerAwareInterface>) className -> {

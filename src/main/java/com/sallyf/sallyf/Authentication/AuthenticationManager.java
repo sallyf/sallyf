@@ -36,21 +36,21 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private final ExpressionLanguage expressionLanguage;
 
-    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher, ExpressionLanguage expressionLanguage)
+    public AuthenticationManager(Configuration configuration, Router router, EventDispatcher eventDispatcher, ExpressionLanguage expressionLanguage)
     {
         this.router = router;
         this.eventDispatcher = eventDispatcher;
         this.expressionLanguage = expressionLanguage;
 
         dataSources = configuration.getDataSources();
+    }
 
+    public void initialize(Container container)
+    {
         container
                 .add(new ServiceDefinition<>(AuthenticationVoter.class))
                 .addTag(AccessDecisionManager.TAG_VOTER);
-    }
 
-    public void initialize()
-    {
         router.addActionParameterResolver(new UserInterfaceResolver(this));
 
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
