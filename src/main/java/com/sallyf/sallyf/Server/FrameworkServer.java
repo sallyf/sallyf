@@ -2,7 +2,7 @@ package com.sallyf.sallyf.Server;
 
 import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.KernelEvents;
 import org.eclipse.jetty.server.Request;
@@ -18,7 +18,7 @@ import org.eclipse.jetty.util.log.Logger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class FrameworkServer extends Server implements ContainerAwareInterface
+public class FrameworkServer extends Server implements ServiceInterface
 {
     private static final Logger LOG = Log.getLogger(FrameworkServer.class);
 

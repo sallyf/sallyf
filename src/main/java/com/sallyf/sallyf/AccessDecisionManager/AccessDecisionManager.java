@@ -2,13 +2,13 @@ package com.sallyf.sallyf.AccessDecisionManager;
 
 import com.sallyf.sallyf.AccessDecisionManager.Voter.VoterInterface;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
 import java.util.ArrayList;
 
-public class AccessDecisionManager implements ContainerAwareInterface
+public class AccessDecisionManager implements ServiceInterface
 {
     public static final String TAG_VOTER = "authentication.voter";
 
@@ -23,7 +23,7 @@ public class AccessDecisionManager implements ContainerAwareInterface
     }
 
     @Override
-    public void initialize()
+    public void initialize(Container container)
     {
         expressionLanguage.addBinding("is_granted", (PredicateIsGrantedHandler) this::vote);
     }

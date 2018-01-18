@@ -22,15 +22,15 @@ public class Container
 {
     private ContainerInstantiator containerInstantiator;
 
-    private Map<Class, ContainerAwareInterface> services = new HashMap<>();
+    private Map<Class, ServiceInterface> services = new HashMap<>();
 
-    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices = new HashMap<>();
+    private Map<String, ArrayList<ServiceInterface>> taggedServices = new HashMap<>();
 
     private boolean instantiated = false;
 
     public Container()
     {
-        containerInstantiator = new ContainerInstantiator(services, taggedServices);
+        containerInstantiator = new ContainerInstantiator(this, services, taggedServices);
 
         addReferenceResolver(new ConfigurationReferenceResolver(this));
         addReferenceResolver(new ContainerReferenceResolver(this));
@@ -42,14 +42,14 @@ public class Container
         addTypeResolver(new ServiceResolver());
     }
 
-    public void addAll(ServiceDefinition<? extends ContainerAwareInterface>[] serviceDefinitions)
+    public void addAll(ServiceDefinition<? extends ServiceInterface>[] serviceDefinitions)
     {
-        for (ServiceDefinition<? extends ContainerAwareInterface> serviceDefinition : serviceDefinitions) {
+        for (ServiceDefinition<? extends ServiceInterface> serviceDefinition : serviceDefinitions) {
             add(serviceDefinition);
         }
     }
 
-    public <T extends ContainerAwareInterface> ServiceDefinition<T> add(ServiceDefinition<T> serviceDefinition)
+    public <T extends ServiceInterface> ServiceDefinition<T> add(ServiceDefinition<T> serviceDefinition)
     {
         if (instantiated) {
             throw new ContainerInstantiatedException();
@@ -76,7 +76,7 @@ public class Container
         instantiated = true;
     }
 
-    public <T extends ContainerAwareInterface> ArrayList<T> getByTag(String tag)
+    public <T extends ServiceInterface> ArrayList<T> getByTag(String tag)
     {
         ArrayList<T> services = (ArrayList<T>) taggedServices.get(tag);
 
@@ -87,7 +87,7 @@ public class Container
         return services;
     }
 
-    public <T extends ContainerAwareInterface> T get(Class<T> serviceClass)
+    public <T extends ServiceInterface> T get(Class<T> serviceClass)
     {
         T service = (T) services.get(serviceClass);
 
@@ -98,12 +98,12 @@ public class Container
         return service;
     }
 
-    public <T extends ContainerAwareInterface> T find(String name)
+    public <T extends ServiceInterface> T find(String name)
     {
         return get(findAlias(name));
     }
 
-    public <T extends ContainerAwareInterface> Class<T> findAlias(String name)
+    public <T extends ServiceInterface> Class<T> findAlias(String name)
     {
         List<Class> serviceClasses = this.services.entrySet().stream()
                 .filter(e -> {
@@ -113,7 +113,7 @@ public class Container
                         return true;
                     }
 
-                    ContainerAwareInterface service = e.getValue();
+                    ServiceInterface service = e.getValue();
 
                     return service.getClass().getName().endsWith(name);
                 })
@@ -141,12 +141,12 @@ public class Container
         return containerInstantiator.getConfigurations();
     }
 
-    public <T extends ContainerAwareInterface> void setConfiguration(Class<T> serviceClass, ConfigurationInterface configuration)
+    public <T extends ServiceInterface> void setConfiguration(Class<T> serviceClass, ConfigurationInterface configuration)
     {
         getConfigurations().put(serviceClass, configuration);
     }
 
-    public <T extends ContainerAwareInterface> ConfigurationInterface getConfiguration(Class<T> serviceClass)
+    public <T extends ServiceInterface> ConfigurationInterface getConfiguration(Class<T> serviceClass)
     {
         return getConfigurations().get(serviceClass);
     }
@@ -161,7 +161,7 @@ public class Container
         containerInstantiator.getTypeResolvers().add(resolver);
     }
 
-    public Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> getServiceDefinitions()
+    public Map<Class, ServiceDefinition<? extends ServiceInterface>> getServiceDefinitions()
     {
         return containerInstantiator.getServiceDefinitions();
     }

@@ -1,14 +1,14 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
 import com.sallyf.sallyf.Container.MethodCallDefinition;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class ServiceDefinitionMeta<T extends ContainerAwareInterface>
+public class ServiceDefinitionMeta<T extends ServiceInterface>
 {
     private ServiceDefinition<T> serviceDefinition;
 

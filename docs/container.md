@@ -6,7 +6,7 @@ We will assume that `container` is an instance of `Container`.
 
 ## Registering a service
 
-A service should implement `ContainerAwareInterface`. They must be added before the kernel is booted.
+A service should implement `ServiceInterface`. They must be added before the kernel is booted.
 
 The constructor signature is free since the services are dynamically resolved.
 
@@ -21,7 +21,7 @@ The constructor signature is free since the services are dynamically resolved.
 - `Class` **alias** : The class the Service is registered as
 - `Class<T>` **type** : The actual Service class
 - `ConfigurationInterface` **configuration** : A `ConfigurationInterface`
-- `ArrayList<ConstructorDefinition>` **constructorDefinitions** : See [ConstructorDefinition](#constructordefinition)
+- `ConstructorDefinition` **constructorDefinition** : See [ConstructorDefinition](#constructordefinition)
 - `ArrayList<MethodCallDefinition>` **methodCallDefinitions** : See [MethodCallDefinition](#methodCallDefinition)
 
 #### ConstructorDefinition

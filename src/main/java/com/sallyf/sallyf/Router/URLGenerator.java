@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Router;
 
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
 import com.sallyf.sallyf.Server.FrameworkServer;
 
@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class URLGenerator implements ContainerAwareInterface
+public class URLGenerator implements ServiceInterface
 {
     private final FrameworkServer server;
 

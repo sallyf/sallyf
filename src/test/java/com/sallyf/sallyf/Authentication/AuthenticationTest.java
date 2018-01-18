@@ -18,9 +18,9 @@ public class AuthenticationTest extends BaseFrameworkTest
         Container c = new Container();
         EventDispatcher ed = new EventDispatcher();
         Router r = new Router(c, ed);
-        ExpressionLanguage el = new ExpressionLanguage(c, r);
+        ExpressionLanguage el = new ExpressionLanguage(r);
 
-        return new AuthenticationManager(configuration, c, r, ed, el);
+        return new AuthenticationManager(configuration, r, ed, el);
     }
 
     @Test(expected = AuthenticationException.class)

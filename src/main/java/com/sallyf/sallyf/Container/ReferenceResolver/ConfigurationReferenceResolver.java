@@ -6,7 +6,7 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class ConfigurationReferenceResolver<T extends ContainerAwareInterface> implements ReferenceResolverInterface<T, ConfigurationReference, ConfigurationInterface>
+public class ConfigurationReferenceResolver<T extends ServiceInterface> implements ReferenceResolverInterface<T, ConfigurationReference, ConfigurationInterface>
 {
     private Container container;
 

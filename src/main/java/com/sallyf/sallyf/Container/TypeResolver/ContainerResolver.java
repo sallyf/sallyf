@@ -2,7 +2,7 @@ package com.sallyf.sallyf.Container.TypeResolver;
 
 import com.sallyf.sallyf.Container.*;
 
-public class ContainerResolver<T extends ContainerAwareInterface> implements TypeResolverInterface<T, Container>
+public class ContainerResolver<T extends ServiceInterface> implements TypeResolverInterface<T, Container>
 {
     @Override
     public boolean supports(ServiceDefinition<T> serviceDefinition, Class type)

@@ -2,7 +2,7 @@ package com.sallyf.sallyf.Container.ReferenceResolver;
 
 import com.sallyf.sallyf.Container.*;
 
-public class ServiceReferenceResolver<T extends ContainerAwareInterface> implements ReferenceResolverInterface<T, ServiceReference<T>, T>
+public class ServiceReferenceResolver<T extends ServiceInterface> implements ReferenceResolverInterface<T, ServiceReference<T>, T>
 {
     private Container container;
 

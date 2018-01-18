@@ -6,7 +6,7 @@ import com.sallyf.sallyf.Authentication.Exception.AuthenticationException;
 import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
 import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.HttpException;
@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class AuthenticationManager implements ContainerAwareInterface
+public class AuthenticationManager implements ServiceInterface
 {
     private ArrayList<UserDataSourceInterface> dataSources;
 
@@ -36,21 +36,21 @@ public class AuthenticationManager implements ContainerAwareInterface
 
     private final ExpressionLanguage expressionLanguage;
 
-    public AuthenticationManager(Configuration configuration, Container container, Router router, EventDispatcher eventDispatcher, ExpressionLanguage expressionLanguage)
+    public AuthenticationManager(Configuration configuration, Router router, EventDispatcher eventDispatcher, ExpressionLanguage expressionLanguage)
     {
         this.router = router;
         this.eventDispatcher = eventDispatcher;
         this.expressionLanguage = expressionLanguage;
 
         dataSources = configuration.getDataSources();
+    }
 
+    public void initialize(Container container)
+    {
         container
                 .add(new ServiceDefinition<>(AuthenticationVoter.class))
                 .addTag(AccessDecisionManager.TAG_VOTER);
-    }
 
-    public void initialize()
-    {
         router.addActionParameterResolver(new UserInterfaceResolver(this));
 
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {

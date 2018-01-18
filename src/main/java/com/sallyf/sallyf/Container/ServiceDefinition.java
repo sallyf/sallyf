@@ -2,19 +2,19 @@ package com.sallyf.sallyf.Container;
 
 import java.util.ArrayList;
 
-public class ServiceDefinition<T extends ContainerAwareInterface> implements ServiceRepresentationInterface
+public class ServiceDefinition<T extends ServiceInterface> implements ServiceRepresentationInterface
 {
     private Class alias;
 
     private Class<T> type;
 
-    private ArrayList<ConstructorDefinition> constructorDefinitions = new ArrayList<>();
+    private ConstructorDefinition constructorDefinition = null;
 
     private ArrayList<MethodCallDefinition> methodCallDefinitions = new ArrayList<>();
 
     private ArrayList<String> tags = new ArrayList<>();
 
-    private ReferenceInterface configurationReference;
+    private ReferenceInterface configurationReference = null;
 
     private boolean autoWire = true;
 
@@ -43,18 +43,18 @@ public class ServiceDefinition<T extends ContainerAwareInterface> implements Ser
         setAutoWire(true);
     }
 
-    public ServiceDefinition(Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<MethodCallDefinition> methodCallDefinitions)
+    public ServiceDefinition(Class<T> type, ConfigurationInterface configuration, ConstructorDefinition constructorDefinition, ArrayList<MethodCallDefinition> methodCallDefinitions)
     {
-        this(type, type, configuration, constructorDefinitions, methodCallDefinitions);
+        this(type, type, configuration, constructorDefinition, methodCallDefinitions);
     }
 
-    public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration, ArrayList<ConstructorDefinition> constructorDefinitions, ArrayList<MethodCallDefinition> methodCallDefinitions)
+    public ServiceDefinition(Class alias, Class<T> type, ConfigurationInterface configuration, ConstructorDefinition constructorDefinition, ArrayList<MethodCallDefinition> methodCallDefinitions)
     {
         this(alias, type, configuration);
 
         setAutoWire(false);
 
-        setConstructorDefinitions(constructorDefinitions);
+        setConstructorDefinition(constructorDefinition);
         setMethodCallDefinitions(methodCallDefinitions);
     }
 
@@ -82,21 +82,14 @@ public class ServiceDefinition<T extends ContainerAwareInterface> implements Ser
         return this;
     }
 
-    public ArrayList<ConstructorDefinition> getConstructorDefinitions()
+    public ConstructorDefinition getConstructorDefinition()
     {
-        return constructorDefinitions;
+        return constructorDefinition;
     }
 
-    public ServiceDefinition<T> setConstructorDefinitions(ArrayList<ConstructorDefinition> constructorDefinitions)
+    public ServiceDefinition<T> setConstructorDefinition(ConstructorDefinition constructorDefinition)
     {
-        this.constructorDefinitions = constructorDefinitions;
-
-        return this;
-    }
-
-    public ServiceDefinition<T> addConstructorDefinition(ConstructorDefinition constructorDefinition)
-    {
-        this.constructorDefinitions.add(constructorDefinition);
+        this.constructorDefinition = constructorDefinition;
 
         return this;
     }

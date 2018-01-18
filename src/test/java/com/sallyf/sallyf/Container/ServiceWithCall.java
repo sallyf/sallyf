@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-public class ServiceWithCall implements ContainerAwareInterface
+public class ServiceWithCall implements ServiceInterface
 {
     public ServiceWithCall()
     {

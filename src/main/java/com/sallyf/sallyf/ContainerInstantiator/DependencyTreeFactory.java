@@ -1,23 +1,21 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
 import com.sallyf.sallyf.Container.*;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DependencyTreeFactory
 {
     private ContainerInstantiator containerInstantiator;
 
-    private HashMap<Class, DependencyTree<? extends ContainerAwareInterface>> trees = new HashMap<>();
+    private HashMap<Class, DependencyTree<? extends ServiceInterface>> trees = new HashMap<>();
 
     public DependencyTreeFactory(ContainerInstantiator containerInstantiator)
     {
         this.containerInstantiator = containerInstantiator;
     }
 
-    public <T extends ContainerAwareInterface> DependencyTree<T> generate(ServiceDefinition<T> serviceDefinition)
+    public <T extends ServiceInterface> DependencyTree<T> generate(ServiceDefinition<T> serviceDefinition)
     {
         if (getTrees().containsKey(serviceDefinition.getAlias())) {
             return (DependencyTree<T>) getTrees().get(serviceDefinition.getAlias());
@@ -35,31 +33,29 @@ public class DependencyTreeFactory
 
     private void addServiceDefinitionToTree(DependencyTree tree, ServiceDefinition<?> serviceDefinition, DependencyNode currentNode)
     {
-        ArrayList<ConstructorDefinition> constructorDefinitions = serviceDefinition.getConstructorDefinitions();
+        ConstructorDefinition constructorDefinition = serviceDefinition.getConstructorDefinition();
 
-        for (ConstructorDefinition constructorDefinition : constructorDefinitions) {
-            for (ReferenceInterface childReference : constructorDefinition.getArgs()) {
-                if (childReference instanceof ServiceReference) {
-                    ServiceReference<?> childServiceReference = (ServiceReference) childReference;
+        for (ReferenceInterface childReference : constructorDefinition.getArgs()) {
+            if (childReference instanceof ServiceReference) {
+                ServiceReference<?> childServiceReference = (ServiceReference) childReference;
 
-                    DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference));
+                DependencyNode childDependencyNode = currentNode.addChild(new DependencyNode(childServiceReference));
 
-                    if (childDependencyNode.isInTree()) {
-                        tree.setCircularReferenceNode(childDependencyNode);
-                        return;
-                    }
+                if (childDependencyNode.isInTree()) {
+                    tree.setCircularReferenceNode(childDependencyNode);
+                    return;
+                }
 
-                    ServiceDefinition<?> childServiceDefinition = containerInstantiator.getServiceDefinitions().get(childServiceReference.getAlias());
+                ServiceDefinition<?> childServiceDefinition = containerInstantiator.getServiceDefinitions().get(childServiceReference.getAlias());
 
-                    if (null != childServiceDefinition) {
-                        addServiceDefinitionToTree(tree, childServiceDefinition, childDependencyNode);
-                    }
+                if (null != childServiceDefinition) {
+                    addServiceDefinitionToTree(tree, childServiceDefinition, childDependencyNode);
                 }
             }
         }
     }
 
-    public HashMap<Class, DependencyTree<? extends ContainerAwareInterface>> getTrees()
+    public HashMap<Class, DependencyTree<? extends ServiceInterface>> getTrees()
     {
         return trees;
     }
