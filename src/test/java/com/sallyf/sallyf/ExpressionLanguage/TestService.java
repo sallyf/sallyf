@@ -1,12 +1,12 @@
 package com.sallyf.sallyf.ExpressionLanguage;
 
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Server.Status;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TestService implements ContainerAwareInterface
+public class TestService implements ServiceInterface
 {
     public boolean returnTrue()
     {

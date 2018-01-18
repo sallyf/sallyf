@@ -1,13 +1,13 @@
 package com.sallyf.sallyf.ContainerInstantiator;
 
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.Container.ServiceRepresentationInterface;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-public class DependencyTree<T extends ContainerAwareInterface>
+public class DependencyTree<T extends ServiceInterface>
 {
     private ContainerInstantiator containerInstantiator;
 

@@ -1,7 +1,7 @@
 package com.sallyf.sallyf.ExpressionLanguage;
 
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.ExpressionLanguage.Exception.EvaluationException;
 import com.sallyf.sallyf.Router.Router;
@@ -10,7 +10,7 @@ import com.sallyf.sallyf.Server.RuntimeBag;
 import javax.script.*;
 import java.util.function.Function;
 
-public class ExpressionLanguage implements ContainerAwareInterface
+public class ExpressionLanguage implements ServiceInterface
 {
     private Router router;
 
@@ -30,11 +30,11 @@ public class ExpressionLanguage implements ContainerAwareInterface
     public void initialize(Container container)
     {
         addBinding("container", container);
-        addBinding("service", (Function<String, ContainerAwareInterface>) className -> {
-            Class<? extends ContainerAwareInterface> type = null;
+        addBinding("service", (Function<String, ServiceInterface>) className -> {
+            Class<? extends ServiceInterface> type = null;
 
             try {
-                type = Class.forName(className).asSubclass(ContainerAwareInterface.class);
+                type = Class.forName(className).asSubclass(ServiceInterface.class);
             } catch (ClassNotFoundException ignored) {
             }
 

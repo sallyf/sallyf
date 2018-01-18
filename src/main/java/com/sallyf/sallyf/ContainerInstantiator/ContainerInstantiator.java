@@ -19,11 +19,11 @@ public class ContainerInstantiator
 
     private DependencyTreeFactory dependencyTreeFactory = new DependencyTreeFactory(this);
 
-    private Map<Class, ContainerAwareInterface> services;
+    private Map<Class, ServiceInterface> services;
 
-    private Map<String, ArrayList<ContainerAwareInterface>> taggedServices;
+    private Map<String, ArrayList<ServiceInterface>> taggedServices;
 
-    private HashMap<Class, ServiceDefinition<? extends ContainerAwareInterface>> serviceDefinitions = new HashMap<>();
+    private HashMap<Class, ServiceDefinition<? extends ServiceInterface>> serviceDefinitions = new HashMap<>();
 
     private ArrayList<ReferenceResolverInterface> referenceResolvers = new ArrayList<>();
 
@@ -33,7 +33,7 @@ public class ContainerInstantiator
 
     private HashMap<Class, ServiceDefinitionMeta<?>> serviceDefinitionMetas = new HashMap<>();
 
-    public ContainerInstantiator(Container container, Map<Class, ContainerAwareInterface> services, Map<String, ArrayList<ContainerAwareInterface>> taggedServices)
+    public ContainerInstantiator(Container container, Map<Class, ServiceInterface> services, Map<String, ArrayList<ServiceInterface>> taggedServices)
     {
         this.container = container;
         this.services = services;
@@ -55,11 +55,11 @@ public class ContainerInstantiator
         }
     }
 
-    private <T extends ContainerAwareInterface> void boot(ChangeTracker ct, ServiceDefinitionMeta<T> serviceDefinitionMeta)
+    private <T extends ServiceInterface> void boot(ChangeTracker ct, ServiceDefinitionMeta<T> serviceDefinitionMeta)
     {
         ServiceDefinition<?> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
-        ContainerAwareInterface instance;
+        ServiceInterface instance;
 
         if (!serviceDefinitionMeta.isInstantiated()) {
             if (!serviceDefinitionMeta.isWired()) {
@@ -143,12 +143,12 @@ public class ContainerInstantiator
         return getUncalledMethodCallDefinitionMetas().isEmpty();
     }
 
-    private <T extends ContainerAwareInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition)
+    private <T extends ServiceInterface> DependencyTree<T> getServiceDependenciesTree(ServiceDefinition<T> serviceDefinition)
     {
         return dependencyTreeFactory.generate(serviceDefinition);
     }
 
-    public <T extends ContainerAwareInterface> void autoWire(ServiceDefinitionMeta<T> serviceDefinitionMeta)
+    public <T extends ServiceInterface> void autoWire(ServiceDefinitionMeta<T> serviceDefinitionMeta)
     {
         ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
@@ -175,7 +175,7 @@ public class ContainerInstantiator
         }
     }
 
-    private <T extends ContainerAwareInterface> T bootService(ServiceDefinitionMeta<T> serviceDefinitionMeta)
+    private <T extends ServiceInterface> T bootService(ServiceDefinitionMeta<T> serviceDefinitionMeta)
     {
         ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
@@ -192,7 +192,7 @@ public class ContainerInstantiator
         return instance;
     }
 
-    private <T extends ContainerAwareInterface> T instantiateService(ServiceDefinition<T> serviceDefinition)
+    private <T extends ServiceInterface> T instantiateService(ServiceDefinition<T> serviceDefinition)
     {
         Class<T> serviceClass = serviceDefinition.getType();
 
@@ -228,7 +228,7 @@ public class ContainerInstantiator
                 continue;
             }
 
-            ContainerAwareInterface instance = services.get(serviceDefinition.getAlias());
+            ServiceInterface instance = services.get(serviceDefinition.getAlias());
 
             try {
                 Object[] args = resolveReferences(serviceDefinition, methodCallDefinition.getArgs());
@@ -324,7 +324,7 @@ public class ContainerInstantiator
         throw new TypeResolutionException("Unable to auto wire reference for " + type);
     }
 
-    private void addTaggedService(String tag, ContainerAwareInterface service)
+    private void addTaggedService(String tag, ServiceInterface service)
     {
         if (!taggedServices.containsKey(tag)) {
             taggedServices.put(tag, new ArrayList<>());
@@ -333,7 +333,7 @@ public class ContainerInstantiator
         taggedServices.get(tag).add(service);
     }
 
-    public <T extends ContainerAwareInterface> void addServiceDefinition(ServiceDefinition<T> serviceDefinition)
+    public <T extends ServiceInterface> void addServiceDefinition(ServiceDefinition<T> serviceDefinition)
     {
         serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
 
@@ -343,7 +343,7 @@ public class ContainerInstantiator
         autoWire(serviceDefinitionMeta);
     }
 
-    public Map<Class, ServiceDefinition<? extends ContainerAwareInterface>> getServiceDefinitions()
+    public Map<Class, ServiceDefinition<? extends ServiceInterface>> getServiceDefinitions()
     {
         return serviceDefinitions;
     }
@@ -363,7 +363,7 @@ public class ContainerInstantiator
         return configurations;
     }
 
-    public Map<Class, ContainerAwareInterface> getServices()
+    public Map<Class, ServiceInterface> getServices()
     {
         return services;
     }

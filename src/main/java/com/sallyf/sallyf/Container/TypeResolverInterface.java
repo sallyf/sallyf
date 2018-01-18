@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-public interface TypeResolverInterface<T extends ContainerAwareInterface, TYPE>
+public interface TypeResolverInterface<T extends ServiceInterface, TYPE>
 {
     boolean supports(ServiceDefinition<T> serviceDefinition, Class type);
 

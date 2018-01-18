@@ -1,7 +1,7 @@
 package com.sallyf.sallyf.Container;
 
 
-public interface ContainerAwareInterface
+public interface ServiceInterface
 {
     default void initialize(Container container) {}
 }

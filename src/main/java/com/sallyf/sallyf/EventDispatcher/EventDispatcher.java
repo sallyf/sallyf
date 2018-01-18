@@ -1,11 +1,11 @@
 package com.sallyf.sallyf.EventDispatcher;
 
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class EventDispatcher implements ContainerAwareInterface
+public class EventDispatcher implements ServiceInterface
 {
     private HashMap<EventType, ArrayList<EventHandlerInterface>> events = new HashMap<>();
 

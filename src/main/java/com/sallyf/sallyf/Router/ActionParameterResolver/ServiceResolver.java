@@ -1,7 +1,7 @@
 package com.sallyf.sallyf.Router.ActionParameterResolver;
 
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Router.ActionParameterResolverInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
@@ -17,7 +17,7 @@ public class ServiceResolver implements ActionParameterResolverInterface
     @Override
     public boolean supports(Class parameterType, RuntimeBag runtimeBag)
     {
-        if (ContainerAwareInterface.class.isAssignableFrom(parameterType)) {
+        if (ServiceInterface.class.isAssignableFrom(parameterType)) {
             if (container.has(parameterType)) {
                 return true;
             }

@@ -8,14 +8,14 @@ public class DependencyTreeFactory
 {
     private ContainerInstantiator containerInstantiator;
 
-    private HashMap<Class, DependencyTree<? extends ContainerAwareInterface>> trees = new HashMap<>();
+    private HashMap<Class, DependencyTree<? extends ServiceInterface>> trees = new HashMap<>();
 
     public DependencyTreeFactory(ContainerInstantiator containerInstantiator)
     {
         this.containerInstantiator = containerInstantiator;
     }
 
-    public <T extends ContainerAwareInterface> DependencyTree<T> generate(ServiceDefinition<T> serviceDefinition)
+    public <T extends ServiceInterface> DependencyTree<T> generate(ServiceDefinition<T> serviceDefinition)
     {
         if (getTrees().containsKey(serviceDefinition.getAlias())) {
             return (DependencyTree<T>) getTrees().get(serviceDefinition.getAlias());
@@ -55,7 +55,7 @@ public class DependencyTreeFactory
         }
     }
 
-    public HashMap<Class, DependencyTree<? extends ContainerAwareInterface>> getTrees()
+    public HashMap<Class, DependencyTree<? extends ServiceInterface>> getTrees()
     {
         return trees;
     }

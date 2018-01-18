@@ -1,7 +1,7 @@
 package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ContainerAwareInterface;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Event.RouteParametersEvent;
 import com.sallyf.sallyf.Event.RouteRegisterEvent;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Router implements ContainerAwareInterface
+public class Router implements ServiceInterface
 {
     private final Container container;
 

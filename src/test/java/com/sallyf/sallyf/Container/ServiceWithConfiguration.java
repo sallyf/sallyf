@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-public class ServiceWithConfiguration implements ContainerAwareInterface
+public class ServiceWithConfiguration implements ServiceInterface
 {
     public DefaultServiceConfiguration configuration;
 

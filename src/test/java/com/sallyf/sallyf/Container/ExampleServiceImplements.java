@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-public class ExampleServiceImplements implements ContainerAwareInterface
+public class ExampleServiceImplements implements ServiceInterface
 {
     private Container container;
 

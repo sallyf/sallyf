@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-public class MyAlias implements ContainerAwareInterface
+public class MyAlias implements ServiceInterface
 {
     public MyAlias()
     {

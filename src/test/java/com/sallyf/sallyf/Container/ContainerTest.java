@@ -216,7 +216,7 @@ public class ContainerTest
 
         container.instantiate();
 
-        ContainerAwareInterface service = container.find("Service2Ambiguous");
+        ServiceInterface service = container.find("Service2Ambiguous");
 
         assertEquals(container.get(Service2Ambiguous.class), service);
     }

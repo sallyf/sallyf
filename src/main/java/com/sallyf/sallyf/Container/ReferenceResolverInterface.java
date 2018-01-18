@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Container;
 
-public interface ReferenceResolverInterface<T extends ContainerAwareInterface, REF extends ReferenceInterface, R>
+public interface ReferenceResolverInterface<T extends ServiceInterface, REF extends ReferenceInterface, R>
 {
     boolean supports(ServiceDefinition serviceDefinition, ReferenceInterface reference);
 
