@@ -5,11 +5,17 @@ import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Configuration;
 import com.sallyf.sallyf.Server.FrameworkServer;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.HttpUrl;
 import org.junit.After;
 import org.junit.Before;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 class ServerConfiguration extends Configuration
@@ -103,5 +109,26 @@ public abstract class BaseFrameworkTest
     public void tearDown()
     {
         app.stop();
+    }
+
+    public CookieJar getCookieJar()
+    {
+        return new CookieJar()
+        {
+            private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
+
+            @Override
+            public void saveFromResponse(HttpUrl url, List<Cookie> cookies)
+            {
+                cookieStore.put(url.host(), cookies);
+            }
+
+            @Override
+            public List<Cookie> loadForRequest(HttpUrl url)
+            {
+                List<Cookie> cookies = cookieStore.get(url.host());
+                return cookies != null ? cookies : new ArrayList<>();
+            }
+        };
     }
 }
