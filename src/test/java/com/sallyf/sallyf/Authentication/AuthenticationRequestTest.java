@@ -6,12 +6,12 @@ import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -53,23 +53,7 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
         setUp(TestController.class);
 
         client = new OkHttpClient.Builder()
-                .cookieJar(new CookieJar()
-                {
-                    private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
-
-                    @Override
-                    public void saveFromResponse(HttpUrl url, List<Cookie> cookies)
-                    {
-                        cookieStore.put(url.host(), cookies);
-                    }
-
-                    @Override
-                    public List<Cookie> loadForRequest(HttpUrl url)
-                    {
-                        List<Cookie> cookies = cookieStore.get(url.host());
-                        return cookies != null ? cookies : new ArrayList<>();
-                    }
-                })
+                .cookieJar(getCookieJar())
                 .build();
     }
 

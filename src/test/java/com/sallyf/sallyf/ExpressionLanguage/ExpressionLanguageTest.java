@@ -4,7 +4,6 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.NonExistentServiceException;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Status;
 import org.junit.Before;
@@ -40,7 +39,7 @@ public class ExpressionLanguageTest
     @Test
     public void evalSimpleTest()
     {
-        Integer result = expressionLanguage.<Integer>evaluate("1 + 1");
+        Integer result = expressionLanguage.evaluate("1 + 1");
 
         assertEquals((Integer) 2, result);
     }

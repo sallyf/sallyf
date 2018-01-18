@@ -4,6 +4,7 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
+import com.sallyf.sallyf.FlashManager.FlashManager;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Router.URLGenerator;
@@ -34,6 +35,7 @@ public class Kernel
                 new ServiceDefinition<>(FrameworkServer.class),
                 new ServiceDefinition<>(Router.class),
                 new ServiceDefinition<>(URLGenerator.class),
+                new ServiceDefinition<>(FlashManager.class),
         };
     }
 
