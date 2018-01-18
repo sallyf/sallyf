@@ -88,4 +88,32 @@ public class FlashManagerTest extends BaseFrameworkTest
 
         assertEquals("Flash 1 Flash 2 Flash 3", response3.body().string());
     }
+
+    @Test
+    public void testAddRedirectRead() throws Exception
+    {
+        Request request1 = new Request.Builder()
+                .url(getRootURL() + "/add-flashes")
+                .build();
+
+        Response response1 = client.newCall(request1).execute();
+
+        assertEquals(Status.OK.getRequestStatus(), response1.code());
+
+        Request request2 = new Request.Builder()
+                .url(getRootURL() + "/redirect")
+                .build();
+
+        client.newCall(request2).execute();
+
+        Request request3 = new Request.Builder()
+                .url(getRootURL() + "/read-flashes")
+                .build();
+
+        Response response3 = client.newCall(request3).execute();
+
+        assertEquals(Status.OK.getRequestStatus(), response3.code());
+
+        assertEquals("Flash 1 Flash 2 Flash 3", response3.body().string());
+    }
 }

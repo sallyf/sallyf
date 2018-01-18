@@ -2,6 +2,7 @@ package com.sallyf.sallyf.FlashManager;
 
 import com.sallyf.sallyf.Annotation.Route;
 import com.sallyf.sallyf.Controller.BaseController;
+import com.sallyf.sallyf.Router.Response;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +25,12 @@ public class TestController extends BaseController
         flashManager.setForward(true);
 
         return "OK";
+    }
+
+    @Route(path = "/redirect")
+    public Response redirect()
+    {
+        return redirect("https://google.com");
     }
 
     @Route(path = "/read-flashes")
