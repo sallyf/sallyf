@@ -3,7 +3,6 @@ package com.sallyf.sallyf;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.Method;
@@ -109,19 +108,6 @@ public class RouterTest
         Route match3 = router.match(request3);
 
         assertNull(match3);
-    }
-
-    @Test(expected = RouteDuplicateException.class)
-    public void routeDuplicateExceptionTest() throws Exception
-    {
-        Route route1 = new Route(new Method[]{Method.GET}, "/abc", (rb) -> null);
-        Route route2 = new Route(new Method[]{Method.GET}, "/abc", (rb) -> null);
-
-        Container container = new Container();
-
-        Router router = new Router(container, new EventDispatcher());
-        router.registerRoute("route_1", route1);
-        router.registerRoute("route_2", route2);
     }
 
     @Test

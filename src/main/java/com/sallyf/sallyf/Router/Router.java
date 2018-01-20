@@ -41,8 +41,6 @@ public class Router implements ServiceInterface
 
     private ArrayList<ResponseTransformerInterface> responseTransformers = new ArrayList<>();
 
-    private ArrayList<String> routeSignatures = new ArrayList<>();
-
     public Router(Container container, EventDispatcher eventDispatcher)
     {
         this.container = container;
@@ -131,15 +129,9 @@ public class Router implements ServiceInterface
 
     public Route registerRoute(String name, Route route)
     {
-        String signature = route.getMethods() + " " + route.getPath().getPattern();
-        if (routeSignatures.contains(signature)) {
-            throw new RouteDuplicateException(route);
-        }
-
         route.setName(name);
 
         routes.put(name, route);
-        routeSignatures.add(signature);
 
         return route;
     }
