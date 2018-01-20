@@ -22,6 +22,7 @@ public class TextType extends InputType
         Set<String> options = super.getRequiredOptions();
 
         options.add("attributes.value");
+        options.add("attributes.name");
 
         return options;
     }

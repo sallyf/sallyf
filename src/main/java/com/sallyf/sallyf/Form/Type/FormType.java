@@ -3,27 +3,56 @@ package com.sallyf.sallyf.Form.Type;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.Options;
-import com.sallyf.sallyf.Form.OptionsAlterer;
+import com.sallyf.sallyf.Form.OptionsConsumer;
 
 import java.util.Set;
 
-public class FormType extends BaseFormType
+public class FormType extends BaseFormType<FormType.FormOptions>
 {
+    public class FormOptions extends Options
+    {
+        public static final String METHOD_KEY = "method";
+
+        public FormOptions()
+        {
+            super();
+
+            put(METHOD_KEY, "post");
+
+        }
+
+        public String getMethod()
+        {
+            return (String) get(METHOD_KEY);
+        }
+
+        public void setMethod(String method)
+        {
+            put(METHOD_KEY, method);
+        }
+    }
+
+    @Override
+    public FormType.FormOptions createOptions()
+    {
+        return new FormOptions();
+    }
+
     @Override
     public Set<String> getRequiredOptions()
     {
         Set<String> options = super.getRequiredOptions();
 
-        options.add("attributes.method");
+        options.add("method");
 
         return options;
     }
 
     @Override
-    public Options getEnforcedOptions()
+    public FormType.FormOptions getEnforcedOptions()
     {
-        Options options = super.getEnforcedOptions();
-        options.getAttributes().put("method", "post");
+        FormType.FormOptions options = super.getEnforcedOptions();
+        options.getAttributes().put("method", getOptions().getMethod());
 
         return options;
     }
@@ -33,7 +62,7 @@ public class FormType extends BaseFormType
         return add(childClass, null);
     }
 
-    public FormType add(Class<? extends FormTypeInterface> childClass, OptionsAlterer optionsAlterer)
+    public FormType add(Class<? extends FormTypeInterface> childClass, OptionsConsumer optionsConsumer)
     {
         FormTypeInterface child;
 
@@ -43,7 +72,7 @@ public class FormType extends BaseFormType
             throw new FrameworkException(e);
         }
 
-        child.applyOptions(optionsAlterer);
+        child.applyOptions(optionsConsumer);
 
         getChildren().add(child);
 

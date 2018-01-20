@@ -3,22 +3,22 @@ package com.sallyf.sallyf.Form.Type;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.Options;
-import com.sallyf.sallyf.Form.OptionsAlterer;
+import com.sallyf.sallyf.Form.OptionsConsumer;
 import com.sallyf.sallyf.Utils.DotNotationUtils;
 import com.sallyf.sallyf.Utils.MapUtils;
 
 import java.util.*;
 
-public abstract class BaseFormType implements FormTypeInterface
+public abstract class BaseFormType<O extends Options> implements FormTypeInterface<O>
 {
     private List<FormTypeInterface> children;
 
-    private Options options;
+    private O options;
 
     public BaseFormType()
     {
         children = new ArrayList<>();
-        options = new Options();
+        options = createOptions();
     }
 
     @Override
@@ -34,23 +34,23 @@ public abstract class BaseFormType implements FormTypeInterface
     }
 
     @Override
-    public void applyOptions(OptionsAlterer optionsAlterer)
+    public void applyOptions(OptionsConsumer<O> optionsConsumer)
     {
-        if (null != optionsAlterer) {
-            optionsAlterer.alert(options);
+        if (null != optionsConsumer) {
+            optionsConsumer.alert(options);
         }
     }
 
     @Override
-    public Options getOptions()
+    public O getOptions()
     {
         return options;
     }
 
     @Override
-    public Options getEnforcedOptions()
+    public O getEnforcedOptions()
     {
-        return new Options();
+        return createOptions();
     }
 
     @Override
@@ -61,7 +61,7 @@ public abstract class BaseFormType implements FormTypeInterface
 
     private void resolveOptions()
     {
-        Options resolvedOptions = new Options();
+        O resolvedOptions = createOptions();
 
         MapUtils.deepMerge(resolvedOptions, getOptions());
         MapUtils.deepMerge(resolvedOptions, getEnforcedOptions());
@@ -73,7 +73,7 @@ public abstract class BaseFormType implements FormTypeInterface
         missingKeys.removeAll(keys);
 
         if (!keys.containsAll(requiredKeys)) {
-            throw new FrameworkException("Missing required options for " + getClass() + " : " + Arrays.toString(missingKeys.toArray()));
+            throw new FrameworkException("Missing required options for " + getClass() + " : " + Arrays.toString(missingKeys.toArray()) + ", got: " + Arrays.toString(keys.toArray()));
         }
 
         options = resolvedOptions;

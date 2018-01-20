@@ -6,7 +6,14 @@ public class FormBuilder
 {
     public static FormType create()
     {
+        return create(null);
+    }
+
+    public static FormType create(OptionsConsumer optionsConsumer)
+    {
         FormType form = new FormType();
+
+        form.applyOptions(optionsConsumer);
 
         return form;
     }

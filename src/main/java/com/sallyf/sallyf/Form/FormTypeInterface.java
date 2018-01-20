@@ -3,17 +3,22 @@ package com.sallyf.sallyf.Form;
 import java.util.List;
 import java.util.Set;
 
-public interface FormTypeInterface
+public interface FormTypeInterface<O extends Options>
 {
+    default O createOptions()
+    {
+        return (O) new Options();
+    }
+
     List<FormTypeInterface> getChildren();
 
     void setChildren(List<FormTypeInterface> children);
 
-    void applyOptions(OptionsAlterer optionsAlterer);
+    void applyOptions(OptionsConsumer<O> optionsConsumer);
 
-    Options getOptions();
+    O getOptions();
 
-    Options getEnforcedOptions();
+    O getEnforcedOptions();
 
     void prepareRender();
 

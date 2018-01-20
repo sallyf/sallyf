@@ -6,10 +6,13 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Form.Renderer.FormRenderer;
 import com.sallyf.sallyf.Form.Renderer.SubmitRenderer;
 import com.sallyf.sallyf.Form.Renderer.TextRenderer;
+import com.sallyf.sallyf.Form.Type.FormType;
+import org.eclipse.jetty.server.Request;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FormManager implements ServiceInterface
 {
@@ -69,5 +72,16 @@ public class FormManager implements ServiceInterface
         }
 
         renderers.add(renderer);
+    }
+
+    public Map<String, String[]> handleRequest(Request request, FormType form)
+    {
+        if (!form.getOptions().getMethod().equalsIgnoreCase(request.getMethod())) {
+            return null;
+        }
+
+        Map<String, String[]> data = request.getParameterMap();
+
+        return data;
     }
 }

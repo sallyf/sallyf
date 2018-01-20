@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Router implements ServiceInterface
 {
@@ -88,7 +89,7 @@ public class Router implements ServiceInterface
 
                 String fullName = actionNamePrefix + actionName;
 
-                Route route = registerAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
+                Route route = registerAction(fullName, routeAnnotation.methods(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
@@ -130,7 +131,7 @@ public class Router implements ServiceInterface
 
     public Route registerRoute(String name, Route route)
     {
-        String signature = route.getMethod() + " " + route.getPath().getPattern();
+        String signature = route.getMethods() + " " + route.getPath().getPattern();
         if (routeSignatures.contains(signature)) {
             throw new RouteDuplicateException(route);
         }
@@ -143,9 +144,9 @@ public class Router implements ServiceInterface
         return route;
     }
 
-    public Route registerAction(String name, Method method, String path, ActionWrapperInterface handler)
+    public Route registerAction(String name, Method[] methods, String path, ActionWrapperInterface handler)
     {
-        return registerRoute(name, new Route(name, method, path, handler));
+        return registerRoute(name, new Route(name, methods, path, handler));
     }
 
     private <T extends ControllerInterface> T instantiateController(Class<T> controllerClass)
@@ -168,7 +169,7 @@ public class Router implements ServiceInterface
     public Route match(Request request)
     {
         for (Route route : routes.values()) {
-            if (request.getMethod().equals(route.getMethod().toString())) {
+            if (Stream.of(route.getMethods()).map(Enum::toString).anyMatch(request.getMethod()::equalsIgnoreCase)) {
                 Pattern r = Pattern.compile(route.getPath().pattern);
 
                 Matcher m = r.matcher(request.getPathInfo());

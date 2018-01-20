@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Options extends HashMap<String, Object>
 {
-    private static final String ATTRIBUTES_KEY = "attributes";
+    public static final String ATTRIBUTES_KEY = "attributes";
 
     public Options()
     {
