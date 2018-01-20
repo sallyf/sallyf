@@ -15,7 +15,7 @@ public interface FormTypeInterface
 
     Options getEnforcedOptions();
 
-    void resolveOptions();
+    void prepareRender();
 
     Set<String> getRequiredOptions();
 }

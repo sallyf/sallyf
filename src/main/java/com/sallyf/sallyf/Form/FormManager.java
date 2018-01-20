@@ -15,13 +15,9 @@ public class FormManager implements ServiceInterface
 {
     private ArrayList<RendererInterface<?>> renderers = new ArrayList<>();
 
-    private FormBuilder builder;
-
     @Override
     public void initialize(Container container)
     {
-        builder = new FormBuilder();
-
         addRenderer(FormRenderer.class);
         addRenderer(SubmitRenderer.class);
         addRenderer(TextRenderer.class);
@@ -31,7 +27,7 @@ public class FormManager implements ServiceInterface
     {
         for (RendererInterface renderer : renderers) {
             if (renderer.supports(form)) {
-                form.resolveOptions();
+                form.prepareRender();
 
                 return renderer.render(form);
             }
@@ -73,10 +69,5 @@ public class FormManager implements ServiceInterface
         }
 
         renderers.add(renderer);
-    }
-
-    public FormBuilder getBuilder()
-    {
-        return builder;
     }
 }

@@ -54,7 +54,12 @@ public abstract class BaseFormType implements FormTypeInterface
     }
 
     @Override
-    public void resolveOptions()
+    public void prepareRender()
+    {
+        resolveOptions();
+    }
+
+    private void resolveOptions()
     {
         Options resolvedOptions = new Options();
 
