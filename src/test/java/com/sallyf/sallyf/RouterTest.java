@@ -7,6 +7,7 @@ import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.http.MetaData;
@@ -188,11 +189,7 @@ public class RouterTest
 
         Object[] actionParameters = router.resolveActionParameters(classes, null);
 
-        Class[] actualClasses = new Class[classes.length];
-        int i = 0;
-        for (Object actionParameter : actionParameters) {
-            actualClasses[i++] = actionParameter.getClass();
-        }
+        Class[] actualClasses = ClassUtils.getClasses(actionParameters);
 
         assertArrayEquals(classes, actualClasses);
     }

@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 public class ClassUtils
 {
@@ -67,7 +66,7 @@ public class ClassUtils
 
     public static <C> C newInstance(Class<C> klass, Consumer<Exception> exceptionHandler, Object... args)
     {
-        Class[] argClasses = Stream.of(args).map(Object::getClass).toArray(Class[]::new);
+        Class[] argClasses = ClassUtils.getClasses(args);
 
         try {
             Constructor<C> constructor = getConstructorForArgs(klass, argClasses);
