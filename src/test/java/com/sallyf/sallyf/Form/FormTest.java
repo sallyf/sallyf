@@ -31,16 +31,18 @@ public class FormTest
     {
         FormType form = FormBuilder.create();
 
-        form.add(TextType.class, (options) -> {
-            options.getAttributes().put("name", "foo");
+        form.add("foo", TextType.class, (options) -> {
+
         });
-        form.add(SubmitType.class, (options) -> {
+        form.add("submit", SubmitType.class, (options) -> {
             options.getAttributes().put("value", "Hello !");
         });
 
+        form.build();
+
         String formView = formManager.render(form);
 
-        String expected = "<form method=\"post\"><input name=\"foo\" type=\"text\" value=\"\"><input type=\"submit\" value=\"Hello !\"></form>";
+        String expected = "<form method=\"post\" name=\"\"><input name=\"foo\" type=\"text\" value=\"\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></form>";
 
         assertEquals(expected, formView);
     }

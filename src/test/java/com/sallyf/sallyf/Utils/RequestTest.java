@@ -22,12 +22,13 @@ public class RequestTest
         foo.put("a", a);
         a.put("b", b);
         b.put("c", c);
-        c.put("d", "test hé");
+        c.put("d", "test");
         expected.put("foo", foo);
         expected.put("yo", "lo");
+        expected.put("bar", "2");
 
-        String in = URLEncoder.encode("foo[a][b][c][d]=test hé&yo=lo", "UTF-8");
+        String in = URLEncoder.encode("foo[a][b][c][d]=test&yo=lo&bar[]=1&bar[]=2", "UTF-8");
 
-        assertEquals(expected, RequestUtils.parseQuery(in, true));
+        assertEquals(expected, RequestUtils.parseQueryPacked(in, true));
     }
 }

@@ -22,7 +22,7 @@ public class Options extends HashMap<String, Object>
         return (Map<String, String>) get(ATTRIBUTES_KEY);
     }
 
-    public List<ConstraintInterface> getConstraint()
+    public List<ConstraintInterface> getConstraints()
     {
         return (List<ConstraintInterface>) get(CONSTRAINTS_KEY);
     }

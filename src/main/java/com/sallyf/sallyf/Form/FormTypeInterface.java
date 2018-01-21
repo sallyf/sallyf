@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Form;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface FormTypeInterface<O extends Options>
@@ -10,9 +10,9 @@ public interface FormTypeInterface<O extends Options>
         return (O) new Options();
     }
 
-    List<FormTypeInterface> getChildren();
+    Map<String, FormTypeInterface> getChildren();
 
-    void setChildren(List<FormTypeInterface> children);
+    void setChildren(Map<String, FormTypeInterface> children);
 
     void applyOptions(OptionsConsumer<O> optionsConsumer);
 
@@ -20,7 +20,15 @@ public interface FormTypeInterface<O extends Options>
 
     O getEnforcedOptions();
 
-    void prepareRender();
+    void build();
 
     Set<String> getRequiredOptions();
+
+    String getName();
+
+    void setName(String name);
+
+    String getFullName();
+
+    FormTypeInterface getParent();
 }

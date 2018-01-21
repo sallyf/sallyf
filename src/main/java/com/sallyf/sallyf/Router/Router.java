@@ -15,6 +15,7 @@ import com.sallyf.sallyf.Router.ResponseTransformer.HttpExceptionTransformer;
 import com.sallyf.sallyf.Router.ResponseTransformer.PrimitiveTransformer;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.server.Request;
 
 import java.lang.reflect.InvocationTargetException;
@@ -143,14 +144,11 @@ public class Router implements ServiceInterface
 
     private <T extends ControllerInterface> T instantiateController(Class<T> controllerClass)
     {
-        try {
-            T controller = controllerClass.newInstance();
-            controller.setContainer(container);
+        T controller = ClassUtils.newInstance(controllerClass, ControllerInstantiationException::new);
 
-            return controller;
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new ControllerInstantiationException(e);
-        }
+        controller.setContainer(container);
+
+        return controller;
     }
 
     public HashMap<String, Route> getRoutes()

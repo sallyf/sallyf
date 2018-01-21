@@ -30,8 +30,6 @@ public class FormRequestTest extends BaseFrameworkTest
     {
         WebClient webClient = new WebClient();
 
-//        while(true){}
-
         HtmlPage page1 = webClient.getPage(getRootURL() + "/simple-form");
 
         HtmlForm form = page1.getForms().get(0);
@@ -39,13 +37,13 @@ public class FormRequestTest extends BaseFrameworkTest
         HtmlTextInput textField = form.getInputByName("foo[a][b][c][d]");
         textField.setValueAttribute("bar");
 
-        HtmlSubmitInput button = form.getInputByValue("Hello !");
+        HtmlSubmitInput button = form.getInputByName("submit");
 
         HtmlPage page2 = button.click();
 
         String v = page2.getBody().getTextContent();
 
-        Assert.assertEquals("{foo={a={b={c={d=bar, e=}}}}}", v);
+        Assert.assertEquals("{foo[a][b][c][d]=[bar],submit=[Hello !],bar[]=[bar 1]}", v);
     }
 
 }

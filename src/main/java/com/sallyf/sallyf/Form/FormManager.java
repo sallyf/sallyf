@@ -7,18 +7,14 @@ import com.sallyf.sallyf.Form.Renderer.FormRenderer;
 import com.sallyf.sallyf.Form.Renderer.SubmitRenderer;
 import com.sallyf.sallyf.Form.Renderer.TextRenderer;
 import com.sallyf.sallyf.Form.Type.FormType;
-import com.sallyf.sallyf.Utils.DotNotationUtils;
-import com.sallyf.sallyf.Utils.RequestUtils;
+import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.server.Request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FormManager implements ServiceInterface
 {
@@ -36,8 +32,6 @@ public class FormManager implements ServiceInterface
     {
         for (RendererInterface renderer : renderers) {
             if (renderer.supports(form)) {
-                form.prepareRender();
-
                 return renderer.render(form);
             }
         }
@@ -45,12 +39,12 @@ public class FormManager implements ServiceInterface
         throw new FrameworkException("Unable to render: " + form.getClass());
     }
 
-    public String renderChildren(FormTypeInterface form)
+    public String renderChildren(FormTypeInterface<?> form)
     {
-        return renderChildren(form.getChildren());
+        return renderChildren(form.getChildren().values());
     }
 
-    public String renderChildren(List<FormTypeInterface> children)
+    public String renderChildren(Collection<FormTypeInterface> children)
     {
         StringBuilder s = new StringBuilder();
 
@@ -63,42 +57,76 @@ public class FormManager implements ServiceInterface
 
     public void addRenderer(Class<? extends RendererInterface<?>> rendererClass)
     {
-        RendererInterface<?> renderer;
+        AtomicReference<RendererInterface<?>> rendererReference = new AtomicReference<>();
 
-        try {
-            renderer = rendererClass.getConstructor(FormManager.class).newInstance(this);
-        } catch (InstantiationException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            try {
-                renderer = rendererClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e2) {
-                e.addSuppressed(e2);
 
-                throw new FrameworkException(e);
-            }
+        RendererInterface<?> rendererWithManager = ClassUtils.newInstance(
+                rendererClass,
+                e -> { // If failure, fallback on parameterless constructor
+                    rendererReference.set(
+                            // If failure, default behavior throws a `FrameworkException`
+                            ClassUtils.newInstance(rendererClass)
+                    );
+                },
+                this
+        );
+
+        if (null == rendererReference.get() && null != rendererWithManager) {
+            rendererReference.set(rendererWithManager);
         }
 
-        renderers.add(renderer);
-    }
-
-    public String getRequestContent(Request request) {
-        try {
-            return new BufferedReader(new InputStreamReader(request.getInputStream())).lines().collect(Collectors.joining("\n"));
-        } catch (IOException e) {
-            throw new FrameworkException(e);
+        if (null != rendererReference.get()) {
+            renderers.add(rendererReference.get());
         }
     }
 
-    public Map<String, Object> handleRequest(Request request, FormType form)
+    public Map<String, String[]> handleRequest(Request request, FormType form)
     {
         if (!form.getOptions().getMethod().equalsIgnoreCase(request.getMethod())) {
             return null;
         }
 
-        return RequestUtils.parseQuery(getRequestContent(request), true);
+        validate(form, request);
+
+        return request.getParameterMap();
     }
 
-    public void validate(FormTypeInterface form, Request request)
+    public Map<String, FormTypeInterface> getFlatParameters(FormTypeInterface<?> form)
     {
-        Map<String, String[]> data = request.getParameterMap();
+        HashMap<String, FormTypeInterface> out = new HashMap<>();
+
+        out.put(form.getFullName(), form);
+
+        for (FormTypeInterface child : form.getChildren().values()) {
+            out.putAll(getFlatParameters(child));
+        }
+
+        return out;
+    }
+
+    public void validate(FormType form, Request request)
+    {
+        Map<String, FormTypeInterface> formParameters = getFlatParameters(form);
+        Map<String, String[]> queryParameters = request.getParameterMap();
+
+        if (queryParameters.keySet().size() > formParameters.keySet().size()) {
+            form.getErrorsBag().addError("", new ValidationError("No extra parameter allowed"));
+        }
+
+        validate(request, form, form);
+    }
+
+    private void validate(Request request, FormTypeInterface<?> form, FormType rootForm)
+    {
+        ErrorsBag errorsBag = rootForm.getErrorsBag();
+        String[] values = request.getParameterMap().get(form.getFullName());
+
+        for (ConstraintInterface constraint : form.getOptions().getConstraints()) {
+            constraint.validate(values, form, errorsBag);
+        }
+
+        for (FormTypeInterface child : form.getChildren().values()) {
+            validate(request, child, rootForm);
+        }
     }
 }

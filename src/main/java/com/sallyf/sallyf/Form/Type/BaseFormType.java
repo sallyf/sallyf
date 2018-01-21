@@ -11,24 +11,30 @@ import java.util.*;
 
 public abstract class BaseFormType<O extends Options> implements FormTypeInterface<O>
 {
-    private List<FormTypeInterface> children;
+    private Map<String, FormTypeInterface> children;
+
+    private String name;
+
+    private FormTypeInterface parent;
 
     private O options;
 
-    public BaseFormType()
+    public BaseFormType(String name, FormTypeInterface parent)
     {
-        children = new ArrayList<>();
-        options = createOptions();
+        this.name = name;
+        this.parent = parent;
+        this.children = new LinkedHashMap<>();
+        this.options = createOptions();
     }
 
     @Override
-    public List<FormTypeInterface> getChildren()
+    public Map<String, FormTypeInterface> getChildren()
     {
         return children;
     }
 
     @Override
-    public void setChildren(List<FormTypeInterface> children)
+    public void setChildren(Map<String, FormTypeInterface> children)
     {
         this.children = children;
     }
@@ -50,13 +56,21 @@ public abstract class BaseFormType<O extends Options> implements FormTypeInterfa
     @Override
     public O getEnforcedOptions()
     {
-        return createOptions();
+        O options = createOptions();
+
+        options.getAttributes().put("name", getName());
+
+        return options;
     }
 
     @Override
-    public void prepareRender()
+    public void build()
     {
         resolveOptions();
+
+        for (FormTypeInterface child : getChildren().values()) {
+            child.build();
+        }
     }
 
     private void resolveOptions()
@@ -88,5 +102,48 @@ public abstract class BaseFormType<O extends Options> implements FormTypeInterfa
         options.add("constraints");
 
         return options;
+    }
+
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
+    @Override
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    @Override
+    public String getFullName()
+    {
+        List<String> names = new ArrayList<>();
+
+        FormTypeInterface current = this;
+
+        while (null != current) {
+            names.add(0, current.getName());
+
+            current = current.getParent();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String name : names) {
+            if (sb.toString().isEmpty()) {
+                sb.append(name);
+            } else {
+                sb.append("[" + name + "]");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public FormTypeInterface getParent()
+    {
+        return parent;
     }
 }

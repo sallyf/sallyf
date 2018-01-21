@@ -11,7 +11,7 @@ public class FormBuilder
 
     public static FormType create(OptionsConsumer optionsConsumer)
     {
-        FormType form = new FormType();
+        FormType form = new FormType("", null);
 
         form.applyOptions(optionsConsumer);
 

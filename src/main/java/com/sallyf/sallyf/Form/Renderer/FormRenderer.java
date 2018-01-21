@@ -1,7 +1,7 @@
 package com.sallyf.sallyf.Form.Renderer;
 
-import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.FormManager;
+import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.Type.FormType;
 
 public class FormRenderer extends BaseFormRenderer<FormType>
@@ -25,6 +25,7 @@ public class FormRenderer extends BaseFormRenderer<FormType>
         String s = "";
 
         s += "<form " + renderAttributes(form) + ">";
+        s += renderErrors(form);
         s += manager.renderChildren(form);
         s += "</form>";
 
