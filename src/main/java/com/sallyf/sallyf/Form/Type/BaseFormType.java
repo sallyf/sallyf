@@ -66,7 +66,7 @@ public abstract class BaseFormType<O extends Options> implements FormTypeInterfa
         MapUtils.deepMerge(resolvedOptions, getOptions());
         MapUtils.deepMerge(resolvedOptions, getEnforcedOptions());
 
-        Set<String> keys = DotNotationUtils.flattenKeys(resolvedOptions, true);
+        Set<String> keys = DotNotationUtils.flattenKeys(resolvedOptions, false);
         Set<String> requiredKeys = getRequiredOptions();
 
         Set<String> missingKeys = new HashSet<>(requiredKeys);
@@ -82,6 +82,11 @@ public abstract class BaseFormType<O extends Options> implements FormTypeInterfa
     @Override
     public Set<String> getRequiredOptions()
     {
-        return new HashSet<>();
+        HashSet<String> options = new HashSet<>();
+
+        options.add("attributes");
+        options.add("constraints");
+
+        return options;
     }
 }

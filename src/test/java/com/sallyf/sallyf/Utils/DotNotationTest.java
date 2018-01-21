@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.Utils;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
@@ -92,5 +93,42 @@ public class DotNotationTest
         Collections.sort(flattenFullList);
 
         assertEquals(expectedFull, flattenFullList);
+    }
+
+    @Test
+    public void packTest()
+    {
+        Map<String, Object> flatMap = new HashMap<>();
+        flatMap.put("foo.bar.test", "yolo");
+        flatMap.put("foo", new HashMap<>());
+        flatMap.put("yolo", "yo");
+
+        HashMap<String, Object> expected = new HashMap<>();
+        HashMap<String, HashMap> foo = new HashMap<>();
+        HashMap<String, String> bar = new HashMap<>();
+        bar.put("test", "yolo");
+        foo.put("bar", bar);
+        expected.put("foo", foo);
+        expected.put("yolo", "yo");
+
+        Assert.assertEquals(expected, DotNotationUtils.pack(flatMap));
+    }
+
+    @Test
+    public void flattenPackTest()
+    {
+        Map<String, Object> flatMap = new HashMap<>();
+        flatMap.put("foo.bar.test", "yolo");
+        flatMap.put("foo", new HashMap<>());
+        flatMap.put("yolo", "yo");
+
+        Map<String, Object> packedMap = DotNotationUtils.pack(flatMap);
+        Map<String, Object> reFlattenMap = DotNotationUtils.flatten(packedMap);
+
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("foo.bar.test", "yolo");
+        expected.put("yolo", "yo");
+
+        Assert.assertEquals(expected, reFlattenMap);
     }
 }

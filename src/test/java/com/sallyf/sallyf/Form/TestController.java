@@ -20,14 +20,17 @@ public class TestController extends BaseController
                     options.getAttributes().put("action", "/simple-form");
                 })
                 .add(TextType.class, (options) -> {
-                    options.getAttributes().put("name", "foo");
+                    options.getAttributes().put("name", "foo[a][b][c][d]");
+                })
+                .add(TextType.class, (options) -> {
+                    options.getAttributes().put("name", "foo[a][b][c][e]");
                 })
                 .add(SubmitType.class, (options) -> {
                     options.getAttributes().put("value", "Hello !");
                 });
 
         if (request.getMethod().equalsIgnoreCase("post")) {
-            Map<String, String[]> data = formManager.handleRequest(request, form);
+            Map<String, Object> data = formManager.handleRequest(request, form);
 
             return data.toString();
         }

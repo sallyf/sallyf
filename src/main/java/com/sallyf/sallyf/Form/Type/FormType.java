@@ -18,7 +18,6 @@ public class FormType extends BaseFormType<FormType.FormOptions>
             super();
 
             put(METHOD_KEY, "post");
-
         }
 
         public String getMethod()

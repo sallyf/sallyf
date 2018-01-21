@@ -7,12 +7,18 @@ import com.sallyf.sallyf.Form.Renderer.FormRenderer;
 import com.sallyf.sallyf.Form.Renderer.SubmitRenderer;
 import com.sallyf.sallyf.Form.Renderer.TextRenderer;
 import com.sallyf.sallyf.Form.Type.FormType;
+import com.sallyf.sallyf.Utils.DotNotationUtils;
+import com.sallyf.sallyf.Utils.RequestUtils;
 import org.eclipse.jetty.server.Request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class FormManager implements ServiceInterface
 {
@@ -74,14 +80,25 @@ public class FormManager implements ServiceInterface
         renderers.add(renderer);
     }
 
-    public Map<String, String[]> handleRequest(Request request, FormType form)
+    public String getRequestContent(Request request) {
+        try {
+            return new BufferedReader(new InputStreamReader(request.getInputStream())).lines().collect(Collectors.joining("\n"));
+        } catch (IOException e) {
+            throw new FrameworkException(e);
+        }
+    }
+
+    public Map<String, Object> handleRequest(Request request, FormType form)
     {
         if (!form.getOptions().getMethod().equalsIgnoreCase(request.getMethod())) {
             return null;
         }
 
-        Map<String, String[]> data = request.getParameterMap();
+        return RequestUtils.parseQuery(getRequestContent(request), true);
+    }
 
-        return data;
+    public void validate(FormTypeInterface form, Request request)
+    {
+        Map<String, String[]> data = request.getParameterMap();
     }
 }
