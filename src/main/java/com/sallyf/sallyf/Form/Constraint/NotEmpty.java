@@ -1,6 +1,7 @@
 package com.sallyf.sallyf.Form.Constraint;
 
 import com.sallyf.sallyf.Form.ErrorsBagHelper;
+import com.sallyf.sallyf.Form.Exception.UnableToValidateException;
 import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.ValidationError;
 
@@ -8,7 +9,7 @@ public class NotEmpty extends AbstractConstraint
 {
     public NotEmpty()
     {
-        this("This value cannot be empty");
+        this("This field cannot be empty");
     }
 
     public NotEmpty(String message)
@@ -27,6 +28,6 @@ public class NotEmpty extends AbstractConstraint
             return;
         }
 
-        errorsBag.addError(new ValidationError("Unable to validate"));
+        throw new UnableToValidateException();
     }
 }

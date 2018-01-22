@@ -3,6 +3,7 @@ package com.sallyf.sallyf.Form;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.Form.Exception.UnableToValidateException;
 import com.sallyf.sallyf.Form.Renderer.FormRenderer;
 import com.sallyf.sallyf.Form.Renderer.SubmitRenderer;
 import com.sallyf.sallyf.Form.Renderer.TextRenderer;
@@ -109,7 +110,13 @@ public class FormManager implements ServiceInterface
         R value = form.transform(rawValue);
 
         for (ConstraintInterface constraint : form.getOptions().getConstraints()) {
-            constraint.validate(value, form, new ErrorsBagHelper(rootForm.getErrorsBag(), form.getFullName()));
+            ErrorsBagHelper errorsBagHelper = new ErrorsBagHelper(rootForm.getErrorsBag(), form.getFullName());
+
+            try {
+                constraint.validate(value, form, errorsBagHelper);
+            } catch (UnableToValidateException e) {
+                errorsBagHelper.addError(new ValidationError("Unable to validate " + value.getClass()));
+            }
         }
 
         for (FormTypeInterface child : form.getChildren().values()) {

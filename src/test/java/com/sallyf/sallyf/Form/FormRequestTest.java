@@ -30,7 +30,7 @@ public class FormRequestTest extends BaseFrameworkTest
     {
         WebClient webClient = new WebClient();
 
-        HtmlPage page1 = webClient.getPage(getRootURL() + "/simple-form");
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/constraint-empty");
 
         HtmlForm form = page1.getForms().get(0);
 
@@ -47,11 +47,11 @@ public class FormRequestTest extends BaseFrameworkTest
     }
 
     @Test
-    public void testSubmitConstraint() throws Exception
+    public void testConstraintNotEmpty() throws Exception
     {
         WebClient webClient = new WebClient();
 
-        HtmlPage page1 = webClient.getPage(getRootURL() + "/simple-form");
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/constraint-empty");
 
         HtmlForm form = page1.getForms().get(0);
 
@@ -62,5 +62,39 @@ public class FormRequestTest extends BaseFrameworkTest
         String content = page2.getWebResponse().getContentAsString();
 
         Assert.assertTrue(content.contains("The value \"\" is blank"));
+    }
+
+    @Test
+    public void testConstraintIsTrueSuccess() throws Exception
+    {
+        WebClient webClient = new WebClient();
+
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/constraint-istrue-success");
+
+        HtmlForm form = page1.getForms().get(0);
+        HtmlSubmitInput button = form.getInputByName("submit");
+
+        HtmlPage page2 = button.click();
+
+        String v = page2.getBody().getTextContent();
+
+        Assert.assertEquals("{test=[true],submit=[Submit]}", v);
+    }
+
+    @Test
+    public void testConstraintIsFalseFailure() throws Exception
+    {
+        WebClient webClient = new WebClient();
+
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/constraint-isfalse-failure");
+
+        HtmlForm form = page1.getForms().get(0);
+        HtmlSubmitInput button = form.getInputByName("submit");
+
+        HtmlPage page2 = button.click();
+
+        String content = page2.getWebResponse().getContentAsString();
+
+        Assert.assertTrue(content.contains("\"yolo\" is not false"));
     }
 }
