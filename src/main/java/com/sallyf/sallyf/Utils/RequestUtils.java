@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class RequestUtils
 {
-    public static Map<String, Object> parseQueryPacked(String in, boolean decode)
+    public static Map<String, Object> parseQuery(String in, boolean decode)
     {
         if (decode) {
             try {
@@ -26,46 +26,12 @@ public class RequestUtils
 
         String[] queryComponents = in.split("&");
 
-        Map<List<String>, String> queryMap = getQueryMap(queryComponents);
+        Map<List<String>, String> queryMap = getQueryMapPath(queryComponents);
 
-        Map<String, Object> out = new HashMap<>();
-
-        for (Map.Entry<List<String>, String> entry : queryMap.entrySet()) {
-            List<String> fullPath = entry.getKey();
-            String value = entry.getValue();
-
-            Map<String, Object> parentNode;
-
-            for (int level = 0; level < fullPath.size(); level++) {
-                boolean isLast = (level == fullPath.size() - 1);
-
-                String key = fullPath.get(level);
-
-                if (level == 0) {
-                    parentNode = out;
-                } else {
-                    List<String> parentPath = fullPath.stream().limit(level).collect(Collectors.toList());
-
-                    parentNode = DotNotationUtils.access(out, String.join(".", parentPath));
-
-                    System.out.println();
-                }
-
-                if (isLast) {
-                    parentNode.put(key, value);
-                } else {
-                    if (!parentNode.containsKey(key)) {
-                        parentNode.put(key, new HashMap<>());
-                    }
-                }
-
-            }
-        }
-
-        return out;
+        return expandQueryMapPath(queryMap);
     }
 
-    private static Map<List<String>, String> getQueryMap(String[] queryComponents)
+    private static Map<List<String>, String> getQueryMapPath(String[] queryComponents)
     {
         Map<List<String>, String> queryMap = new HashMap<>();
 
@@ -117,5 +83,42 @@ public class RequestUtils
         }
 
         return queryMap;
+    }
+
+    private static Map<String, Object> expandQueryMapPath(Map<List<String>, String> queryMap)
+    {
+        Map<String, Object> out = new HashMap<>();
+
+        for (Map.Entry<List<String>, String> entry : queryMap.entrySet()) {
+            List<String> fullPath = entry.getKey();
+            String value = entry.getValue();
+
+            Map<String, Object> parentNode;
+
+            for (int level = 0; level < fullPath.size(); level++) {
+                boolean isLast = (level == fullPath.size() - 1);
+
+                String key = fullPath.get(level);
+
+                if (level == 0) {
+                    parentNode = out;
+                } else {
+                    List<String> parentPath = fullPath.stream().limit(level).collect(Collectors.toList());
+
+                    parentNode = DotNotationUtils.access(out, String.join(".", parentPath));
+                }
+
+                if (isLast) {
+                    parentNode.put(key, value);
+                } else {
+                    if (!parentNode.containsKey(key)) {
+                        parentNode.put(key, new HashMap<>());
+                    }
+                }
+
+            }
+        }
+
+        return out;
     }
 }

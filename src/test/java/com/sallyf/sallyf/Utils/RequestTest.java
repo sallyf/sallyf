@@ -36,7 +36,7 @@ public class RequestTest
 
         String in = URLEncoder.encode("foo[a][b][c][d]=test&yo=lo&bar[][foo]=foovalue&bar[][bar]=barvalue", "UTF-8");
 
-        Map<String, Object> actual = RequestUtils.parseQueryPacked(in, true);
+        Map<String, Object> actual = RequestUtils.parseQuery(in, true);
 
         assertEquals(expected, actual);
     }
