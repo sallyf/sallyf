@@ -4,10 +4,7 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Form.Exception.UnableToValidateException;
-import com.sallyf.sallyf.Form.Renderer.CheckboxRenderer;
-import com.sallyf.sallyf.Form.Renderer.FormRenderer;
-import com.sallyf.sallyf.Form.Renderer.SubmitRenderer;
-import com.sallyf.sallyf.Form.Renderer.TextRenderer;
+import com.sallyf.sallyf.Form.Renderer.*;
 import com.sallyf.sallyf.Form.Type.FormType;
 import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.server.Request;
@@ -28,6 +25,7 @@ public class FormManager implements ServiceInterface
         addRenderer(SubmitRenderer.class);
         addRenderer(TextRenderer.class);
         addRenderer(CheckboxRenderer.class);
+        addRenderer(TextareaRenderer.class);
     }
 
     public String render(FormTypeInterface form)

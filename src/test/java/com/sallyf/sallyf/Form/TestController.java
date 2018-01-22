@@ -5,10 +5,7 @@ import com.sallyf.sallyf.Controller.BaseController;
 import com.sallyf.sallyf.Form.Constraint.IsFalse;
 import com.sallyf.sallyf.Form.Constraint.IsTrue;
 import com.sallyf.sallyf.Form.Constraint.NotEmpty;
-import com.sallyf.sallyf.Form.Type.CheckboxType;
-import com.sallyf.sallyf.Form.Type.FormType;
-import com.sallyf.sallyf.Form.Type.SubmitType;
-import com.sallyf.sallyf.Form.Type.TextType;
+import com.sallyf.sallyf.Form.Type.*;
 import com.sallyf.sallyf.Server.Method;
 import org.eclipse.jetty.server.Request;
 
@@ -120,4 +117,26 @@ public class TestController extends BaseController
         return formManager.render(form);
     }
 
+    @Route(path = "/textarea", methods = {Method.GET, Method.POST})
+    public String textarea(Request request, FormManager formManager)
+    {
+        FormType form = FormBuilder
+                .create()
+                .add("ta", TextareaType.class, (options) -> {
+                    options.getConstraints().add(new NotEmpty());
+                }, () -> "Hello, World")
+                .add("submit", SubmitType.class, () -> "Submit");
+
+        form.build();
+
+        if (request.getMethod().equalsIgnoreCase("post")) {
+            Map<String, String[]> data = formManager.handleRequest(request, form);
+
+            if (!form.getErrorsBag().hasErrors()) {
+                return data.toString();
+            }
+        }
+
+        return formManager.render(form);
+    }
 }

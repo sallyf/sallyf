@@ -114,4 +114,21 @@ public class FormRequestTest extends BaseFrameworkTest
         Assert.assertTrue(content.contains("cb2 should be unchecked"));
         Assert.assertFalse(content.contains("cb3 should be unchecked"));
     }
+
+    @Test
+    public void testTextarea() throws Exception
+    {
+        WebClient webClient = new WebClient();
+
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/textarea");
+
+        HtmlForm form = page1.getForms().get(0);
+        HtmlSubmitInput button = form.getInputByName("submit");
+
+        HtmlPage page2 = button.click();
+
+        String v = page2.getBody().getTextContent();
+
+        Assert.assertEquals("{submit=[Submit],ta=[Hello, World]}", v);
+    }
 }
