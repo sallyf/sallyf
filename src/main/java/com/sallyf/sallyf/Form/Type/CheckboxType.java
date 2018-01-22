@@ -3,35 +3,37 @@ package com.sallyf.sallyf.Form.Type;
 import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.Options;
 
-import java.util.Set;
-
-public class TextType extends InputType<String>
+public class CheckboxType extends InputType<Boolean>
 {
-    public TextType(String name, FormTypeInterface parent)
+    public CheckboxType(String name, FormTypeInterface parent)
     {
         super(name, parent);
-
-        setValue("");
     }
 
     @Override
     public Options getEnforcedOptions()
     {
         Options options = super.getEnforcedOptions();
-        options.getAttributes().put("type", "text");
+        options.getAttributes().put("type", "checkbox");
 
         return options;
     }
 
     @Override
-    public String transform(String[] value)
+    public Boolean transform(String[] value)
     {
-        return value[0];
+        return value == null ? false : true;
+    }
+
+    @Override
+    String getValueAttributeName()
+    {
+        return "checked";
     }
 
     @Override
     public String getAttributeValue()
     {
-        return getValue();
+        return getValue() ? "checked" : null;
     }
 }

@@ -18,8 +18,19 @@ public abstract class InputType<R> extends BaseFormType<Options, R>
         Set<String> options = super.getRequiredOptions();
 
         options.add("attributes.type");
-        options.add("attributes.name");
+        options.add("attributes." + getValueAttributeName());
 
         return options;
+    }
+
+    @Override
+    public void applyValue()
+    {
+        getOptions().getAttributes().put(getValueAttributeName(), getAttributeValue());
+    }
+
+    String getValueAttributeName()
+    {
+        return "value";
     }
 }

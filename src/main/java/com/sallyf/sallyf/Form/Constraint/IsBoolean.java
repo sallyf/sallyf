@@ -13,14 +13,14 @@ public class IsBoolean extends Is
     {
         super(
                 (value) -> {
-                    if (value instanceof String) {
-                        return value.equals(Boolean.toString(expected));
-                    }
-
                     if (value instanceof Boolean) {
                         boolean booleanValue = (Boolean) value;
 
                         return booleanValue == expected;
+                    }
+
+                    if (value instanceof String) {
+                        return value.equals(Boolean.toString(expected));
                     }
 
                     throw new UnableToValidateException();

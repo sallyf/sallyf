@@ -22,18 +22,14 @@ public class SubmitType extends InputType<String>
     }
 
     @Override
-    public Set<String> getRequiredOptions()
-    {
-        Set<String> options = super.getRequiredOptions();
-
-        options.add("attributes.value");
-
-        return options;
-    }
-
-    @Override
     public String transform(String[] value)
     {
         return value[0];
+    }
+
+    @Override
+    public String getAttributeValue()
+    {
+        return getValue();
     }
 }

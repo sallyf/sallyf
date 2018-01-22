@@ -1,10 +1,7 @@
 package com.sallyf.sallyf.Form;
 
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.gargoylesoftware.htmlunit.html.*;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
@@ -26,7 +23,7 @@ public class FormRequestTest extends BaseFrameworkTest
     }
 
     @Test
-    public void testSubmit() throws Exception
+    public void testNoConstraints() throws Exception
     {
         WebClient webClient = new WebClient();
 
@@ -96,5 +93,25 @@ public class FormRequestTest extends BaseFrameworkTest
         String content = page2.getWebResponse().getContentAsString();
 
         Assert.assertTrue(content.contains("\"yolo\" is not false"));
+    }
+
+    @Test
+    public void testConstraintCheckboxes() throws Exception
+    {
+        WebClient webClient = new WebClient();
+
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/checkboxes");
+
+        HtmlForm form = page1.getForms().get(0);
+
+        HtmlSubmitInput button = form.getInputByName("submit");
+
+        HtmlPage page2 = button.click();
+
+        String content = page2.getWebResponse().getContentAsString();
+
+        Assert.assertFalse(content.contains("cb1 should be checked"));
+        Assert.assertTrue(content.contains("cb2 should be unchecked"));
+        Assert.assertFalse(content.contains("cb3 should be unchecked"));
     }
 }

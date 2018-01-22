@@ -19,6 +19,8 @@ public abstract class BaseFormType<O extends Options, R> implements FormTypeInte
 
     private O options;
 
+    private R value = null;
+
     public BaseFormType(String name, FormTypeInterface parent)
     {
         this.name = name;
@@ -75,6 +77,8 @@ public abstract class BaseFormType<O extends Options, R> implements FormTypeInte
 
     private void resolveOptions()
     {
+        applyValue();
+
         O resolvedOptions = createOptions();
 
         MapUtils.deepMerge(resolvedOptions, getOptions());
@@ -145,5 +149,17 @@ public abstract class BaseFormType<O extends Options, R> implements FormTypeInte
     public FormTypeInterface getParent()
     {
         return parent;
+    }
+
+    @Override
+    public R getValue()
+    {
+        return value;
+    }
+
+    @Override
+    public void setValue(R value)
+    {
+        this.value = value;
     }
 }

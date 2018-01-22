@@ -21,6 +21,7 @@ public abstract class BaseFormRenderer<T extends FormTypeInterface> implements R
     public String renderAttributes(Map<String, String> attributes)
     {
         return attributes.entrySet().stream()
+                .filter(e -> null != e.getKey() & null != e.getValue())
                 .map(this::renderAttribute)
                 .collect(joining(" "));
     }

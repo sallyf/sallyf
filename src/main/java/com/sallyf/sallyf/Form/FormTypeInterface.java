@@ -33,4 +33,12 @@ public interface FormTypeInterface<O extends Options, R>
     FormTypeInterface getParent();
 
     R transform(String[] value);
+
+    R getValue();
+
+    String getAttributeValue();
+
+    void setValue(R value);
+
+    void applyValue();
 }

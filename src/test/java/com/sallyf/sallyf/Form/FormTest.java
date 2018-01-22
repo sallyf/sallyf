@@ -34,8 +34,7 @@ public class FormTest
 
                 })
                 .add("submit", SubmitType.class, (options) -> {
-                    options.getAttributes().put("value", "Hello !");
-                });
+                }, () -> "Hello !");
 
         form.build();
 
