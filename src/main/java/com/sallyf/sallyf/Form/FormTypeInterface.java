@@ -3,7 +3,7 @@ package com.sallyf.sallyf.Form;
 import java.util.Map;
 import java.util.Set;
 
-public interface FormTypeInterface<O extends Options>
+public interface FormTypeInterface<O extends Options, R>
 {
     default O createOptions()
     {
@@ -31,4 +31,6 @@ public interface FormTypeInterface<O extends Options>
     String getFullName();
 
     FormTypeInterface getParent();
+
+    R transform(String[] value);
 }

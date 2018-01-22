@@ -5,7 +5,7 @@ import com.sallyf.sallyf.Form.Options;
 
 import java.util.Set;
 
-public class TextType extends InputType
+public class TextType extends InputType<String>
 {
     public TextType(String name, FormTypeInterface parent)
     {
@@ -31,5 +31,11 @@ public class TextType extends InputType
         options.add("attributes.value");
 
         return options;
+    }
+
+    @Override
+    public String transform(String[] value)
+    {
+        return value[0];
     }
 }

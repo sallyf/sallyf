@@ -5,7 +5,7 @@ import com.sallyf.sallyf.Form.Options;
 
 import java.util.Set;
 
-public class SubmitType extends InputType
+public class SubmitType extends InputType<String>
 {
     public SubmitType(String name, FormTypeInterface parent)
     {
@@ -29,5 +29,11 @@ public class SubmitType extends InputType
         options.add("attributes.value");
 
         return options;
+    }
+
+    @Override
+    public String transform(String[] value)
+    {
+        return value[0];
     }
 }

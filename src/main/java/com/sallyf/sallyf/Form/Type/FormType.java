@@ -8,7 +8,7 @@ import com.sallyf.sallyf.Utils.ClassUtils;
 
 import java.util.Set;
 
-public class FormType extends BaseFormType<FormType.FormOptions>
+public class FormType extends BaseFormType<FormType.FormOptions, Object>
 {
     private ErrorsBag errorsBag;
 
@@ -85,5 +85,11 @@ public class FormType extends BaseFormType<FormType.FormOptions>
     public ErrorsBag getErrorsBag()
     {
         return errorsBag;
+    }
+
+    @Override
+    public Object transform(String[] value)
+    {
+        return value;
     }
 }

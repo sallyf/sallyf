@@ -2,7 +2,7 @@ package com.sallyf.sallyf.Form;
 
 import com.sallyf.sallyf.Annotation.Route;
 import com.sallyf.sallyf.Controller.BaseController;
-import com.sallyf.sallyf.Form.Constraint.NotBlank;
+import com.sallyf.sallyf.Form.Constraint.NotEmpty;
 import com.sallyf.sallyf.Form.Type.FormType;
 import com.sallyf.sallyf.Form.Type.SubmitType;
 import com.sallyf.sallyf.Form.Type.TextType;
@@ -21,10 +21,10 @@ public class TestController extends BaseController
                     options.getAttributes().put("action", "/simple-form");
                 })
                 .add("foo[a][b][c][d]", TextType.class, (options) -> {
-                    options.getConstraints().add(new NotBlank("The value \"{{value.0}}\" is blank"));
+                    options.getConstraints().add(new NotEmpty("The value \"{{value}}\" is blank"));
                 })
                 .add("bar[]", TextType.class, (options) -> {
-                    options.getConstraints().add(new NotBlank());
+                    options.getConstraints().add(new NotEmpty());
                     options.getAttributes().put("value", "bar 1");
                 })
                 .add("submit", SubmitType.class, (options) -> {

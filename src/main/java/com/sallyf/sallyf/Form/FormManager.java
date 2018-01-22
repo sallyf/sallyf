@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class FormManager implements ServiceInterface
 {
@@ -39,7 +38,7 @@ public class FormManager implements ServiceInterface
         throw new FrameworkException("Unable to render: " + form.getClass());
     }
 
-    public String renderChildren(FormTypeInterface<?> form)
+    public String renderChildren(FormTypeInterface<?, ?> form)
     {
         return renderChildren(form.getChildren().values());
     }
@@ -57,27 +56,14 @@ public class FormManager implements ServiceInterface
 
     public void addRenderer(Class<? extends RendererInterface<?>> rendererClass)
     {
-        AtomicReference<RendererInterface<?>> rendererReference = new AtomicReference<>();
+        // If failure, ignore, fallback on parameterless constructor
+        RendererInterface<?> renderer = ClassUtils.newInstance(rendererClass, e -> {}, this);
 
-
-        RendererInterface<?> rendererWithManager = ClassUtils.newInstance(
-                rendererClass,
-                e -> { // If failure, fallback on parameterless constructor
-                    rendererReference.set(
-                            // If failure, default behavior throws a `FrameworkException`
-                            ClassUtils.newInstance(rendererClass)
-                    );
-                },
-                this
-        );
-
-        if (null == rendererReference.get() && null != rendererWithManager) {
-            rendererReference.set(rendererWithManager);
+        if (null == renderer) {
+            renderer = ClassUtils.newInstance(rendererClass);
         }
 
-        if (null != rendererReference.get()) {
-            renderers.add(rendererReference.get());
-        }
+        renderers.add(renderer);
     }
 
     public Map<String, String[]> handleRequest(Request request, FormType form)
@@ -91,7 +77,7 @@ public class FormManager implements ServiceInterface
         return request.getParameterMap();
     }
 
-    public Map<String, FormTypeInterface> getFlatParameters(FormTypeInterface<?> form)
+    public Map<String, FormTypeInterface> getFlatParameters(FormTypeInterface<?, ?> form)
     {
         HashMap<String, FormTypeInterface> out = new HashMap<>();
 
@@ -116,12 +102,14 @@ public class FormManager implements ServiceInterface
         validate(request, form, form);
     }
 
-    private void validate(Request request, FormTypeInterface<?> form, FormType rootForm)
+    private <R> void validate(Request request, FormTypeInterface<?, R> form, FormType rootForm)
     {
-        String[] values = request.getParameterMap().get(form.getFullName());
+        String[] rawValue = request.getParameterMap().get(form.getFullName());
+
+        R value = form.transform(rawValue);
 
         for (ConstraintInterface constraint : form.getOptions().getConstraints()) {
-            constraint.validate(values, form, new ErrorsBagHelper(rootForm.getErrorsBag(), form.getFullName()));
+            constraint.validate(value, form, new ErrorsBagHelper(rootForm.getErrorsBag(), form.getFullName()));
         }
 
         for (FormTypeInterface child : form.getChildren().values()) {

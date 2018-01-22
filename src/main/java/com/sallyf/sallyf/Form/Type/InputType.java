@@ -5,7 +5,7 @@ import com.sallyf.sallyf.Form.Options;
 
 import java.util.Set;
 
-public abstract class InputType extends BaseFormType<Options>
+public abstract class InputType<R> extends BaseFormType<Options, R>
 {
     public InputType(String name, FormTypeInterface parent)
     {

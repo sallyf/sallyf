@@ -9,7 +9,7 @@ import com.sallyf.sallyf.Utils.MapUtils;
 
 import java.util.*;
 
-public abstract class BaseFormType<O extends Options> implements FormTypeInterface<O>
+public abstract class BaseFormType<O extends Options, R> implements FormTypeInterface<O, R>
 {
     private Map<String, FormTypeInterface> children;
 
