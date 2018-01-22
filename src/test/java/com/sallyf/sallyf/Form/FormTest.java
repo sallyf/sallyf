@@ -29,14 +29,13 @@ public class FormTest
     @Test
     public void createFormTest()
     {
-        FormType form = FormBuilder.create();
+        FormType form = FormBuilder.create()
+                .add("foo", TextType.class, (options) -> {
 
-        form.add("foo", TextType.class, (options) -> {
-
-        });
-        form.add("submit", SubmitType.class, (options) -> {
-            options.getAttributes().put("value", "Hello !");
-        });
+                })
+                .add("submit", SubmitType.class, (options) -> {
+                    options.getAttributes().put("value", "Hello !");
+                });
 
         form.build();
 

@@ -46,4 +46,19 @@ public class FormRequestTest extends BaseFrameworkTest
         Assert.assertEquals("{foo[a][b][c][d]=[bar],submit=[Hello !],bar[]=[bar 1]}", v);
     }
 
+    @Test
+    public void testSubmitConstraint() throws Exception
+    {
+        WebClient webClient = new WebClient();
+
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/simple-form");
+
+        HtmlForm form = page1.getForms().get(0);
+
+        HtmlSubmitInput button = form.getInputByName("submit");
+
+        HtmlPage page2 = button.click();
+
+        Assert.assertTrue(page2.getWebResponse().getContentAsString().contains("This value cannot be blank"));
+    }
 }

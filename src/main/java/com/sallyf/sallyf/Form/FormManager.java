@@ -118,11 +118,10 @@ public class FormManager implements ServiceInterface
 
     private void validate(Request request, FormTypeInterface<?> form, FormType rootForm)
     {
-        ErrorsBag errorsBag = rootForm.getErrorsBag();
         String[] values = request.getParameterMap().get(form.getFullName());
 
         for (ConstraintInterface constraint : form.getOptions().getConstraints()) {
-            constraint.validate(values, form, errorsBag);
+            constraint.validate(values, form, new ErrorsBagHelper(rootForm.getErrorsBag(), form.getFullName()));
         }
 
         for (FormTypeInterface child : form.getChildren().values()) {
