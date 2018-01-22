@@ -1,12 +1,21 @@
 package com.sallyf.sallyf.Form.Constraint;
 
-import com.sallyf.sallyf.Form.ConstraintInterface;
 import com.sallyf.sallyf.Form.ErrorsBagHelper;
 import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.ValidationError;
 
-public class NotBlank implements ConstraintInterface
+public class NotBlank extends AbstractConstraint
 {
+    public NotBlank()
+    {
+        this("This value cannot be blank");
+    }
+
+    public NotBlank(String message)
+    {
+        super(message);
+    }
+
     @Override
     public void validate(Object value, FormTypeInterface<?> form, ErrorsBagHelper errorsBag)
     {
@@ -18,7 +27,7 @@ public class NotBlank implements ConstraintInterface
 
                 if (arrayString.length == 1) {
                     if (arrayString[0].isEmpty()) {
-                        errorsBag.addError(new ValidationError("This value cannot be blank"));
+                        errorsBag.addError(new ValidationError(getMessage(value, form)));
                     }
                     return;
                 }

@@ -21,9 +21,10 @@ public class TestController extends BaseController
                     options.getAttributes().put("action", "/simple-form");
                 })
                 .add("foo[a][b][c][d]", TextType.class, (options) -> {
-                    options.getConstraints().add(new NotBlank());
+                    options.getConstraints().add(new NotBlank("The value \"{{value.0}}\" is blank"));
                 })
                 .add("bar[]", TextType.class, (options) -> {
+                    options.getConstraints().add(new NotBlank());
                     options.getAttributes().put("value", "bar 1");
                 })
                 .add("submit", SubmitType.class, (options) -> {

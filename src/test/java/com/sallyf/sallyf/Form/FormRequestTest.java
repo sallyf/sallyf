@@ -59,6 +59,8 @@ public class FormRequestTest extends BaseFrameworkTest
 
         HtmlPage page2 = button.click();
 
-        Assert.assertTrue(page2.getWebResponse().getContentAsString().contains("This value cannot be blank"));
+        String content = page2.getWebResponse().getContentAsString();
+
+        Assert.assertTrue(content.contains("The value \"\" is blank"));
     }
 }

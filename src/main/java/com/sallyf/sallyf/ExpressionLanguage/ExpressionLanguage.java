@@ -4,6 +4,7 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.ExpressionLanguage.Exception.EvaluationException;
+import com.sallyf.sallyf.ExpressionLanguage.Libraries.Mustache;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
@@ -14,16 +15,20 @@ public class ExpressionLanguage implements ServiceInterface
 {
     private Router router;
 
-    private ScriptEngine engine;
+    private static ScriptEngine engine = makeEngine();
 
     private Bindings bindings = new SimpleBindings();
 
     public ExpressionLanguage(Router router)
     {
         this.router = router;
+    }
 
+    private static ScriptEngine makeEngine()
+    {
         ScriptEngineManager manager = new ScriptEngineManager();
-        engine = manager.getEngineByName("js");
+
+        return manager.getEngineByName("js");
     }
 
     @Override
@@ -50,26 +55,56 @@ public class ExpressionLanguage implements ServiceInterface
         });
     }
 
+    public static <R> R evaluatePure(String s)
+    {
+        return evaluatePure(s, new SimpleBindings());
+    }
+
+    public static <R> R evaluatePure(String s, Bindings bindings)
+    {
+        try {
+            return (R) engine.eval(s, bindings);
+        } catch (ScriptException e) {
+            throw new EvaluationException(e);
+        }
+    }
+
+    public static <R> R mustacheEvaluate(String s, Bindings bindings)
+    {
+        String s1 = "Mustache.render(mustacheTemplate, view)";
+
+        String mustache = Mustache.get();
+
+        bindings.put("mustacheTemplate", s);
+        bindings.put("view", bindings);
+
+        return evaluatePure(mustache + s1, bindings);
+    }
+
     public <R> R evaluate(String s)
     {
-        return evaluate(s, null);
+        return evaluate(s, new SimpleBindings());
     }
 
     public <R> R evaluate(String s, RuntimeBag runtimeBag)
     {
         Bindings bindings = new SimpleBindings();
-        bindings.putAll(this.bindings);
         bindings.put("$", runtimeBag);
 
         if (null != runtimeBag) {
             bindings.putAll(router.getRouteParameters(runtimeBag));
         }
 
-        try {
-            return (R) engine.eval(s, bindings);
-        } catch (ScriptException e) {
-            throw new EvaluationException(e);
-        }
+        return evaluate(s, bindings);
+    }
+
+    public <R> R evaluate(String s, Bindings extraBindings)
+    {
+        Bindings bindings = new SimpleBindings();
+        bindings.putAll(this.bindings);
+        bindings.putAll(extraBindings);
+
+        return evaluatePure(s, bindings);
     }
 
     public void addBinding(String name, Object value)
