@@ -4,25 +4,17 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class RequestUtils
 {
     public static Map<String, Object> parseQueryPacked(String in, boolean decode)
-    {
-        return DotNotationUtils.pack(parseQuery(in, decode));
-    }
-
-    public static Map<String, Object> parseQuery(Map<String, String[]> in, boolean decode) {
-        return null;
-    }
-
-    public static Map<String, Object> parseQuery(String in, boolean decode)
     {
         if (decode) {
             try {
@@ -34,67 +26,96 @@ public class RequestUtils
 
         String[] queryComponents = in.split("&");
 
-        HashMap<String, Object> parts = new HashMap<>();
+        Map<List<String>, String> queryMap = getQueryMap(queryComponents);
 
-        for (String queryComponent : queryComponents) {
-            Map.Entry<String, String> entry = queryComponentToDotNotation(queryComponent);
+        Map<String, Object> out = new HashMap<>();
 
-            if (null != entry) {
-                parts.put(entry.getKey(), entry.getValue());
-            }
-        }
+        for (Map.Entry<List<String>, String> entry : queryMap.entrySet()) {
+            List<String> fullPath = entry.getKey();
+            String value = entry.getValue();
 
-        return parts;
-    }
+            Map<String, Object> parentNode;
 
-    public static String queryComponentNameToDotNotation(String nameComponents)
-    {
-        Pattern structurePattern = Pattern.compile("^([\\w]+)(.*)$");
-        Pattern nestedPattern = Pattern.compile("\\[(.*?)\\]");
+            for (int level = 0; level < fullPath.size(); level++) {
+                boolean isLast = (level == fullPath.size() - 1);
 
-        Matcher structureMatcher = structurePattern.matcher(nameComponents);
+                String key = fullPath.get(level);
 
-        if (structureMatcher.find()) {
-            String root = structureMatcher.group(1);
-            String nested = structureMatcher.group(2);
+                if (level == 0) {
+                    parentNode = out;
+                } else {
+                    List<String> parentPath = fullPath.stream().limit(level).collect(Collectors.toList());
 
-            String path = root;
+                    parentNode = DotNotationUtils.access(out, String.join(".", parentPath));
 
-            ArrayList<String> nestedKeys = new ArrayList<>();
-
-            if (!nested.isEmpty()) {
-                Matcher nestedMatcher = nestedPattern.matcher(nested);
-
-                while (nestedMatcher.find()) {
-                    nestedKeys.add(nestedMatcher.group(1));
+                    System.out.println();
                 }
 
-                path += "." + String.join(".", nestedKeys);
-            }
+                if (isLast) {
+                    parentNode.put(key, value);
+                } else {
+                    if (!parentNode.containsKey(key)) {
+                        parentNode.put(key, new HashMap<>());
+                    }
+                }
 
-            return path;
+            }
         }
 
-        return null;
+        return out;
     }
 
-    public static Map.Entry<String, String> queryComponentToDotNotation(String queryComponent)
+    private static Map<List<String>, String> getQueryMap(String[] queryComponents)
     {
-        Pattern globalPattern = Pattern.compile("^(.+)=(.*)$");
+        Map<List<String>, String> queryMap = new HashMap<>();
 
-        Matcher globalMatcher = globalPattern.matcher(queryComponent);
+        Map<String, Integer> undefinedKeyIndexes = new HashMap<>();
 
-        if (globalMatcher.find()) {
-            String name = globalMatcher.group(1);
-            String value = globalMatcher.group(2);
+        for (String queryComponent : queryComponents) {
+            Pattern keyValuePattern = Pattern.compile("^(.+)=(.*)$");
 
-            String nameDotNotation = queryComponentNameToDotNotation(name);
+            Matcher keyValueMatcher = keyValuePattern.matcher(queryComponent);
 
-            if (null != nameDotNotation) {
-                return new AbstractMap.SimpleEntry<>(nameDotNotation, value);
+            if (keyValueMatcher.find()) {
+                String key = keyValueMatcher.group(1);
+                String value = keyValueMatcher.group(2);
+
+                Pattern structurePattern = Pattern.compile("^([\\w]+)(.*)$");
+
+                Matcher structureMatcher = structurePattern.matcher(key);
+
+                if (structureMatcher.find()) {
+                    List<String> path = new ArrayList<>();
+
+                    String root = structureMatcher.group(1);
+                    String nested = structureMatcher.group(2);
+
+                    path.add(root);
+
+                    Pattern nestedPattern = Pattern.compile("\\[(.*?)\\]");
+
+                    Matcher nestedMatcher = nestedPattern.matcher(nested);
+
+                    while (nestedMatcher.find()) {
+                        String dotPath = String.join(".", path);
+
+                        int undefinedKeyIndex = undefinedKeyIndexes.getOrDefault(dotPath, 0);
+
+                        String nKey = nestedMatcher.group(1);
+
+                        if (nKey.isEmpty()) {
+                            nKey = String.valueOf(undefinedKeyIndex++);
+                            undefinedKeyIndexes.put(dotPath, undefinedKeyIndex);
+                        }
+
+                        path.add(nKey);
+                    }
+
+                    queryMap.put(path, value);
+                }
             }
         }
 
-        return null;
+        return queryMap;
     }
 }

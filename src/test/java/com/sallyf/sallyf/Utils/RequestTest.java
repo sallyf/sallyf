@@ -19,16 +19,25 @@ public class RequestTest
         Map<String, Object> a = new HashMap<>();
         Map<String, Object> b = new HashMap<>();
         Map<String, Object> c = new HashMap<>();
+        Map<String, Object> bar = new HashMap<>();
+        Map<String, Object> foo1 = new HashMap<>();
+        Map<String, Object> bar1 = new HashMap<>();
         foo.put("a", a);
         a.put("b", b);
         b.put("c", c);
         c.put("d", "test");
+        foo1.put("foo", "foovalue");
+        bar1.put("bar", "barvalue");
+        bar.put("0", foo1);
+        bar.put("1", bar1);
         expected.put("foo", foo);
         expected.put("yo", "lo");
-        expected.put("bar", "2");
+        expected.put("bar", bar);
 
-        String in = URLEncoder.encode("foo[a][b][c][d]=test&yo=lo&bar[]=1&bar[]=2", "UTF-8");
+        String in = URLEncoder.encode("foo[a][b][c][d]=test&yo=lo&bar[][foo]=foovalue&bar[][bar]=barvalue", "UTF-8");
 
-        assertEquals(expected, RequestUtils.parseQueryPacked(in, true));
+        Map<String, Object> actual = RequestUtils.parseQueryPacked(in, true);
+
+        assertEquals(expected, actual);
     }
 }
