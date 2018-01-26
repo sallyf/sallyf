@@ -5,6 +5,7 @@ import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.Form.Type.FormType;
 import com.sallyf.sallyf.Form.Type.SubmitType;
 import com.sallyf.sallyf.Form.Type.TextType;
+import com.sallyf.sallyf.Utils.MapUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,18 +30,22 @@ public class FormTest
     @Test
     public void createFormTest()
     {
-        FormType form = FormBuilder.create()
+        FormBuilder<FormType, FormType.FormOptions, Object, Object> builder = new FormBuilder<>(new Container(), "", FormType.class);
+
+        builder.setData(MapUtils.parse("{submit: 'Hello !'}"));
+
+        Form form = builder
                 .add("foo", TextType.class, (options) -> {
 
                 })
                 .add("submit", SubmitType.class, (options) -> {
-                }, () -> "Hello !");
 
-        form.build();
+                })
+                .getForm();
 
-        String formView = formManager.render(form);
+        String formView = formManager.render(form.createView());
 
-        String expected = "<form method=\"post\" name=\"\"><input name=\"foo\" type=\"text\" value=\"\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></form>";
+        String expected = "<form method=\"post\"><input name=\"foo\" type=\"text\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></form>";
 
         assertEquals(expected, formView);
     }

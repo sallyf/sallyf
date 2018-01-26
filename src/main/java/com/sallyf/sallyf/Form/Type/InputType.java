@@ -1,17 +1,16 @@
 package com.sallyf.sallyf.Form.Type;
 
-import com.sallyf.sallyf.Form.FormTypeInterface;
+import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
+import com.sallyf.sallyf.Utils.DataUtils;
+import com.sallyf.sallyf.Utils.MapUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
-public abstract class InputType<R> extends BaseFormType<Options, R>
+public abstract class InputType<VD, FD> extends BaseFormType<Options, VD, FD>
 {
-    public InputType(String name, FormTypeInterface parent)
-    {
-        super(name, parent);
-    }
-
     @Override
     public Set<String> getRequiredOptions()
     {
@@ -23,14 +22,37 @@ public abstract class InputType<R> extends BaseFormType<Options, R>
         return options;
     }
 
-    @Override
-    public void applyValue()
-    {
-        getOptions().getAttributes().put(getValueAttributeName(), getAttributeValue());
-    }
-
     String getValueAttributeName()
     {
         return "value";
+    }
+
+    abstract String getInputType();
+
+    @Override
+    public void buildView(FormView<?, Options, VD, FD> formView)
+    {
+        super.buildView(formView);
+
+        Map<String, String> attributes = formView.getVars().getAttributes();
+
+        attributes.remove("value");
+        attributes.put(getValueAttributeName(), (String) formView.getData());
+        attributes.put("type", getInputType());
+    }
+
+    @Override
+    public void finishView(FormView<?, Options, VD, FD> formView)
+    {
+        super.finishView(formView);
+
+        Map<String, String> attributes = formView.getVars().getAttributes();
+
+        Map<String, String> newAttributes = new HashMap<>();
+        newAttributes.put(getValueAttributeName(), DataUtils.fallback((String) formView.getData(), ""));
+
+        MapUtils.deepMerge(newAttributes, attributes);
+
+        formView.getVars().setAttributes(newAttributes);
     }
 }

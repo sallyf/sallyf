@@ -1,44 +1,43 @@
 package com.sallyf.sallyf.Form;
 
-import java.util.Map;
 import java.util.Set;
 
-public interface FormTypeInterface<O extends Options, R>
+public interface FormTypeInterface<O extends Options, VD, FD>
 {
     default O createOptions()
     {
         return (O) new Options();
     }
 
-    Map<String, FormTypeInterface> getChildren();
+    default O getEnforcedOptions()
+    {
+        return null;
+    }
 
-    void setChildren(Map<String, FormTypeInterface> children);
+    default Set<String> getRequiredOptions()
+    {
+        return null;
+    }
 
-    void applyOptions(OptionsConsumer<O> optionsConsumer);
+    FormDataTransformer<VD, FD> getFormDataTransformer();
 
-    O getOptions();
+    default void buildView(FormView<?, O, VD, FD> formView)
+    {
 
-    O getEnforcedOptions();
+    }
 
-    void build();
+    default void finishView(FormView<?, O, VD, FD> formView)
+    {
 
-    Set<String> getRequiredOptions();
+    }
 
-    String getName();
+    default void buildForm(Form<?, O, VD, FD> form)
+    {
 
-    void setName(String name);
+    }
 
-    String getFullName();
+    default void configureOptions(FormBuilder<?, O, VD, FD> formBuilder, O options)
+    {
 
-    FormTypeInterface getParent();
-
-    R transform(String[] value);
-
-    R getValue();
-
-    String getAttributeValue();
-
-    void setValue(R value);
-
-    void applyValue();
+    }
 }

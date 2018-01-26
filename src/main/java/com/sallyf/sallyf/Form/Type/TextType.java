@@ -1,19 +1,9 @@
 package com.sallyf.sallyf.Form.Type;
 
-import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.Options;
 
-import java.util.Set;
-
-public class TextType extends InputType<String>
+public class TextType extends InputType<String, String>
 {
-    public TextType(String name, FormTypeInterface parent)
-    {
-        super(name, parent);
-
-        setValue("");
-    }
-
     @Override
     public Options getEnforcedOptions()
     {
@@ -24,14 +14,8 @@ public class TextType extends InputType<String>
     }
 
     @Override
-    public String transform(String[] value)
+    String getInputType()
     {
-        return value[0];
-    }
-
-    @Override
-    public String getAttributeValue()
-    {
-        return getValue();
+        return "text";
     }
 }

@@ -31,7 +31,7 @@ public class FormRequestTest extends BaseFrameworkTest
 
         HtmlForm form = page1.getForms().get(0);
 
-        HtmlTextInput textField = form.getInputByName("foo[a][b][c][d]");
+        HtmlTextInput textField = form.getInputByName("foo");
         textField.setValueAttribute("bar");
 
         HtmlSubmitInput button = form.getInputByName("submit");
@@ -40,7 +40,7 @@ public class FormRequestTest extends BaseFrameworkTest
 
         String v = page2.getBody().getTextContent();
 
-        Assert.assertEquals("{foo[a][b][c][d]=[bar],submit=[Hello !],bar[]=[bar 1]}", v);
+        Assert.assertEquals("{bar=bar 1, submit=Hello !, foo=bar}", v);
     }
 
     @Test
@@ -68,6 +68,8 @@ public class FormRequestTest extends BaseFrameworkTest
 
         HtmlPage page1 = webClient.getPage(getRootURL() + "/constraint-istrue-success");
 
+        String v1 = page1.getWebResponse().getContentAsString();
+
         HtmlForm form = page1.getForms().get(0);
         HtmlSubmitInput button = form.getInputByName("submit");
 
@@ -75,7 +77,9 @@ public class FormRequestTest extends BaseFrameworkTest
 
         String v = page2.getBody().getTextContent();
 
-        Assert.assertEquals("{test=[true],submit=[Submit]}", v);
+        String v2 = page2.getWebResponse().getContentAsString();
+
+        Assert.assertEquals("{test=true, submit=submit}", v);
     }
 
     @Test
@@ -129,6 +133,6 @@ public class FormRequestTest extends BaseFrameworkTest
 
         String v = page2.getBody().getTextContent();
 
-        Assert.assertEquals("{submit=[Submit],ta=[Hello, World]}", v);
+        Assert.assertEquals("{submit=submit, ta=Hello, World}", v);
     }
 }

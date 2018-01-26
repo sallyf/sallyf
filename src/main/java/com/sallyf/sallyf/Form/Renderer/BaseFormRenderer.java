@@ -1,9 +1,6 @@
 package com.sallyf.sallyf.Form.Renderer;
 
-import com.sallyf.sallyf.Form.FormTypeInterface;
-import com.sallyf.sallyf.Form.RendererInterface;
-import com.sallyf.sallyf.Form.Type.FormType;
-import com.sallyf.sallyf.Form.ValidationError;
+import com.sallyf.sallyf.Form.*;
 import com.sallyf.sallyf.Utils.HTMLUtils;
 
 import java.util.Map;
@@ -11,11 +8,11 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
-public abstract class BaseFormRenderer<T extends FormTypeInterface> implements RendererInterface<T>
+public abstract class BaseFormRenderer<T extends FormTypeInterface<O, ?, ?>, O extends Options> implements RendererInterface<T, O>
 {
-    public String renderAttributes(FormTypeInterface form)
+    public String renderAttributes(FormView<T, O, ?, ?> formView)
     {
-        return renderAttributes(form.getOptions().getAttributes());
+        return renderAttributes(formView.getVars().getAttributes());
     }
 
     public String renderAttributes(Map<String, String> attributes)
@@ -31,11 +28,11 @@ public abstract class BaseFormRenderer<T extends FormTypeInterface> implements R
         return String.format("%s=\"%s\"", HTMLUtils.escapeHtmlAttribute(entry.getKey()), HTMLUtils.escapeHtmlAttribute(entry.getValue()));
     }
 
-    public String renderErrors(FormType form)
+    public String renderErrors(FormView<T, O, ?, ?> formView)
     {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<String, Set<ValidationError>> entry : form.getErrorsBag().getErrors().entrySet()) {
+        for (Map.Entry<String, Set<ValidationError>> entry : formView.getErrorsBag().getErrors().entrySet()) {
             String name = entry.getKey();
             Set<ValidationError> errors = entry.getValue();
 

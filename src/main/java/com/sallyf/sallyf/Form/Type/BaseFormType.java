@@ -1,102 +1,15 @@
 package com.sallyf.sallyf.Form.Type;
 
-import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.Form.FormDataTransformer;
 import com.sallyf.sallyf.Form.FormTypeInterface;
+import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
-import com.sallyf.sallyf.Form.OptionsConsumer;
-import com.sallyf.sallyf.Utils.DotNotationUtils;
-import com.sallyf.sallyf.Utils.MapUtils;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-public abstract class BaseFormType<O extends Options, R> implements FormTypeInterface<O, R>
+public abstract class BaseFormType<O extends Options, VD, FD> implements FormTypeInterface<O, VD, FD>
 {
-    private Map<String, FormTypeInterface> children;
-
-    private String name;
-
-    private FormTypeInterface parent;
-
-    private O options;
-
-    private R value = null;
-
-    public BaseFormType(String name, FormTypeInterface parent)
-    {
-        this.name = name;
-        this.parent = parent;
-        this.children = new LinkedHashMap<>();
-        this.options = createOptions();
-    }
-
-    @Override
-    public Map<String, FormTypeInterface> getChildren()
-    {
-        return children;
-    }
-
-    @Override
-    public void setChildren(Map<String, FormTypeInterface> children)
-    {
-        this.children = children;
-    }
-
-    @Override
-    public void applyOptions(OptionsConsumer<O> optionsConsumer)
-    {
-        if (null != optionsConsumer) {
-            optionsConsumer.alert(options);
-        }
-    }
-
-    @Override
-    public O getOptions()
-    {
-        return options;
-    }
-
-    @Override
-    public O getEnforcedOptions()
-    {
-        O options = createOptions();
-
-        options.getAttributes().put("name", getName());
-
-        return options;
-    }
-
-    @Override
-    public void build()
-    {
-        resolveOptions();
-
-        for (FormTypeInterface child : getChildren().values()) {
-            child.build();
-        }
-    }
-
-    private void resolveOptions()
-    {
-        applyValue();
-
-        O resolvedOptions = createOptions();
-
-        MapUtils.deepMerge(resolvedOptions, getOptions());
-        MapUtils.deepMerge(resolvedOptions, getEnforcedOptions());
-
-        Set<String> keys = DotNotationUtils.flattenKeys(resolvedOptions, false);
-        Set<String> requiredKeys = getRequiredOptions();
-
-        Set<String> missingKeys = new HashSet<>(requiredKeys);
-        missingKeys.removeAll(keys);
-
-        if (!keys.containsAll(requiredKeys)) {
-            throw new FrameworkException("Missing required options for " + getClass() + " : " + Arrays.toString(missingKeys.toArray()) + ", got: " + Arrays.toString(keys.toArray()));
-        }
-
-        options = resolvedOptions;
-    }
-
     @Override
     public Set<String> getRequiredOptions()
     {
@@ -109,57 +22,27 @@ public abstract class BaseFormType<O extends Options, R> implements FormTypeInte
     }
 
     @Override
-    public String getName()
+    public void buildView(FormView<?, O, VD, FD> formView)
     {
-        return name;
+        formView.getVars().getAttributes().put("name", formView.getForm().getFullName());
     }
 
     @Override
-    public void setName(String name)
+    public FormDataTransformer<VD, FD> getFormDataTransformer()
     {
-        this.name = name;
-    }
-
-    @Override
-    public String getFullName()
-    {
-        List<String> names = new ArrayList<>();
-
-        FormTypeInterface current = this;
-
-        while (null != current) {
-            names.add(0, current.getName());
-
-            current = current.getParent();
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (String name : names) {
-            if (sb.toString().isEmpty()) {
-                sb.append(name);
-            } else {
-                sb.append("[" + name + "]");
+        return new FormDataTransformer<VD, FD>()
+        {
+            @Override
+            public FD transform(VD viewData)
+            {
+                return (FD) viewData;
             }
-        }
 
-        return sb.toString();
-    }
-
-    @Override
-    public FormTypeInterface getParent()
-    {
-        return parent;
-    }
-
-    @Override
-    public R getValue()
-    {
-        return value;
-    }
-
-    @Override
-    public void setValue(R value)
-    {
-        this.value = value;
+            @Override
+            public VD reverseTransform(FD formData)
+            {
+                return (VD) formData;
+            }
+        };
     }
 }

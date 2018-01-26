@@ -1,8 +1,7 @@
 package com.sallyf.sallyf.Form.Constraint;
 
 import com.sallyf.sallyf.Form.ErrorsBagHelper;
-import com.sallyf.sallyf.Form.Exception.UnableToValidateException;
-import com.sallyf.sallyf.Form.FormTypeInterface;
+import com.sallyf.sallyf.Form.Form;
 import com.sallyf.sallyf.Form.ValidationError;
 
 import java.util.function.Predicate;
@@ -24,7 +23,7 @@ public class Is extends AbstractConstraint
     }
 
     @Override
-    public void validate(Object value, FormTypeInterface<?, ?> form, ErrorsBagHelper errorsBag)
+    public void validate(Object value, Form<?, ?, ?, ?> form, ErrorsBagHelper errorsBag)
     {
         if (!predicate.test(value)) {
             errorsBag.addError(new ValidationError(getMessage(value, form)));

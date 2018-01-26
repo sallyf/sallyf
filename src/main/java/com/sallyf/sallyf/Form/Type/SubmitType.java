@@ -1,17 +1,13 @@
 package com.sallyf.sallyf.Form.Type;
 
-import com.sallyf.sallyf.Form.FormTypeInterface;
+import com.sallyf.sallyf.Form.Form;
+import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
 
-import java.util.Set;
+import java.util.Map;
 
-public class SubmitType extends InputType<String>
+public class SubmitType extends InputType<String, String>
 {
-    public SubmitType(String name, FormTypeInterface parent)
-    {
-        super(name, parent);
-    }
-
     @Override
     public Options getEnforcedOptions()
     {
@@ -22,14 +18,26 @@ public class SubmitType extends InputType<String>
     }
 
     @Override
-    public String transform(String[] value)
+    public void buildForm(Form<?, Options, String, String> form)
     {
-        return value[0];
+        super.buildForm(form);
     }
 
     @Override
-    public String getAttributeValue()
+    public void finishView(FormView<?, Options, String, String> formView)
     {
-        return getValue();
+        super.finishView(formView);
+
+        Map<String, String> attributes = formView.getVars().getAttributes();
+
+        if (!attributes.containsKey("value") || attributes.get("value") == null || attributes.get("value").isEmpty()) {
+            attributes.put("value", formView.getForm().getName());
+        }
+    }
+
+    @Override
+    String getInputType()
+    {
+        return "submit";
     }
 }

@@ -2,9 +2,10 @@ package com.sallyf.sallyf.Form.Renderer;
 
 import com.sallyf.sallyf.Form.FormManager;
 import com.sallyf.sallyf.Form.FormTypeInterface;
+import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Type.FormType;
 
-public class FormRenderer extends BaseFormRenderer<FormType>
+public class FormRenderer extends BaseFormRenderer<FormType, FormType.FormOptions>
 {
     private FormManager manager;
 
@@ -20,7 +21,7 @@ public class FormRenderer extends BaseFormRenderer<FormType>
     }
 
     @Override
-    public String render(FormType form)
+    public String render(FormView<FormType, FormType.FormOptions, ?, ?> form)
     {
         String s = "";
 
