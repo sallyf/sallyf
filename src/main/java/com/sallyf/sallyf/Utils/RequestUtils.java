@@ -14,11 +14,6 @@ import java.util.stream.Collectors;
 
 public class RequestUtils
 {
-//    public static Map<String, Object> parseQuery(String in, boolean decode)
-//    {
-//
-//    }
-//
     public static Map<String, Object> parseQuery(String in, boolean decode)
     {
         if (decode) {

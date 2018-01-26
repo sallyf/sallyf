@@ -7,20 +7,9 @@ import com.sallyf.sallyf.Utils.MapUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public abstract class InputType<VD, FD> extends BaseFormType<Options, VD, FD>
 {
-    @Override
-    public Set<String> getRequiredOptions()
-    {
-        Set<String> options = super.getRequiredOptions();
-
-        options.add("attributes.type");
-        options.add("attributes." + getValueAttributeName());
-
-        return options;
-    }
 
     String getValueAttributeName()
     {

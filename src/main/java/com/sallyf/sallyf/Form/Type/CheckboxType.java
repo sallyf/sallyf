@@ -7,14 +7,6 @@ import com.sallyf.sallyf.Form.Options;
 
 public class CheckboxType extends InputType<String, Boolean>
 {
-    @Override
-    public Options getEnforcedOptions()
-    {
-        Options options = super.getEnforcedOptions();
-        options.getAttributes().put("type", "checkbox");
-
-        return options;
-    }
 
     @Override
     String getValueAttributeName()

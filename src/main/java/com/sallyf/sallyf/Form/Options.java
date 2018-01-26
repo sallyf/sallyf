@@ -31,11 +31,6 @@ public class Options extends HashMap<String, Object>
         put(DATA_TYPE_KEY, null);
     }
 
-    public Options newInstance()
-    {
-        return new Options();
-    }
-
     public Map<String, String> getAttributes()
     {
         return (Map<String, String>) get(ATTRIBUTES_KEY);

@@ -3,8 +3,6 @@ package com.sallyf.sallyf.Form.Type;
 import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
 
-import java.util.Set;
-
 public class FormType extends BaseFormType<FormType.FormOptions, Object, Object>
 {
     public class FormOptions extends Options
@@ -33,16 +31,6 @@ public class FormType extends BaseFormType<FormType.FormOptions, Object, Object>
     public FormType.FormOptions createOptions()
     {
         return new FormOptions();
-    }
-
-    @Override
-    public Set<String> getRequiredOptions()
-    {
-        Set<String> options = super.getRequiredOptions();
-
-        options.add("method");
-
-        return options;
     }
 
     @Override

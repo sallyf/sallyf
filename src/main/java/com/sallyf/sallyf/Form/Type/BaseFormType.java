@@ -5,21 +5,8 @@ import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public abstract class BaseFormType<O extends Options, VD, FD> implements FormTypeInterface<O, VD, FD>
 {
-    @Override
-    public Set<String> getRequiredOptions()
-    {
-        HashSet<String> options = new HashSet<>();
-
-        options.add("attributes");
-        options.add("constraints");
-
-        return options;
-    }
 
     @Override
     public void buildView(FormView<?, O, VD, FD> formView)

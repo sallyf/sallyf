@@ -8,14 +8,6 @@ import java.util.Map;
 
 public class SubmitType extends InputType<String, String>
 {
-    @Override
-    public Options getEnforcedOptions()
-    {
-        Options options = super.getEnforcedOptions();
-        options.getAttributes().put("type", "submit");
-
-        return options;
-    }
 
     @Override
     public void buildForm(Form<?, Options, String, String> form)
