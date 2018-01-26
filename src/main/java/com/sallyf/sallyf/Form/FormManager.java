@@ -72,7 +72,7 @@ public class FormManager implements ServiceInterface
         try {
             String s = IO.toString(request.getInputStream());
             Map<String, Object> data = RequestUtils.parseQuery(s, true);
-            form.setRawData(data);
+            form.setRawData(data, true);
 
             validate(form);
 

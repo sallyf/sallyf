@@ -26,9 +26,9 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
         this.options = options;
         this.children = new LinkedHashMap<>();
 
-        if(parentForm == null) {
+        if (parentForm == null) {
             this.errorsBag = new ErrorsBag();
-        }else{
+        } else {
             this.errorsBag = getRoot().getErrorsBag();
         }
     }
@@ -113,7 +113,7 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
         this.data = data;
     }
 
-    public void setRawData(Object rawData)
+    public void setRawData(Object rawData, boolean transform)
     {
         if (rawData instanceof Map) {
             Map<String, Object> rawMap = (Map<String, Object>) rawData;
@@ -122,11 +122,15 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
                 String fullName = child.getFullName();
 
                 if (rawMap.containsKey(fullName)) {
-                    child.setRawData(rawMap.get(child.getFullName()));
+                    child.setRawData(rawMap.get(child.getFullName()), transform);
                 }
             });
         } else {
-            setData(getFormType().getFormDataTransformer().transform((VD) rawData));
+            if (transform) {
+                setData(getFormType().getFormDataTransformer().transform((VD) rawData));
+            } else {
+                setData((FD) rawData);
+            }
         }
     }
 

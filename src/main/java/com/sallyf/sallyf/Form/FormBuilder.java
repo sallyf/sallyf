@@ -139,7 +139,7 @@ public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Optio
 
         Form<T, O, VD, FD> form = new Form<>(this, parentForm, resolvedOptions);
 
-        form.setRawData(data);
+        form.setRawData(data, false);
 
         getFormType().buildForm(form);
 

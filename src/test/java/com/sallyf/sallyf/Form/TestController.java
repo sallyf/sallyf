@@ -93,7 +93,7 @@ public class TestController extends BaseController
     @Route(path = "/checkboxes", methods = {Method.GET, Method.POST})
     public String checkboxes(Request request, FormManager formManager)
     {
-        Map<String, Object> inData = MapUtils.parse("{cb1: 'on', cb2: 'checked'}");
+        Map<String, Object> inData = MapUtils.parse("{cb1: true, cb2: true}");
 
         Form<FormType, FormType.FormOptions, Object, Object> form = this.createFormBuilder(inData)
                 .add("cb1", CheckboxType.class, (options) -> {
