@@ -26,8 +26,8 @@ class ServerConfiguration extends Configuration
     {
         Random r = new Random();
 
-        int low = 3000;
-        int high = 7000;
+        int low = 2000;
+        int high = 9999;
 
         int i = 0;
         while (port == -1 && i < high - low) {
@@ -84,11 +84,11 @@ public abstract class BaseFrameworkTest
     {
         app = Kernel.newInstance();
 
+        preBoot();
+
         app.getContainer()
                 .getServiceDefinition(FrameworkServer.class)
                 .setConfigurationReference(new PlainReference<>(new ServerConfiguration()));
-
-        preBoot();
 
         app.boot();
 

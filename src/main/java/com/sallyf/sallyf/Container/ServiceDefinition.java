@@ -38,7 +38,7 @@ public class ServiceDefinition<T extends ServiceInterface> implements ServiceRep
         this.type = type;
         this.alias = alias;
 
-        setConfigurationReference(configuration == null ? new ConfigurationReference() : new PlainReference<>(configuration));
+        setConfigurationReference(configuration == null ? new DefaultConfigurationReference() : new PlainReference<>(configuration));
 
         setAutoWire(true);
     }

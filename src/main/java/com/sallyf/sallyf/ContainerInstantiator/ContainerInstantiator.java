@@ -42,6 +42,12 @@ public class ContainerInstantiator
 
     public void boot()
     {
+        if (container.isInstantiated()) {
+            throw new ContainerInstantiatedException();
+        }
+
+        serviceDefinitionMetas.values().forEach(this::autoWire);
+
         while (!allServiceDefinitionMetasReady()) {
             ChangeTracker ct = new ChangeTracker();
 
@@ -62,10 +68,6 @@ public class ContainerInstantiator
         ServiceInterface instance;
 
         if (!serviceDefinitionMeta.isInstantiated()) {
-            if (!serviceDefinitionMeta.isWired()) {
-                autoWire(serviceDefinitionMeta);
-            }
-
             DependencyTree dependenciesTree = getServiceDependenciesTree(serviceDefinition);
 
             if (!dependenciesTree.isFullyInstantiable()) {
@@ -152,11 +154,7 @@ public class ContainerInstantiator
     {
         ServiceDefinition<T> serviceDefinition = serviceDefinitionMeta.getServiceDefinition();
 
-        if (!serviceDefinition.isAutoWire()) {
-            serviceDefinitionMeta.setWired(true);
-        }
-
-        if (!serviceDefinitionMeta.isWired()) {
+        if (serviceDefinition.isAutoWire() && !serviceDefinitionMeta.isWired()) {
             Constructor<?>[] constructors = serviceDefinition.getType().getConstructors();
 
             if (constructors.length != 1) {
@@ -170,9 +168,9 @@ public class ContainerInstantiator
             ReferenceInterface[] references = resolveTypes(serviceDefinition, parameterTypes);
 
             serviceDefinition.setConstructorDefinition(new ConstructorDefinition(references));
-
-            serviceDefinitionMeta.setWired(true);
         }
+
+        serviceDefinitionMeta.setWired(true);
     }
 
     private <T extends ServiceInterface> T bootService(ServiceDefinitionMeta<T> serviceDefinitionMeta)
@@ -335,12 +333,18 @@ public class ContainerInstantiator
 
     public <T extends ServiceInterface> void addServiceDefinition(ServiceDefinition<T> serviceDefinition)
     {
+        if (container.isInstantiated()) {
+            throw new ContainerInstantiatedException();
+        }
+
         serviceDefinitions.put(serviceDefinition.getAlias(), serviceDefinition);
 
         ServiceDefinitionMeta<T> serviceDefinitionMeta = new ServiceDefinitionMeta<>(serviceDefinition);
         serviceDefinitionMetas.put(serviceDefinition.getAlias(), serviceDefinitionMeta);
 
-        autoWire(serviceDefinitionMeta);
+        if (container.isInstantiating()) {
+            autoWire(serviceDefinitionMeta);
+        }
     }
 
     public Map<Class, ServiceDefinition<? extends ServiceInterface>> getServiceDefinitions()
