@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Container;
 
 import com.sallyf.sallyf.Container.Exception.AmbiguousServiceException;
-import com.sallyf.sallyf.Container.Exception.ContainerInstantiatedException;
 import com.sallyf.sallyf.Container.ReferenceResolver.ConfigurationReferenceResolver;
 import com.sallyf.sallyf.Container.ReferenceResolver.ContainerReferenceResolver;
 import com.sallyf.sallyf.Container.ReferenceResolver.PlainReferenceResolver;
@@ -12,10 +11,7 @@ import com.sallyf.sallyf.Container.TypeResolver.ServiceResolver;
 import com.sallyf.sallyf.ContainerInstantiator.ContainerInstantiator;
 import com.sallyf.sallyf.Exception.NonExistentServiceException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Container
@@ -28,13 +24,15 @@ public class Container
 
     private boolean instantiated = false;
 
+    private boolean instantiating = false;
+
     public Container()
     {
         containerInstantiator = new ContainerInstantiator(this, services, taggedServices);
 
+        addReferenceResolver(new PlainReferenceResolver());
         addReferenceResolver(new ConfigurationReferenceResolver(this));
         addReferenceResolver(new ContainerReferenceResolver(this));
-        addReferenceResolver(new PlainReferenceResolver());
         addReferenceResolver(new ServiceReferenceResolver(this));
 
         addTypeResolver(new ConfigurationResolver());
@@ -51,10 +49,6 @@ public class Container
 
     public <T extends ServiceInterface> ServiceDefinition<T> add(ServiceDefinition<T> serviceDefinition)
     {
-        if (instantiated) {
-            throw new ContainerInstantiatedException();
-        }
-
         containerInstantiator.addServiceDefinition(serviceDefinition);
 
         return serviceDefinition;
@@ -67,13 +61,20 @@ public class Container
 
     public void instantiate()
     {
-        if (instantiated) {
-            throw new ContainerInstantiatedException();
-        }
+        instantiating = true;
 
         containerInstantiator.boot();
 
+        instantiating = false;
         instantiated = true;
+
+        freeze();
+    }
+
+    private void freeze()
+    {
+        services = Collections.unmodifiableMap(services);
+        taggedServices = Collections.unmodifiableMap(taggedServices);
     }
 
     public <T extends ServiceInterface> ArrayList<T> getByTag(String tag)
@@ -136,21 +137,6 @@ public class Container
         return services.containsKey(serviceClass);
     }
 
-    public Map<Class, ConfigurationInterface> getConfigurations()
-    {
-        return containerInstantiator.getConfigurations();
-    }
-
-    public <T extends ServiceInterface> void setConfiguration(Class<T> serviceClass, ConfigurationInterface configuration)
-    {
-        getConfigurations().put(serviceClass, configuration);
-    }
-
-    public <T extends ServiceInterface> ConfigurationInterface getConfiguration(Class<T> serviceClass)
-    {
-        return getConfigurations().get(serviceClass);
-    }
-
     public void addReferenceResolver(ReferenceResolverInterface resolver)
     {
         containerInstantiator.getReferenceResolvers().add(resolver);
@@ -164,5 +150,15 @@ public class Container
     public Map<Class, ServiceDefinition<? extends ServiceInterface>> getServiceDefinitions()
     {
         return containerInstantiator.getServiceDefinitions();
+    }
+
+    public boolean isInstantiated()
+    {
+        return instantiated;
+    }
+
+    public boolean isInstantiating()
+    {
+        return instantiating;
     }
 }

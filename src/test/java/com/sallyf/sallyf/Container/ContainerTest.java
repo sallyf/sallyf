@@ -177,22 +177,6 @@ public class ContainerTest
         assertEquals(2, service.configuration.getNumber());
     }
 
-    @Test
-    public void testConfigurationManualDeclarationInContainer() throws FrameworkException
-    {
-        Container container = new Container();
-
-        container.add(new ServiceDefinition<>(ServiceWithConfiguration.class));
-
-        container.setConfiguration(ServiceWithConfiguration.class, new ServiceWithConfiguration.CustomServiceConfiguration());
-
-        container.instantiate();
-
-        ServiceWithConfiguration service = container.get(ServiceWithConfiguration.class);
-
-        assertEquals(2, service.configuration.getNumber());
-    }
-
     @Test(expected = AmbiguousServiceException.class)
     public void testFindAmbiguous()
     {

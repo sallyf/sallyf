@@ -4,8 +4,8 @@ import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
 import com.sallyf.sallyf.Authentication.DataSource.InMemoryDataSource;
 import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
+import com.sallyf.sallyf.Container.PlainReference;
 import com.sallyf.sallyf.Container.ServiceDefinition;
-import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -41,9 +41,10 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
     @Override
     public void preBoot() throws ServiceInstantiationException
     {
-        app.getContainer().add(new ServiceDefinition<>(AuthenticationManager.class, new AuthenticationConfiguration()));
-        app.getContainer().add(new ServiceDefinition<>(AccessDecisionManager.class));
-        app.getContainer().add(new ServiceDefinition<>(ExpressionLanguage.class));
+        app.getContainer()
+                .getServiceDefinition(AuthenticationManager.class)
+                .setConfigurationReference(new PlainReference<>(new AuthenticationConfiguration()));
+
         app.getContainer().add(new ServiceDefinition<>(NameVoter.class)).addTag(AccessDecisionManager.TAG_VOTER);
     }
 
