@@ -7,7 +7,7 @@ import com.sallyf.sallyf.Utils.ClassUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class ConfigurationReferenceResolver<T extends ServiceInterface> implements ReferenceResolverInterface<T, ConfigurationReference, ConfigurationInterface>
+public class ConfigurationReferenceResolver<T extends ServiceInterface> implements ReferenceResolverInterface<T, DefaultConfigurationReference, ConfigurationInterface>
 {
     private Container container;
 
@@ -19,19 +19,13 @@ public class ConfigurationReferenceResolver<T extends ServiceInterface> implemen
     @Override
     public boolean supports(ServiceDefinition serviceDefinition, ReferenceInterface reference)
     {
-        return reference instanceof ConfigurationReference;
+        return reference instanceof DefaultConfigurationReference;
     }
 
     @Override
-    public ConfigurationInterface resolve(ServiceDefinition<T> serviceDefinition, ConfigurationReference reference)
+    public ConfigurationInterface resolve(ServiceDefinition<T> serviceDefinition, DefaultConfigurationReference reference)
     {
         Class<T> type = serviceDefinition.getType();
-
-        ConfigurationInterface configuration = container.getConfigurations().get(type);
-
-        if (null != configuration) {
-            return configuration;
-        }
 
         try {
             Method method = type.getDeclaredMethod("getDefaultConfigurationClass");

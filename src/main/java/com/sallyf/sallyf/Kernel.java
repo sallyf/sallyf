@@ -1,10 +1,14 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.AccessDecisionManager.AccessDecisionManager;
+import com.sallyf.sallyf.Authentication.AuthenticationManager;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
+import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import com.sallyf.sallyf.FlashManager.FlashManager;
+import com.sallyf.sallyf.FreeMarker.FreeMarker;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Router.URLGenerator;
@@ -28,7 +32,7 @@ public class Kernel
         return new Kernel(new Container());
     }
 
-    private ServiceDefinition[] getDefaultServices()
+    private ServiceDefinition<?>[] getDefaultServices()
     {
         return new ServiceDefinition[]{
                 new ServiceDefinition<>(EventDispatcher.class),
@@ -36,6 +40,10 @@ public class Kernel
                 new ServiceDefinition<>(Router.class),
                 new ServiceDefinition<>(URLGenerator.class),
                 new ServiceDefinition<>(FlashManager.class),
+                new ServiceDefinition<>(AuthenticationManager.class),
+                new ServiceDefinition<>(ExpressionLanguage.class),
+                new ServiceDefinition<>(AccessDecisionManager.class),
+                new ServiceDefinition<>(FreeMarker.class),
         };
     }
 
@@ -89,14 +97,17 @@ public class Kernel
 
     public void stop()
     {
-        FrameworkServer server = container.get(FrameworkServer.class);
+        try {
+            FrameworkServer server = container.get(FrameworkServer.class);
 
-        if (null != server) {
-            try {
-                server.stop();
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (null != server) {
+                try {
+                    server.stop();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+        } catch (FrameworkException ignored) {
         }
     }
 }
