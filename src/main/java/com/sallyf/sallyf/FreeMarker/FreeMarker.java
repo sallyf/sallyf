@@ -1,6 +1,7 @@
 package com.sallyf.sallyf.FreeMarker;
 
 
+import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Router.Router;
@@ -26,5 +27,10 @@ public class FreeMarker implements ServiceInterface
     public Configuration getConfiguration()
     {
         return configuration;
+    }
+
+    public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
+    {
+        return Configuration.class;
     }
 }

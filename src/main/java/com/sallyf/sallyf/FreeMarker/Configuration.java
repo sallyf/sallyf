@@ -10,6 +10,7 @@ public class Configuration extends freemarker.template.Configuration implements 
 {
     public Configuration()
     {
+        this.setClassForTemplateLoading(getClass(), "/");
         this.setIncompatibleImprovements(new Version(2, 3, 20));
         this.setDefaultEncoding("UTF-8");
         this.setLocale(Locale.US);
