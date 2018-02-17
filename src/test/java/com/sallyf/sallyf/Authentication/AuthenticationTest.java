@@ -20,7 +20,7 @@ public class AuthenticationTest extends BaseFrameworkTest
         Router r = new Router(c, ed);
         ExpressionLanguage el = new ExpressionLanguage(r);
 
-        return new AuthenticationManager(configuration, r, ed, el);
+        return new AuthenticationManager(c, configuration, r, ed, el);
     }
 
     @Test(expected = AuthenticationException.class)
