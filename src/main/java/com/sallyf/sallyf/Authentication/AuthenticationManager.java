@@ -6,17 +6,16 @@ import com.sallyf.sallyf.Authentication.Exception.AuthenticationException;
 import com.sallyf.sallyf.Authentication.Voter.AuthenticationVoter;
 import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Exception.HttpException;
+import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.ActionParameterResolver.UserInterfaceResolver;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
-import com.sallyf.sallyf.Server.Status;
 import org.eclipse.jetty.server.Request;
 
 import javax.servlet.http.HttpSession;
@@ -30,14 +29,17 @@ public class AuthenticationManager implements ServiceInterface
 
     private HashMap<Route, Security> securedRoutes = new HashMap<>();
 
+    private Container container;
+
     private Router router;
 
     private EventDispatcher eventDispatcher;
 
     private final ExpressionLanguage expressionLanguage;
 
-    public AuthenticationManager(Configuration configuration, Router router, EventDispatcher eventDispatcher, ExpressionLanguage expressionLanguage)
+    public AuthenticationManager(Container container, Configuration configuration, Router router, EventDispatcher eventDispatcher, ExpressionLanguage expressionLanguage)
     {
+        this.container = container;
         this.router = router;
         this.eventDispatcher = eventDispatcher;
         this.expressionLanguage = expressionLanguage;
@@ -64,24 +66,26 @@ public class AuthenticationManager implements ServiceInterface
         });
 
         eventDispatcher.register(KernelEvents.POST_MATCH_ROUTE, (et1, routeMatchEvent) -> {
-            Route route = routeMatchEvent.getRuntimeBag().getRoute();
-            if (!vote(route, routeMatchEvent.getRuntimeBag())) {
-                route.setHandler(rb -> {
-                    throw new HttpException(Status.FORBIDDEN);
-                });
+            RuntimeBag runtimeBag = routeMatchEvent.getRuntimeBag();
+
+            Route route = runtimeBag.getRoute();
+
+            if (securedRoutes.containsKey(route)) {
+                Security annotation = securedRoutes.get(route);
+
+                boolean decision = this.expressionLanguage.evaluate(annotation.value(), runtimeBag);
+
+                if (!decision) {
+                    route.setHandler(rb -> {
+                        try {
+                            return annotation.handler().newInstance().apply(container, rb);
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            throw new FrameworkException(e);
+                        }
+                    });
+                }
             }
         });
-    }
-
-    private boolean vote(Route route, RuntimeBag runtimeBag)
-    {
-        if (securedRoutes.containsKey(route)) {
-            Security annotation = securedRoutes.get(route);
-
-            return this.expressionLanguage.evaluate(annotation.value(), runtimeBag);
-        }
-
-        return true;
     }
 
     public UserInterface authenticate(Request request, String username, String password)
