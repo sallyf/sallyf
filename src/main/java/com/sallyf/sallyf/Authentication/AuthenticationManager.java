@@ -25,9 +25,22 @@ import java.util.HashMap;
 
 public class AuthenticationManager implements ServiceInterface
 {
+    class RouteSecurities
+    {
+        Security route;
+
+        Security controller;
+
+        public RouteSecurities(Security route, Security controller)
+        {
+            this.route = route;
+            this.controller = controller;
+        }
+    }
+
     private ArrayList<UserDataSourceInterface> dataSources;
 
-    private HashMap<Route, Security> securedRoutes = new HashMap<>();
+    private HashMap<Route, RouteSecurities> securedRoutes = new HashMap<Route, RouteSecurities>();
 
     private Container container;
 
@@ -58,11 +71,10 @@ public class AuthenticationManager implements ServiceInterface
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
 
-            Security annotation = method.getAnnotation(Security.class);
+            Security routeAnnotation = method.getAnnotation(Security.class);
+            Security controllerAnnotation = method.getDeclaringClass().getAnnotation(Security.class);
 
-            if (null != annotation) {
-                securedRoutes.put(routeRegisterEvent.getRoute(), annotation);
-            }
+            securedRoutes.put(routeRegisterEvent.getRoute(), new RouteSecurities(routeAnnotation, controllerAnnotation));
         });
 
         eventDispatcher.register(KernelEvents.POST_MATCH_ROUTE, (et1, routeMatchEvent) -> {
@@ -71,18 +83,27 @@ public class AuthenticationManager implements ServiceInterface
             Route route = runtimeBag.getRoute();
 
             if (securedRoutes.containsKey(route)) {
-                Security annotation = securedRoutes.get(route);
+                RouteSecurities securities = securedRoutes.get(route);
 
-                boolean decision = this.expressionLanguage.evaluate(annotation.value(), runtimeBag);
+                Security[] annotations = new Security[]{securities.controller, securities.route};
 
-                if (!decision) {
-                    route.setHandler(rb -> {
-                        try {
-                            return annotation.handler().newInstance().apply(container, rb);
-                        } catch (InstantiationException | IllegalAccessException e) {
-                            throw new FrameworkException(e);
-                        }
-                    });
+                for (Security annotation : annotations) {
+                    if (annotation == null) {
+                        continue;
+                    }
+
+                    boolean decision = this.expressionLanguage.evaluate(annotation.value(), runtimeBag);
+
+                    if (!decision) {
+                        route.setHandler(rb -> {
+                            try {
+                                return annotation.handler().newInstance().apply(container, rb);
+                            } catch (InstantiationException | IllegalAccessException e) {
+                                throw new FrameworkException(e);
+                            }
+                        });
+                        break;
+                    }
                 }
             }
         });
