@@ -24,7 +24,7 @@ public class RequestTest extends BaseFrameworkTest
     }
 
     @Test
-    public void testFreeMarkerResponse() throws Exception
+    public void testJTwigResponse() throws Exception
     {
         Request request = new Request.Builder()
                 .url(getRootURL() + "/jtwig-response")
@@ -34,5 +34,18 @@ public class RequestTest extends BaseFrameworkTest
 
         assertThat("Response Code", response.code(), is(200));
         assertThat("Content", response.body().string(), is("Hello world !"));
+    }
+
+    @Test
+    public void testJTwigPathFunction() throws Exception
+    {
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/jtwig-path")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(200));
+        assertThat("Content", response.body().string(), is("/jtwig-path/jtwig-path"));
     }
 }

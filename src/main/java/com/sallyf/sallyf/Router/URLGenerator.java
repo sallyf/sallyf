@@ -1,7 +1,10 @@
 package com.sallyf.sallyf.Router;
 
+import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
+import com.sallyf.sallyf.Router.JTwigFunctions.PathFunction;
 import com.sallyf.sallyf.Server.FrameworkServer;
 
 import java.util.Collection;
@@ -18,6 +21,12 @@ public class URLGenerator implements ServiceInterface
     {
         this.server = server;
         this.router = router;
+    }
+
+    @Override
+    public void initialize(Container container)
+    {
+        container.add(new ServiceDefinition<>(PathFunction.class)).addTag("jtwig.function");
     }
 
     public String url(String actionName, HashMap<String, String> parameters)

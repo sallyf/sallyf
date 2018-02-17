@@ -16,4 +16,10 @@ public class TestController extends BaseController
 
         return new JTwigResponse("helloworld.twig", data);
     }
+
+    @Route(path = "/jtwig-path")
+    public JTwigResponse path()
+    {
+        return new JTwigResponse("path.twig");
+    }
 }

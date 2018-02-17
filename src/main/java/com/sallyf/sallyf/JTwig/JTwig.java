@@ -9,20 +9,25 @@ import com.sallyf.sallyf.Router.Router;
 import org.jtwig.environment.EnvironmentConfiguration;
 import org.jtwig.environment.EnvironmentConfigurationBuilder;
 
+import java.util.ArrayList;
+
 public class JTwig implements ServiceInterface
 {
     private final Router router;
 
     private EnvironmentConfiguration configuration;
 
-    public JTwig(EventDispatcher eventDispatcher, Router router)
+    public JTwig(Container container, EventDispatcher eventDispatcher, Router router)
     {
         this.router = router;
 
         eventDispatcher.register(KernelEvents.STARTED, (t, e) -> {
-            configuration = EnvironmentConfigurationBuilder
-                    .configuration()
-                    .build();
+            EnvironmentConfigurationBuilder builder = EnvironmentConfigurationBuilder.configuration();
+
+            ArrayList<JTwigServiceFunction> functions = container.getByTag("jtwig.function");
+            functions.forEach(f -> builder.functions().add(f));
+
+            this.configuration = builder.build();
         });
     }
 
