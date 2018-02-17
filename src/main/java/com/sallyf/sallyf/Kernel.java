@@ -9,6 +9,7 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import com.sallyf.sallyf.FlashManager.FlashManager;
 import com.sallyf.sallyf.FreeMarker.FreeMarker;
+import com.sallyf.sallyf.JTwig.JTwig;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Router.URLGenerator;
@@ -44,6 +45,7 @@ public class Kernel
                 new ServiceDefinition<>(ExpressionLanguage.class),
                 new ServiceDefinition<>(AccessDecisionManager.class),
                 new ServiceDefinition<>(FreeMarker.class),
+                new ServiceDefinition<>(JTwig.class),
         };
     }
 
