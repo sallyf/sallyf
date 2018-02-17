@@ -10,6 +10,7 @@ import com.sallyf.sallyf.Exception.*;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RequestResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RouteParameterResolver;
+import com.sallyf.sallyf.Router.ActionParameterResolver.RuntimeBagResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.ServiceResolver;
 import com.sallyf.sallyf.Router.ResponseTransformer.HttpExceptionTransformer;
 import com.sallyf.sallyf.Router.ResponseTransformer.PrimitiveTransformer;
@@ -51,6 +52,7 @@ public class Router implements ServiceInterface
     public void initialize(Container container)
     {
         addActionParameterResolver(new RequestResolver());
+        addActionParameterResolver(new RuntimeBagResolver());
         addActionParameterResolver(new RouteParameterResolver(container));
         addActionParameterResolver(new ServiceResolver(container));
 
