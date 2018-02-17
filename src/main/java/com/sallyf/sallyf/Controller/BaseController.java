@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Controller;
 
 import com.sallyf.sallyf.Container.Container;
-import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
 import com.sallyf.sallyf.Router.RedirectResponse;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.URLGenerator;
@@ -26,7 +25,7 @@ abstract public class BaseController implements ControllerInterface
 
     public Response redirect(String url)
     {
-        return new RedirectResponse(url, Status.REDIRECT);
+        return new RedirectResponse(url, Status.MOVED_TEMPORARILY);
     }
 
     public Response redirectToRoute(String actionName)

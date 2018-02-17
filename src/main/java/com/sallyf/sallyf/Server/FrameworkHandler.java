@@ -36,7 +36,6 @@ public class FrameworkHandler extends AbstractHandler
                        HttpServletRequest servletRequest,
                        HttpServletResponse r)
     {
-
         org.eclipse.jetty.server.Response servletResponse = (org.eclipse.jetty.server.Response) r;
 
         applyResponse(servletResponse, handle(servletRequest, servletResponse));
