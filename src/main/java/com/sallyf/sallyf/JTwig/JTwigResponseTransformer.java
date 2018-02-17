@@ -25,7 +25,9 @@ public class JTwigResponseTransformer implements ResponseTransformerInterface<JT
     {
         JtwigTemplate jtwigTemplate = JtwigTemplate.classpathTemplate(response.getTemplate(), jtwig.getConfiguration());
 
-        JtwigModel model = JtwigModel.newModel(response.getData());
+        JtwigModel model = JtwigModel.newModel(response.getData())
+                .with("$", runtimeBag)
+                .with("runtimeBag", runtimeBag);
 
         return jtwigTemplate.render(model);
     }
