@@ -47,8 +47,12 @@ public class RouterTest
         Router router = app.getContainer().get(Router.class);
 
         Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
+        Path path = route.getPath();
+        path.getRequirements().put("foo", "(YOLO)");
 
-        assertEquals("^/hello/([^/]*)/([^/]*)/([^/]*)$", route.getPath().getPattern());
+        path.computePattern();
+
+        assertEquals("^/hello/(YOLO)/([^/]*)/([^/]*)$", path.getPattern());
 
         Request request = new Request(null, null);
         request.setMethod(Method.GET.toString());
@@ -152,7 +156,7 @@ public class RouterTest
 
         HashMap<String, Route> routes = router.getRoutes();
 
-        assertEquals(6, routes.size());
+        assertEquals(7, routes.size());
 
         Route route = routes.get("test_hello_named");
 

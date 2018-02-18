@@ -72,7 +72,7 @@ public class Route implements Cloneable
     @Override
     public String toString()
     {
-        return String.format("%s %s", getMethod(), getPath().declaration);
+        return String.format("%s %s", getMethod(), getPath().getDeclaration());
     }
 
     public Object clone() throws CloneNotSupportedException

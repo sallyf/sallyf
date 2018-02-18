@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.Router;
 
+import com.sallyf.sallyf.Annotation.Requirement;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Controller.ControllerInterface;
@@ -14,7 +15,6 @@ import com.sallyf.sallyf.Router.ActionParameterResolver.RuntimeBagResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.ServiceResolver;
 import com.sallyf.sallyf.Router.ResponseTransformer.HttpExceptionTransformer;
 import com.sallyf.sallyf.Router.ResponseTransformer.PrimitiveTransformer;
-import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
 import org.eclipse.jetty.server.Request;
 
@@ -81,6 +81,13 @@ public class Router implements ServiceInterface
             if (method.isAnnotationPresent(com.sallyf.sallyf.Annotation.Route.class)) {
                 com.sallyf.sallyf.Annotation.Route routeAnnotation = method.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
 
+                com.sallyf.sallyf.Annotation.Route[] annotations;
+                if (controllerAnnotation == null) {
+                    annotations = new com.sallyf.sallyf.Annotation.Route[]{routeAnnotation};
+                } else {
+                    annotations = new com.sallyf.sallyf.Annotation.Route[]{controllerAnnotation, routeAnnotation};
+                }
+
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
                 String actionName = method.getName();
@@ -89,8 +96,9 @@ public class Router implements ServiceInterface
                 }
 
                 String fullName = actionNamePrefix + actionName;
+                String fullPath = pathPrefix + routeAnnotation.path();
 
-                Route route = registerAction(fullName, routeAnnotation.method(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
+                ActionWrapperInterface handler = (runtimeBag) -> {
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
@@ -99,7 +107,18 @@ public class Router implements ServiceInterface
                         e.printStackTrace();
                         return null;
                     }
-                });
+                };
+
+                Route route = new Route(fullName, routeAnnotation.method(), fullPath, handler);
+                Path path = route.getPath();
+
+                for (com.sallyf.sallyf.Annotation.Route annotation : annotations) {
+                    for (Requirement requirement : annotation.requirements()) {
+                        path.getRequirements().put(requirement.name(), requirement.requirement());
+                    }
+                }
+
+                registerRoute(fullName, route);
 
                 eventDispatcher.dispatch(KernelEvents.ROUTE_REGISTER, new RouteRegisterEvent(route, controller, method));
             }
@@ -132,6 +151,8 @@ public class Router implements ServiceInterface
 
     public Route registerRoute(String name, Route route)
     {
+        route.getPath().computePattern();
+
         String signature = route.getMethod() + " " + route.getPath().getPattern();
         if (routeSignatures.contains(signature)) {
             throw new RouteDuplicateException(route);
@@ -143,11 +164,6 @@ public class Router implements ServiceInterface
         routeSignatures.add(signature);
 
         return route;
-    }
-
-    public Route registerAction(String name, Method method, String path, ActionWrapperInterface handler)
-    {
-        return registerRoute(name, new Route(name, method, path, handler));
     }
 
     private <T extends ControllerInterface> T instantiateController(Class<T> controllerClass)
@@ -171,7 +187,7 @@ public class Router implements ServiceInterface
     {
         for (Route route : routes.values()) {
             if (request.getMethod().equals(route.getMethod().toString())) {
-                Pattern r = Pattern.compile(route.getPath().pattern);
+                Pattern r = Pattern.compile(route.getPath().getPattern());
 
                 Matcher m = r.matcher(request.getPathInfo());
 
@@ -193,7 +209,7 @@ public class Router implements ServiceInterface
         RouteParameters parameterValues = new RouteParameters();
 
         if (m.matches()) {
-            runtimeBag.getRoute().getPath().parameters.forEach((index, name) -> {
+            runtimeBag.getRoute().getPath().getParameters().forEach((index, name) -> {
                 parameterValues.put(name, resolveRouteParameter(m, index, name, runtimeBag));
             });
         }
