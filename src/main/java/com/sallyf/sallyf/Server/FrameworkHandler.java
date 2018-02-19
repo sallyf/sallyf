@@ -36,7 +36,6 @@ public class FrameworkHandler extends AbstractHandler
                        HttpServletRequest servletRequest,
                        HttpServletResponse r)
     {
-
         org.eclipse.jetty.server.Response servletResponse = (org.eclipse.jetty.server.Response) r;
 
         applyResponse(servletResponse, handle(servletRequest, servletResponse));
@@ -93,6 +92,18 @@ public class FrameworkHandler extends AbstractHandler
 
     public void applyResponse(org.eclipse.jetty.server.Response servletResponse, Response response)
     {
+        for (Map.Entry<String, ArrayList<String>> entry : response.getHeaders().entrySet()) {
+            String name = entry.getKey();
+            ArrayList<String> headers = entry.getValue();
+            for (String values : headers) {
+                servletResponse.addHeader(name, values);
+            }
+        }
+
+        for (HttpCookie cookie : response.getCookies()) {
+            servletResponse.addCookie(cookie);
+        }
+
         if (response instanceof RedirectResponse) {
             RedirectResponse redirectResponse = (RedirectResponse) response;
 
@@ -106,18 +117,6 @@ public class FrameworkHandler extends AbstractHandler
             }
 
             return;
-        }
-
-        for (Map.Entry<String, ArrayList<String>> entry : response.getHeaders().entrySet()) {
-            String name = entry.getKey();
-            ArrayList<String> headers = entry.getValue();
-            for (String values : headers) {
-                servletResponse.addHeader(name, values);
-            }
-        }
-
-        for (HttpCookie cookie : response.getCookies()) {
-            servletResponse.addCookie(cookie);
         }
 
         servletResponse.setContentType(response.getMimeType());

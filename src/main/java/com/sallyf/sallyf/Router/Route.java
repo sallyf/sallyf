@@ -75,7 +75,7 @@ public class Route implements Cloneable
     {
         String[] methods = Stream.of(getMethods()).map(Enum::toString).toArray(String[]::new);
 
-        return String.format("%s %s", String.join("|", methods), getPath().declaration);
+        return String.format("%s %s", String.join("|", methods), getPath().getDeclaration());
     }
 
     public Object clone() throws CloneNotSupportedException

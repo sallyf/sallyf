@@ -6,6 +6,7 @@ import com.sallyf.sallyf.BaseFrameworkTest;
 import com.sallyf.sallyf.Container.Exception.ServiceInstantiationException;
 import com.sallyf.sallyf.Container.PlainReference;
 import com.sallyf.sallyf.Container.ServiceDefinition;
+import com.sallyf.sallyf.Router.Router;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -56,6 +57,13 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
         client = new OkHttpClient.Builder()
                 .cookieJar(getCookieJar())
                 .build();
+    }
+
+    @Override
+    public void postBoot() throws Exception
+    {
+        super.postBoot();
+        app.getContainer().get(Router.class).registerController(Test2Controller.class);
     }
 
     @Test
@@ -186,4 +194,15 @@ public class AuthenticationRequestTest extends BaseFrameworkTest
         assertThat("Response Code", response2.code(), is(403));
     }
 
+    @Test
+    public void testControllerSecurity() throws Exception
+    {
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/test2/test")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(403));
+    }
 }

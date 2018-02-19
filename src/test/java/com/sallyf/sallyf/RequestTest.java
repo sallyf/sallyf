@@ -119,6 +119,30 @@ public class RequestTest extends BaseFrameworkTest
     }
 
     @Test
+    public void testSlashParameter() throws IOException
+    {
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/prefixed/hello/slashed/i/am/slashed")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(200));
+        assertThat("Content", response.body().string(), is("i/am/slashed"));
+
+        EventType[] expectedEvents = {
+                KernelEvents.PRE_SEND_RESPONSE,
+                KernelEvents.POST_MATCH_ROUTE,
+                KernelEvents.REQUEST,
+                KernelEvents.ROUTE_PARAMETERS,
+                KernelEvents.PRE_TRANSFORM_RESPONSE,
+                KernelEvents.START,
+                KernelEvents.STARTED,
+        };
+        assertTrue(dispatchedEvents.containsAll(Arrays.asList(expectedEvents)));
+    }
+
+    @Test
     public void testTransform() throws IOException
     {
         Request request = new Request.Builder()

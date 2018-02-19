@@ -1,5 +1,6 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Annotation.Requirement;
 import com.sallyf.sallyf.Annotation.Route;
 import com.sallyf.sallyf.Controller.BaseController;
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
@@ -39,6 +40,14 @@ public class TestController extends BaseController
     public Response hello5(RouteParameters parameters)
     {
         return new Response("hello, " + parameters.get("name") + " " + parameters.get("___", "fallback"));
+    }
+
+    @Route(path = "/hello/slashed/{path}", requirements = {
+            @Requirement(name = "path", requirement = "(.+)")
+    })
+    public Object helloSlashed(RouteParameters parameters)
+    {
+        return parameters.get("path");
     }
 
     @Route(path = "/invalidresponse")

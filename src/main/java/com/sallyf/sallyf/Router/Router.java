@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.Router;
 
+import com.sallyf.sallyf.Annotation.Requirement;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Controller.ControllerInterface;
@@ -10,10 +11,10 @@ import com.sallyf.sallyf.Exception.*;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RequestResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RouteParameterResolver;
+import com.sallyf.sallyf.Router.ActionParameterResolver.RuntimeBagResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.ServiceResolver;
 import com.sallyf.sallyf.Router.ResponseTransformer.HttpExceptionTransformer;
 import com.sallyf.sallyf.Router.ResponseTransformer.PrimitiveTransformer;
-import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
 import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.server.Request;
@@ -51,6 +52,7 @@ public class Router implements ServiceInterface
     public void initialize(Container container)
     {
         addActionParameterResolver(new RequestResolver());
+        addActionParameterResolver(new RuntimeBagResolver());
         addActionParameterResolver(new RouteParameterResolver(container));
         addActionParameterResolver(new ServiceResolver(container));
 
@@ -79,6 +81,13 @@ public class Router implements ServiceInterface
             if (method.isAnnotationPresent(com.sallyf.sallyf.Annotation.Route.class)) {
                 com.sallyf.sallyf.Annotation.Route routeAnnotation = method.getAnnotation(com.sallyf.sallyf.Annotation.Route.class);
 
+                com.sallyf.sallyf.Annotation.Route[] annotations;
+                if (controllerAnnotation == null) {
+                    annotations = new com.sallyf.sallyf.Annotation.Route[]{routeAnnotation};
+                } else {
+                    annotations = new com.sallyf.sallyf.Annotation.Route[]{controllerAnnotation, routeAnnotation};
+                }
+
                 final Class<?>[] parameterTypes = method.getParameterTypes();
 
                 String actionName = method.getName();
@@ -87,8 +96,9 @@ public class Router implements ServiceInterface
                 }
 
                 String fullName = actionNamePrefix + actionName;
+                String fullPath = pathPrefix + routeAnnotation.path();
 
-                Route route = registerAction(fullName, routeAnnotation.methods(), pathPrefix + routeAnnotation.path(), (runtimeBag) -> {
+                ActionWrapperInterface handler = (runtimeBag) -> {
                     Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
 
                     try {
@@ -97,7 +107,18 @@ public class Router implements ServiceInterface
                         e.printStackTrace();
                         return null;
                     }
-                });
+                };
+
+                Route route = new Route(fullName, routeAnnotation.methods(), fullPath, handler);
+                Path path = route.getPath();
+
+                for (com.sallyf.sallyf.Annotation.Route annotation : annotations) {
+                    for (Requirement requirement : annotation.requirements()) {
+                        path.getRequirements().put(requirement.name(), requirement.requirement());
+                    }
+                }
+
+                registerRoute(fullName, route);
 
                 eventDispatcher.dispatch(KernelEvents.ROUTE_REGISTER, new RouteRegisterEvent(route, controller, method));
             }
@@ -130,16 +151,13 @@ public class Router implements ServiceInterface
 
     public Route registerRoute(String name, Route route)
     {
+        route.getPath().computePattern();
+
         route.setName(name);
 
         routes.put(name, route);
 
         return route;
-    }
-
-    public Route registerAction(String name, Method[] methods, String path, ActionWrapperInterface handler)
-    {
-        return registerRoute(name, new Route(name, methods, path, handler));
     }
 
     private <T extends ControllerInterface> T instantiateController(Class<T> controllerClass)
@@ -160,7 +178,7 @@ public class Router implements ServiceInterface
     {
         for (Route route : routes.values()) {
             if (Stream.of(route.getMethods()).map(Enum::toString).anyMatch(request.getMethod()::equalsIgnoreCase)) {
-                Pattern r = Pattern.compile(route.getPath().pattern);
+                Pattern r = Pattern.compile(route.getPath().getPattern());
 
                 Matcher m = r.matcher(request.getPathInfo());
 
@@ -182,7 +200,7 @@ public class Router implements ServiceInterface
         RouteParameters parameterValues = new RouteParameters();
 
         if (m.matches()) {
-            runtimeBag.getRoute().getPath().parameters.forEach((index, name) -> {
+            runtimeBag.getRoute().getPath().getParameters().forEach((index, name) -> {
                 parameterValues.put(name, resolveRouteParameter(m, index, name, runtimeBag));
             });
         }

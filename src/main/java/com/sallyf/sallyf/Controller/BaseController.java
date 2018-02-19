@@ -27,7 +27,7 @@ abstract public class BaseController implements ControllerInterface
 
     public Response redirect(String url)
     {
-        return new RedirectResponse(url, Status.REDIRECT);
+        return new RedirectResponse(url, Status.MOVED_TEMPORARILY);
     }
 
     public Response redirectToRoute(String actionName)
