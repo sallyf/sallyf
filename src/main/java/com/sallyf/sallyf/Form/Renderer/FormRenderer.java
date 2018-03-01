@@ -21,15 +21,27 @@ public class FormRenderer extends BaseFormRenderer<FormType, FormType.FormOption
     }
 
     @Override
-    public String render(FormView<FormType, FormType.FormOptions, ?> form)
+    public String renderRow(FormView<FormType, FormType.FormOptions, ?> formView)
+    {
+        return renderWidget(formView);
+    }
+
+    @Override
+    public String renderWidget(FormView<FormType, FormType.FormOptions, ?> formView)
     {
         String s = "";
 
-        s += "<form " + renderAttributes(form) + ">";
-        s += renderErrors(form);
-        s += manager.renderChildren(form);
+        s += "<form " + renderAttributes(formView) + ">";
+        s += renderErrors(formView);
+        s += manager.renderChildren(formView);
         s += "</form>";
 
         return s;
+    }
+
+    @Override
+    public String renderLabel(FormView<FormType, FormType.FormOptions, ?> formView)
+    {
+        return "";
     }
 }

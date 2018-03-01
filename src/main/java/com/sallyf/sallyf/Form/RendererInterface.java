@@ -4,5 +4,11 @@ public interface RendererInterface<T extends FormTypeInterface<O, ?>, O extends 
 {
     boolean supports(FormTypeInterface form);
 
-    String render(FormView<T, O, ?> formView);
+    String renderErrors(FormView<T, O, ?> formView);
+
+    String renderRow(FormView<T, O, ?> formView);
+
+    String renderWidget(FormView<T, O, ?> formView);
+
+    String renderLabel(FormView<T, O, ?> formView);
 }

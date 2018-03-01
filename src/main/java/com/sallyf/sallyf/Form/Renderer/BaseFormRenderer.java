@@ -33,24 +33,47 @@ public abstract class BaseFormRenderer<T extends FormTypeInterface<O, ?>, O exte
         return String.format("%s=\"%s\"", HTMLUtils.escapeHtmlAttribute(key), HTMLUtils.escapeHtmlAttribute(value));
     }
 
+    @Override
     public String renderErrors(FormView<T, O, ?> formView)
     {
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<String, Set<ValidationError>> entry : formView.getErrorsBag().getErrors().entrySet()) {
-            String name = entry.getKey();
             Set<ValidationError> errors = entry.getValue();
 
-            sb.append("<div>");
-            sb.append("<p>" + name + ":</p>");
             sb.append("<ul>");
             for (ValidationError error : errors) {
                 sb.append("<li>" + error.getMessage() + "</li>");
             }
             sb.append("</ul>");
-            sb.append("</div>");
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public String renderRow(FormView<T, O, ?> formView)
+    {
+        String s = "<div>";
+
+        s += renderLabel(formView);
+        s += renderErrors(formView);
+        s += renderWidget(formView);
+
+        s += "</div>";
+
+        return s;
+    }
+
+    @Override
+    public String renderLabel(FormView<T, O, ?> formView)
+    {
+        String label = formView.getVars().getLabel();
+
+        if (label == null) {
+            return "";
+        }
+
+        return "<label>" + label + "</label>";
     }
 }

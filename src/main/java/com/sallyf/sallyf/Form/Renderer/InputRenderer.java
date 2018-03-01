@@ -7,7 +7,7 @@ import com.sallyf.sallyf.Form.Options;
 public abstract class InputRenderer<T extends FormTypeInterface<O, ?>, O extends Options> extends BaseFormRenderer<T, O>
 {
     @Override
-    public String render(FormView<T, O, ?> formView)
+    public String renderWidget(FormView<T, O, ?> formView)
     {
         return "<input " + renderAttributes(formView) + ">";
     }

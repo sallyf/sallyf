@@ -57,6 +57,8 @@ public class FormBuilder<T extends FormTypeInterface<O, ND>, O extends Options, 
 
         getChildren().add(childBuilder);
 
+        childBuilder.getOptions().setLabel(name);
+
         childBuilderConsumer.accept(childBuilder, childBuilder.getOptions());
 
         return this;

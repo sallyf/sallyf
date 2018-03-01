@@ -4,7 +4,7 @@ import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.Options;
 import com.sallyf.sallyf.Form.Type.RadioType;
 
-public class RadioRenderer extends InputRenderer<RadioType, Options>
+public class RadioRenderer extends CheckableRenderer<RadioType, Options>
 {
     @Override
     public boolean supports(FormTypeInterface form)

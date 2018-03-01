@@ -45,7 +45,7 @@ public class FormTest
 
         String formView = formManager.render(form.createView());
 
-        String expected = "<form method=\"post\"><input name=\"foo\" type=\"text\" value=\"\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></form>";
+        String expected = "<form method=\"post\"><div><label>foo</label><input name=\"foo\" type=\"text\" value=\"\"></div><div><input name=\"submit\" type=\"submit\" value=\"Hello !\"></div></form>";
 
         assertEquals(expected, formView);
     }

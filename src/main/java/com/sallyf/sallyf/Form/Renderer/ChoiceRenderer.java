@@ -27,7 +27,7 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
     }
 
     @Override
-    public String render(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
+    public String renderWidget(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
     {
         ChoiceType.ChoiceOptions vars = form.getVars();
 
@@ -51,10 +51,15 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
 
         String s = "";
 
+        String label = form.getVars().getLabel();
+        if (label != null) {
+            s += "<label>" + label + "</label>";
+        }
+
         s += "<select " + renderAttributes(form) + ">";
 
-        for (Object o : vars.getChoices()) {
-            final String value = vars.getChoiceValueResolver().apply(o);
+        for (Object choice : vars.getChoices()) {
+            final String value = vars.getChoiceValueResolver().apply(choice);
 
             HashMap<String, String> entryAttributes = MapUtils.createHashMap(
                     entry("value", value)
@@ -64,7 +69,7 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
                 entryAttributes.put("checked", "checked");
             }
 
-            s += "<option " + renderAttributes(entryAttributes) + ">" + String.valueOf(o) + "</option>";
+            s += "<option " + renderAttributes(entryAttributes) + ">" + vars.getChoiceLabelResolver().apply(choice) + "</option>";
         }
 
         s += "</select>";
@@ -86,7 +91,12 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
     {
         String s = "";
 
+        String label = form.getVars().getLabel();
+
         s += "<div>";
+        if (label != null) {
+            s += "<label>" + label + "</label>";
+        }
         s += manager.renderChildren(form);
         s += "</div>";
 

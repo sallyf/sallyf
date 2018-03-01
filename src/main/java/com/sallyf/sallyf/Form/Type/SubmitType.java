@@ -20,10 +20,11 @@ public class SubmitType extends InputType<String>
     {
         super.finishView(formView);
 
-        Map<String, String> attributes = formView.getVars().getAttributes();
+        Options vars = formView.getVars();
+        Map<String, String> attributes = vars.getAttributes();
 
         if (!attributes.containsKey("value") || attributes.get("value") == null || attributes.get("value").isEmpty()) {
-            attributes.put("value", formView.getForm().getName());
+            attributes.put("value", vars.getLabel() != null ? vars.getLabel() : formView.getName());
         }
     }
 
