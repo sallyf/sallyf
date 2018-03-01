@@ -12,7 +12,7 @@ public class Is extends AbstractConstraint
 
     public Is(Predicate<Object> predicate)
     {
-        this(predicate, "\"{{value}}\" is not valid");
+        this(predicate, "`\"${value}\" is not valid`");
     }
 
     public Is(Predicate<Object> predicate, String message)

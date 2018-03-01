@@ -9,7 +9,7 @@ public class NotEmpty extends AbstractConstraint
 {
     public NotEmpty()
     {
-        this("This field cannot be empty");
+        this("`This field cannot be empty`");
     }
 
     public NotEmpty(String message)
