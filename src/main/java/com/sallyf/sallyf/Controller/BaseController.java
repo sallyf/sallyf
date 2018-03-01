@@ -1,6 +1,8 @@
 package com.sallyf.sallyf.Controller;
 
 import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Form.FormBuilder;
+import com.sallyf.sallyf.Form.Type.FormType;
 import com.sallyf.sallyf.Router.RedirectResponse;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.URLGenerator;
@@ -36,5 +38,19 @@ abstract public class BaseController implements ControllerInterface
     public Response redirectToRoute(String actionName, HashMap<String, String> parameters)
     {
         return redirect(getContainer().get(URLGenerator.class).url(actionName, parameters));
+    }
+
+    public FormBuilder<FormType, FormType.FormOptions, Object> createFormBuilder(Object data)
+    {
+        FormBuilder<FormType, FormType.FormOptions, Object> builder = new FormBuilder<>(container, "", FormType.class);
+
+        builder.setData(data);
+
+        return builder;
+    }
+
+    public FormBuilder<FormType, FormType.FormOptions, Object> createFormBuilder()
+    {
+        return createFormBuilder(null);
     }
 }

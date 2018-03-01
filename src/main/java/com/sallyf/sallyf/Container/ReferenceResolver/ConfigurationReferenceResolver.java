@@ -2,6 +2,7 @@ package com.sallyf.sallyf.Container.ReferenceResolver;
 
 import com.sallyf.sallyf.Container.*;
 import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.Utils.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,8 +35,8 @@ public class ConfigurationReferenceResolver<T extends ServiceInterface> implemen
                 return null;
             }
 
-            return defaultConfigurationClass.newInstance();
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            return ClassUtils.newInstance(defaultConfigurationClass);
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new FrameworkException(e);
         } catch (NoSuchMethodException ignored) {
         }

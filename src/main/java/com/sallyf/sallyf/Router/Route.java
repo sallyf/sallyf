@@ -3,10 +3,11 @@ package com.sallyf.sallyf.Router;
 import com.sallyf.sallyf.Server.Method;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class Route implements Cloneable
 {
-    private Method method;
+    private Method[] methods;
 
     private Path path;
 
@@ -14,24 +15,24 @@ public class Route implements Cloneable
 
     private String name;
 
-    public Route(Method method, String pathDeclaration, ActionWrapperInterface handler)
+    public Route(Method[] methods, String pathDeclaration, ActionWrapperInterface handler)
     {
-        this.method = method;
+        this.methods = methods;
         this.path = new Path(pathDeclaration);
         this.handler = handler;
     }
 
-    public Route(String name, Method method, String pathDeclaration, ActionWrapperInterface handler)
+    public Route(String name, Method[] methods, String pathDeclaration, ActionWrapperInterface handler)
     {
-        this.method = method;
+        this.methods = methods;
         this.path = new Path(pathDeclaration);
         this.handler = handler;
         this.name = name;
     }
 
-    public Method getMethod()
+    public Method[] getMethods()
     {
-        return method;
+        return methods;
     }
 
     public Path getPath()
@@ -44,9 +45,9 @@ public class Route implements Cloneable
         return handler;
     }
 
-    public void setMethod(Method method)
+    public void setMethod(Method[] methods)
     {
-        this.method = method;
+        this.methods = methods;
     }
 
     public void setPath(Path path)
@@ -72,7 +73,9 @@ public class Route implements Cloneable
     @Override
     public String toString()
     {
-        return String.format("%s %s", getMethod(), getPath().getDeclaration());
+        String[] methods = Stream.of(getMethods()).map(Enum::toString).toArray(String[]::new);
+
+        return String.format("%s %s", String.join("|", methods), getPath().getDeclaration());
     }
 
     public Object clone() throws CloneNotSupportedException
@@ -92,7 +95,7 @@ public class Route implements Cloneable
         }
 
         Route route = (Route) o;
-        return getMethod() == route.getMethod() &&
+        return getMethods() == route.getMethods() &&
                 Objects.equals(getPath(), route.getPath()) &&
                 Objects.equals(getName(), route.getName());
     }
@@ -100,6 +103,6 @@ public class Route implements Cloneable
     @Override
     public int hashCode()
     {
-        return Objects.hash(getMethod(), getPath(), getName());
+        return Objects.hash(getMethods(), getPath(), getName());
     }
 }

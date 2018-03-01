@@ -3,11 +3,11 @@ package com.sallyf.sallyf;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.RouteDuplicateException;
 import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.http.MetaData;
@@ -46,7 +46,7 @@ public class RouterTest
 
         Router router = app.getContainer().get(Router.class);
 
-        Route route = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
+        Route route = new Route(new Method[]{Method.GET}, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
         Path path = route.getPath();
         path.getRequirements().put("foo", "(YOLO)");
 
@@ -71,10 +71,10 @@ public class RouterTest
     @Test
     public void routeMatcherTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
-        Route route2 = new Route(Method.GET, "/qwertyuiop", (rb) -> null);
-        Route route3 = new Route(Method.POST, "/qwertyuiop", (rb) -> null);
-        Route route4 = new Route(Method.GET, "/", (rb) -> null);
+        Route route1 = new Route(new Method[]{Method.GET}, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
+        Route route2 = new Route(new Method[]{Method.GET}, "/qwertyuiop", (rb) -> null);
+        Route route3 = new Route(new Method[]{Method.POST}, "/qwertyuiop", (rb) -> null);
+        Route route4 = new Route(new Method[]{Method.GET}, "/", (rb) -> null);
 
         Container container = new Container();
 
@@ -115,24 +115,11 @@ public class RouterTest
         assertNull(match3);
     }
 
-    @Test(expected = RouteDuplicateException.class)
-    public void routeDuplicateExceptionTest() throws Exception
-    {
-        Route route1 = new Route(Method.GET, "/abc", (rb) -> null);
-        Route route2 = new Route(Method.GET, "/abc", (rb) -> null);
-
-        Container container = new Container();
-
-        Router router = new Router(container, new EventDispatcher());
-        router.registerRoute("route_1", route1);
-        router.registerRoute("route_2", route2);
-    }
-
     @Test
     public void routeDuplicateTest() throws Exception
     {
-        Route route1 = new Route(Method.GET, "/abc", (rb) -> null);
-        Route route2 = new Route(Method.POST, "/abc", (rb) -> null);
+        Route route1 = new Route(new Method[]{Method.GET}, "/abc", (rb) -> null);
+        Route route2 = new Route(new Method[]{Method.POST}, "/abc", (rb) -> null);
 
         Container container = new Container();
 
@@ -179,7 +166,7 @@ public class RouterTest
 
         router.addRouteParameterResolver(new CapitalizerResolver());
 
-        Route route = new Route(Method.GET, "/{name}", (rb) -> null);
+        Route route = new Route(new Method[]{Method.GET}, "/{name}", (rb) -> null);
         router.registerRoute("route_1", route);
 
         Request request = new Request(null, null);
@@ -206,11 +193,7 @@ public class RouterTest
 
         Object[] actionParameters = router.resolveActionParameters(classes, null);
 
-        Class[] actualClasses = new Class[classes.length];
-        int i = 0;
-        for (Object actionParameter : actionParameters) {
-            actualClasses[i++] = actionParameter.getClass();
-        }
+        Class[] actualClasses = ClassUtils.getClasses(actionParameters);
 
         assertArrayEquals(classes, actualClasses);
     }

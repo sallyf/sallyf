@@ -1,6 +1,11 @@
 package com.sallyf.sallyf.Utils;
 
+import com.sallyf.sallyf.Exception.FrameworkException;
+
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.function.Consumer;
 
 public class ClassUtils
 {
@@ -51,6 +56,30 @@ public class ClassUtils
         }
 
         //No matching constructor
+        return null;
+    }
+
+    public static <C> C newInstance(Class<C> klass, Object... args)
+    {
+        return newInstance(klass, e -> {throw new FrameworkException(e);}, args);
+    }
+
+    public static <C> C newInstance(Class<C> klass, Consumer<Exception> exceptionHandler, Object... args)
+    {
+        Class[] argClasses = ClassUtils.getClasses(args);
+
+        try {
+            Constructor<C> constructor = getConstructorForArgs(klass, argClasses);
+
+            if (null == constructor) {
+                throw new NoSuchMethodException("Unable to find constructor for: " + klass + " with args: " + Arrays.toString(argClasses));
+            }
+
+            return constructor.newInstance(args);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            exceptionHandler.accept(e);
+        }
+
         return null;
     }
 }

@@ -13,7 +13,7 @@ public @interface Route
 {
     String path();
 
-    Method method() default Method.GET;
+    Method[] methods() default {Method.GET};
 
     String name() default "";
 

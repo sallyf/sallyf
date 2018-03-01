@@ -39,7 +39,7 @@ public class ExpressionLanguageTest
     @Test
     public void evalSimpleTest()
     {
-        Integer result = expressionLanguage.evaluate("1 + 1");
+        Integer result = ExpressionLanguage.evaluatePure("1 + 1");
 
         assertEquals((Integer) 2, result);
     }
