@@ -4,9 +4,13 @@ import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
 import com.sallyf.sallyf.Form.ConstraintInterface;
 import com.sallyf.sallyf.Form.Form;
 import com.sallyf.sallyf.Form.FormTypeInterface;
+import com.sallyf.sallyf.Utils.MapUtils;
 
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
+import java.util.HashMap;
+
+import static com.sallyf.sallyf.Utils.MapUtils.entry;
 
 public abstract class AbstractConstraint implements ConstraintInterface
 {
@@ -19,10 +23,8 @@ public abstract class AbstractConstraint implements ConstraintInterface
 
     public String getMessage(Object value, Form form)
     {
-        Bindings bindings = new SimpleBindings();
-        bindings.put("value", value);
-        bindings.put("form", form);
+        HashMap<String, Object> env = MapUtils.createHashMap(entry("value", value), entry("form", form));
 
-        return ExpressionLanguage.mustacheEvaluate(messageTemplate, bindings);
+        return ExpressionLanguage.evaluateStandalone(messageTemplate, env);
     }
 }

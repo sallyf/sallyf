@@ -25,7 +25,19 @@ public class AccessDecisionManager implements ServiceInterface
     @Override
     public void initialize(Container container)
     {
-        expressionLanguage.addBinding("is_granted", (PredicateIsGrantedHandler) this::vote);
+        expressionLanguage.addFunction("is_granted", request -> {
+            request.arguments(2, 4);
+
+            if (request.getArgs().length == 2) {
+                return vote(request.get(0), request.get(1), null);
+            }
+
+            if (request.getArgs().length == 3) {
+                return vote(request.get(0), request.get(1), request.get(2));
+            }
+
+            return vote(request.get(0), request.get(1), request.get(2), request.get(3));
+        });
     }
 
     public <O> boolean vote(RuntimeBag runtimeBag, String attribute, O subject)

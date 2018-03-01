@@ -23,7 +23,7 @@ public class TestController extends BaseController
 
         Form<FormType, FormType.FormOptions, Object> form = this.createFormBuilder(inData)
                 .add("foo", TextType.class, (options) -> {
-                    options.getConstraints().add(new NotEmpty("The value \"{{value}}\" is blank"));
+                    options.getConstraints().add(new NotEmpty("`The value \"${value}\" is blank`"));
                 })
                 .add("bar", TextType.class, (options) -> {
                 })
@@ -92,13 +92,13 @@ public class TestController extends BaseController
 
         Form<FormType, FormType.FormOptions, Object> form = this.createFormBuilder(inData)
                 .add("cb1", CheckboxType.class, (options) -> {
-                    options.getConstraints().add(new IsTrue("cb1 should be checked"));
+                    options.getConstraints().add(new IsTrue("`cb1 should be checked`"));
                 })
                 .add("cb2", CheckboxType.class, (options) -> {
-                    options.getConstraints().add(new IsFalse("cb2 should be unchecked"));
+                    options.getConstraints().add(new IsFalse("`cb2 should be unchecked`"));
                 })
                 .add("cb3", CheckboxType.class, (options) -> {
-                    options.getConstraints().add(new IsFalse("cb3 should be unchecked"));
+                    options.getConstraints().add(new IsFalse("`cb3 should be unchecked`"));
                 })
                 .add("submit", SubmitType.class)
                 .getForm();

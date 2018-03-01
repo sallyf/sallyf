@@ -6,7 +6,7 @@ public class IsBoolean extends Is
 {
     public IsBoolean(boolean expected)
     {
-        this(expected, "\"{{value}}\" is not " + Boolean.toString(expected));
+        this(expected, "`\"${value}\" is not " + Boolean.toString(expected) + "`");
     }
 
     public IsBoolean(boolean expected, String message)

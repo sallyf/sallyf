@@ -39,7 +39,7 @@ public class ExpressionLanguageTest
     @Test
     public void evalSimpleTest()
     {
-        Integer result = ExpressionLanguage.evaluatePure("1 + 1");
+        Integer result = ExpressionLanguage.evaluateStandalone("1 + 1");
 
         assertEquals((Integer) 2, result);
     }
@@ -79,7 +79,7 @@ public class ExpressionLanguageTest
     @Test
     public void evalFullHashMapTest()
     {
-        Status result = expressionLanguage.evaluate("service('TestService').returnHashMapOfArrayListOfStatus().get('statuses').get(0)");
+        Object result = expressionLanguage.evaluate("service('TestService').returnHashMapOfArrayListOfStatus().get('statuses').get(0)");
 
         assertEquals(Status.OK, result);
     }

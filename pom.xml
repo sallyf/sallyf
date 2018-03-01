@@ -8,7 +8,19 @@
     <artifactId>sallyf</artifactId>
     <version>1.0</version>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>com.github.raphaelvigee</groupId>
+            <artifactId>JavaExpressionLanguage</artifactId>
+            <version>62663c9</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
