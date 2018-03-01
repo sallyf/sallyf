@@ -1,33 +1,35 @@
 package com.sallyf.sallyf.Form;
 
-import java.util.Set;
+import org.eclipse.jetty.server.Request;
 
-public interface FormTypeInterface<O extends Options, VD, FD>
+public interface FormTypeInterface<O extends Options, ND>
 {
     default O createOptions()
     {
         return (O) new Options();
     }
 
-    FormDataTransformer<VD, FD> getFormDataTransformer();
+    ND requestToNorm(Form<?, O, ND> form, Request request);
 
-    default void buildView(FormView<?, O, VD, FD> formView)
+    default void buildView(FormView<?, O, ND> formView)
     {
 
     }
 
-    default void finishView(FormView<?, O, VD, FD> formView)
+    default void finishView(FormView<?, O, ND> formView)
     {
 
     }
 
-    default void buildForm(Form<?, O, VD, FD> form)
+    default void buildForm(Form<?, O, ND> form)
     {
 
     }
 
-    default void configureOptions(FormBuilder<?, O, VD, FD> formBuilder, O options)
+    default void configureOptions(FormBuilder<?, O, ND> formBuilder, O options)
     {
 
     }
+
+    <T extends FormTypeInterface<O, ND>> Object resolveData(Form<T, O, ND> form);
 }

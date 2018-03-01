@@ -1,8 +1,10 @@
 package com.sallyf.sallyf.Form;
 
-public interface FormDataTransformer<VD, FD>
-{
-    FD transform(VD viewData);
+import org.eclipse.jetty.server.Request;
 
-    VD reverseTransform(FD formData);
+public interface FormDataTransformer<O extends Options, ND>
+{
+    ND modelToNorm(Form<?, O, ND> form, Object data);
+
+    Object normToView(Form<?, O, ND> form, ND data);
 }

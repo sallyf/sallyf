@@ -1,15 +1,20 @@
 package com.sallyf.sallyf.Form;
 
 import com.sallyf.sallyf.Utils.MapUtils;
+import org.eclipse.jetty.server.Request;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 
-public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD, FD>
+public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 {
-    private FormBuilder<T, O, VD, FD> formBuilder;
+    private String name;
 
-    private LinkedHashMap<String, Form> children;
+    private FormBuilder<T, O, ND> formBuilder;
+
+    private LinkedHashSet<Form> children;
 
     private Form parentForm;
 
@@ -17,14 +22,15 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
 
     private ErrorsBag errorsBag;
 
-    private FD data;
+    private ND data;
 
-    public Form(FormBuilder<T, O, VD, FD> formBuilder, Form parentForm, O options)
+    public Form(String name, FormBuilder<T, O, ND> formBuilder, Form parentForm, O options)
     {
+        this.name = name;
         this.formBuilder = formBuilder;
         this.parentForm = parentForm;
         this.options = options;
-        this.children = new LinkedHashMap<>();
+        this.children = new LinkedHashSet<>();
 
         if (parentForm == null) {
             this.errorsBag = new ErrorsBag();
@@ -33,12 +39,23 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
         }
     }
 
-    public LinkedHashMap<String, Form> getChildren()
+    public LinkedHashSet<Form> getChildren()
     {
         return children;
     }
 
-    public void setChildren(LinkedHashMap<String, Form> children)
+    public Form getChildren(String name)
+    {
+        for (Form child : children) {
+            if (child.getName().equals(name)) {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+    public void setChildren(LinkedHashSet<Form> children)
     {
         this.children = children;
     }
@@ -48,7 +65,7 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
         return options;
     }
 
-    public FormBuilder<T, O, VD, FD> getBuilder()
+    public FormBuilder<T, O, ND> getBuilder()
     {
         return formBuilder;
     }
@@ -58,7 +75,7 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
         return parentForm;
     }
 
-    public FormView<T, O, VD, FD> createView()
+    public FormView<T, O, ND> createView()
     {
         return createView(null);
     }
@@ -70,17 +87,38 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
 
     public String getName()
     {
-        return getBuilder().getName();
+        return name;
     }
 
     public void setName(String name)
     {
-        getBuilder().setName(name);
+        this.name = name;
     }
 
     public String getFullName()
     {
-        return getBuilder().getFullName();
+        List<String> names = new ArrayList<>();
+
+        Form current = this;
+
+        while (null != current) {
+            names.add(0, current.getName());
+
+            current = current.getParent();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String name : names) {
+            if (name != null) {
+                if (sb.toString().isEmpty()) {
+                    sb.append(name);
+                } else {
+                    sb.append(String.format("[%s]", name));
+                }
+            }
+        }
+
+        return sb.toString();
     }
 
     public T getFormType()
@@ -88,7 +126,7 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
         return getBuilder().getFormType();
     }
 
-    public FD getData()
+    public ND getData()
     {
         return data;
     }
@@ -108,54 +146,62 @@ public class Form<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD,
         }
     }
 
-    public void setData(FD data)
+    public void setData(ND data)
     {
         this.data = data;
     }
 
-    public void setRawData(Object rawData, boolean transform)
-    {
-        if (rawData instanceof Map) {
-            Map<String, Object> rawMap = (Map<String, Object>) rawData;
-
-            getChildren().forEach((name, child) -> {
-                String fullName = child.getFullName();
-
-                if (rawMap.containsKey(fullName)) {
-                    child.setRawData(rawMap.get(child.getFullName()), transform);
-                }
-            });
-        } else {
-            if (transform) {
-                setData(getFormType().getFormDataTransformer().transform((VD) rawData));
-            } else {
-                setData((FD) rawData);
-            }
-        }
-    }
-
-    private <PT extends FormTypeInterface<PO, PVD, PFD>, PO extends Options, PVD, PFD> FormView<T, O, VD, FD> createView(FormView<PT, PO, PVD, PFD> parentView)
+    private <PT extends FormTypeInterface<PO, PD>, PO extends Options, PD> FormView<T, O, ND> createView(FormView<PT, PO, PD> parentView)
     {
         O resolvedVars = getBuilder().getFormType().createOptions();
 
         MapUtils.deepMerge(resolvedVars, getOptions());
 
-        FormView<T, O, VD, FD> formView = new FormView<>(this, parentView, resolvedVars);
+        FormView<T, O, ND> formView = new FormView<>(getName(), this, parentView, resolvedVars);
 
-        VD viewData = getFormType().getFormDataTransformer().reverseTransform(getData());
-
-        formView.setData(viewData);
+        formView.setData(getData());
 
         getFormType().buildView(formView);
 
         getFormType().finishView(formView);
 
-        LinkedHashMap<String, FormView> childrenFormViews = new LinkedHashMap<>();
+        LinkedHashSet<FormView> childrenFormViews = new LinkedHashSet<>();
 
-        getChildren().forEach((key, value) -> childrenFormViews.put(key, value.createView(formView)));
+        getChildren().forEach(childForm -> childrenFormViews.add(childForm.createView(formView)));
 
         formView.setChildren(childrenFormViews);
 
         return formView;
+    }
+
+    public void submit(Request request)
+    {
+        ND normalizedData = getFormType().requestToNorm(this, request);
+
+        setData(normalizedData);
+
+        getChildren().forEach(childForm -> childForm.submit(request));
+    }
+
+    public void propagateChildData()
+    {
+        if (data instanceof Map) {
+            Map<String, Object> mapData = (Map<String, Object>) data;
+
+            mapData.keySet().forEach(name -> {
+                Form<?, ?, Object> child = getChildren(name);
+
+                if (child != null) {
+                    child.setData(mapData.get(name));
+
+                    child.propagateChildData();
+                }
+            });
+        }
+    }
+
+    public Object resolveData()
+    {
+        return getFormType().resolveData(this);
     }
 }

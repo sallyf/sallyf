@@ -8,9 +8,9 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
-public abstract class BaseFormRenderer<T extends FormTypeInterface<O, ?, ?>, O extends Options> implements RendererInterface<T, O>
+public abstract class BaseFormRenderer<T extends FormTypeInterface<O, ?>, O extends Options> implements RendererInterface<T, O>
 {
-    public String renderAttributes(FormView<T, O, ?, ?> formView)
+    public String renderAttributes(FormView<T, O, ?> formView)
     {
         return renderAttributes(formView.getVars().getAttributes());
     }
@@ -23,12 +23,17 @@ public abstract class BaseFormRenderer<T extends FormTypeInterface<O, ?, ?>, O e
                 .collect(joining(" "));
     }
 
-    private String renderAttribute(Map.Entry<String, String> entry)
+    public String renderAttribute(Map.Entry<String, String> entry)
     {
-        return String.format("%s=\"%s\"", HTMLUtils.escapeHtmlAttribute(entry.getKey()), HTMLUtils.escapeHtmlAttribute(entry.getValue()));
+        return renderAttribute(entry.getKey(), entry.getValue());
     }
 
-    public String renderErrors(FormView<T, O, ?, ?> formView)
+    public String renderAttribute(String key, String value)
+    {
+        return String.format("%s=\"%s\"", HTMLUtils.escapeHtmlAttribute(key), HTMLUtils.escapeHtmlAttribute(value));
+    }
+
+    public String renderErrors(FormView<T, O, ?> formView)
     {
         StringBuilder sb = new StringBuilder();
 

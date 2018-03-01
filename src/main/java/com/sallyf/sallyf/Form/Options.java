@@ -11,8 +11,6 @@ public class Options extends HashMap<String, Object>
 
     public static final String CONSTRAINTS_KEY = "constraints";
 
-    public static final String DATA_TYPE_KEY = "data_type";
-
     public Options()
     {
         initialize();
@@ -28,7 +26,6 @@ public class Options extends HashMap<String, Object>
     {
         put(ATTRIBUTES_KEY, new HashMap<String, Object>());
         put(CONSTRAINTS_KEY, new ArrayList<ConstraintInterface>());
-        put(DATA_TYPE_KEY, null);
     }
 
     public Map<String, String> getAttributes()

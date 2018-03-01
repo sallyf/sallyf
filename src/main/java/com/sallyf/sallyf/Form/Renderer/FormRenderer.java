@@ -21,7 +21,7 @@ public class FormRenderer extends BaseFormRenderer<FormType, FormType.FormOption
     }
 
     @Override
-    public String render(FormView<FormType, FormType.FormOptions, ?, ?> form)
+    public String render(FormView<FormType, FormType.FormOptions, ?> form)
     {
         String s = "";
 

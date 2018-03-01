@@ -1,27 +1,32 @@
 package com.sallyf.sallyf.Form;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 
-public class FormView<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD, FD>
+public class FormView<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 {
-    private Form<T, O, VD, FD> form;
+    private String name;
+
+    private Form<T, O, ND> form;
 
     private FormView parentView;
 
-    private LinkedHashMap<String, FormView> children;
+    private LinkedHashSet<FormView> children;
 
     private O vars;
 
-    private VD data;
+    private Object data;
 
-    public FormView(Form<T, O, VD, FD> form, FormView parentView, O vars)
+    public FormView(String name, Form<T, O, ND> form, FormView parentView, O vars)
     {
+        this.name = name;
         this.form = form;
         this.parentView = parentView;
         this.vars = vars;
     }
 
-    public Form<T, O, VD, FD> getForm()
+    public Form<T, O, ND> getForm()
     {
         return form;
     }
@@ -36,12 +41,12 @@ public class FormView<T extends FormTypeInterface<O, VD, FD>, O extends Options,
         return parentView;
     }
 
-    public LinkedHashMap<String, FormView> getChildren()
+    public LinkedHashSet<FormView> getChildren()
     {
         return children;
     }
 
-    public void setChildren(LinkedHashMap<String, FormView> children)
+    public void setChildren(LinkedHashSet<FormView> children)
     {
         this.children = children;
     }
@@ -51,13 +56,49 @@ public class FormView<T extends FormTypeInterface<O, VD, FD>, O extends Options,
         return form.getErrorsBag();
     }
 
-    public VD getData()
+    public Object getData()
     {
         return data;
     }
 
-    public void setData(VD data)
+    public void setData(Object data)
     {
         this.data = data;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getFullName()
+    {
+        List<String> names = new ArrayList<>();
+
+        FormView current = this;
+
+        while (null != current) {
+            names.add(0, current.getName());
+
+            current = current.getParent();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String name : names) {
+            if(name != null) {
+                if (sb.toString().isEmpty()) {
+                    sb.append(name);
+                } else {
+                    sb.append(String.format("[%s]", name));
+                }
+            }
+        }
+
+        return sb.toString();
     }
 }

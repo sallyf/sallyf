@@ -23,7 +23,7 @@ public class Is extends AbstractConstraint
     }
 
     @Override
-    public void validate(Object value, Form<?, ?, ?, ?> form, ErrorsBagHelper errorsBag)
+    public void validate(Object value, Form<?, ?, ?> form, ErrorsBagHelper errorsBag)
     {
         if (!predicate.test(value)) {
             errorsBag.addError(new ValidationError(getMessage(value, form)));

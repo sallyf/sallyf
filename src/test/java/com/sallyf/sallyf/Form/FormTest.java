@@ -30,7 +30,7 @@ public class FormTest
     @Test
     public void createFormTest()
     {
-        FormBuilder<FormType, FormType.FormOptions, Object, Object> builder = new FormBuilder<>(new Container(), "", FormType.class);
+        FormBuilder<FormType, FormType.FormOptions, Object> builder = new FormBuilder<>(new Container(), "", FormType.class);
 
         builder.setData(MapUtils.parse("{submit: 'Hello !'}"));
 
@@ -45,7 +45,7 @@ public class FormTest
 
         String formView = formManager.render(form.createView());
 
-        String expected = "<form method=\"post\"><input name=\"foo\" type=\"text\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></form>";
+        String expected = "<form method=\"post\"><input name=\"foo\" type=\"text\" value=\"\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></form>";
 
         assertEquals(expected, formView);
     }

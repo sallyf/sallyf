@@ -6,11 +6,12 @@ import com.sallyf.sallyf.Utils.ClassUtils;
 import com.sallyf.sallyf.Utils.MapUtils;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
-public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Options, VD, FD>
+public class FormBuilder<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 {
     private Container container;
 
@@ -18,13 +19,13 @@ public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Optio
 
     private T formType;
 
-    private LinkedHashMap<String, FormBuilder> children;
+    private LinkedHashSet<FormBuilder> children;
 
-    private FormBuilder<T, O, VD, FD> parent = null;
+    private FormBuilder<T, O, ND> parent = null;
 
     private O options;
 
-    private FD data;
+    private ND data;
 
     public FormBuilder(Container container, String name, Class<T> formTypeClass, FormBuilder parent)
     {
@@ -37,7 +38,7 @@ public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Optio
     {
         this.container = container;
         this.name = name;
-        this.children = new LinkedHashMap<>();
+        this.children = new LinkedHashSet<>();
 
         boolean isService = ServiceInterface.class.isAssignableFrom(formTypeClass);
 
@@ -50,22 +51,25 @@ public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Optio
         this.options = this.formType.createOptions();
     }
 
-    public <CT extends FormTypeInterface<CO, CVD, CFD>, CO extends Options, CVD, CFD> FormBuilder<T, O, VD, FD> add(String name, Class<CT> childTypeClass, OptionsConsumer<CO> optionsConsumer)
+    public <CT extends FormTypeInterface<CO, CD>, CO extends Options, CD> FormBuilder<T, O, ND> add(String name, Class<CT> childTypeClass, BiConsumer<FormBuilder<CT, CO, CD>, CO> childBuilderConsumer)
     {
-        FormBuilder<CT, CO, CVD, CFD> childBuilder = new FormBuilder<>(container, name, childTypeClass, this);
+        FormBuilder<CT, CO, CD> childBuilder = new FormBuilder<>(container, name, childTypeClass, this);
 
-        getChildren().put(name, childBuilder);
+        getChildren().add(childBuilder);
 
-        if (optionsConsumer != null) {
-            optionsConsumer.apply(childBuilder.getOptions());
-        }
+        childBuilderConsumer.accept(childBuilder, childBuilder.getOptions());
 
         return this;
     }
 
-    public <CT extends FormTypeInterface<CO, CVD, CFD>, CO extends Options, CVD, CFD> FormBuilder<T, O, VD, FD> add(String name, Class<CT> childTypeClass)
+    public <CT extends FormTypeInterface<CO, CD>, CO extends Options, CD> FormBuilder<T, O, ND> add(String name, Class<CT> childTypeClass, OptionsConsumer<CO> optionsConsumer)
     {
-        return add(name, childTypeClass, null);
+        return add(name, childTypeClass, (childBuilder, options) -> optionsConsumer.apply(options));
+    }
+
+    public <CT extends FormTypeInterface<CO, CD>, CO extends Options, CD> FormBuilder<T, O, ND> add(String name, Class<CT> childTypeClass)
+    {
+        return add(name, childTypeClass, (e1, e2) -> {});
     }
 
     public T getFormType()
@@ -73,9 +77,20 @@ public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Optio
         return formType;
     }
 
-    public LinkedHashMap<String, FormBuilder> getChildren()
+    public LinkedHashSet<FormBuilder> getChildren()
     {
         return children;
+    }
+
+    public FormBuilder getChildren(String name)
+    {
+        for (FormBuilder child : children) {
+            if (child.getName().equals(name)) {
+                return child;
+            }
+        }
+
+        return null;
     }
 
     public O getOptions()
@@ -83,12 +98,12 @@ public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Optio
         return options;
     }
 
-    public FormBuilder<T, O, VD, FD> getParent()
+    public FormBuilder<T, O, ND> getParent()
     {
         return parent;
     }
 
-    public Form<T, O, VD, FD> getForm()
+    public Form<T, O, ND> getForm()
     {
         return getForm(null);
     }
@@ -117,62 +132,49 @@ public class FormBuilder<T extends FormTypeInterface<O, VD, FD>, O extends Optio
 
         StringBuilder sb = new StringBuilder();
         for (String name : names) {
-            if (sb.toString().isEmpty()) {
-                sb.append(name);
-            } else {
-                sb.append(String.format("[%s]", name));
+            if (name != null) {
+                if (sb.toString().isEmpty()) {
+                    sb.append(name);
+                } else {
+                    sb.append(String.format("[%s]", name));
+                }
             }
         }
 
         return sb.toString();
     }
 
-    private <PT extends FormTypeInterface<PO, PVD, PFD>, PO extends Options, PVD, PFD> Form<T, O, VD, FD> getForm(Form<PT, PO, PVD, PFD> parentForm)
+    private <PT extends FormTypeInterface<PO, PD>, PO extends Options, PD> Form<T, O, ND> getForm(Form<PT, PO, PD> parentForm)
     {
-        propagateChildData();
-
         O resolvedOptions = getFormType().createOptions();
 
         MapUtils.deepMerge(resolvedOptions, getOptions());
 
-        getFormType().configureOptions(this, resolvedOptions);
+//        getFormType().configureOptions(this, resolvedOptions);
 
-        Form<T, O, VD, FD> form = new Form<>(this, parentForm, resolvedOptions);
+        Form<T, O, ND> form = new Form<>(getName(), this, parentForm, resolvedOptions);
 
-        form.setRawData(data, false);
+        form.setData(getData());
 
         getFormType().buildForm(form);
 
-        LinkedHashMap<String, Form> childrenForms = new LinkedHashMap<>();
+        LinkedHashSet<Form> childrenForms = new LinkedHashSet<>();
 
-        getChildren().forEach((key, value) -> childrenForms.put(key, value.getForm(form)));
+        getChildren().forEach(childrenFormBuilder -> childrenForms.add(childrenFormBuilder.getForm(form)));
 
         form.setChildren(childrenForms);
+
+        form.propagateChildData();
 
         return form;
     }
 
-    private void propagateChildData()
-    {
-        if (data instanceof Map) {
-            Map<String, Object> mapData = (Map<String, Object>) data;
-
-            mapData.keySet().forEach(k -> {
-                FormBuilder child = getChildren().get(k);
-
-                if (child != null) {
-                    child.setData(mapData.get(k));
-                }
-            });
-        }
-    }
-
-    public void setData(FD data)
+    public void setData(ND data)
     {
         this.data = data;
     }
 
-    public FD getData()
+    public ND getData()
     {
         return data;
     }

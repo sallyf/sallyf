@@ -8,9 +8,8 @@ import com.sallyf.sallyf.Utils.MapUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class InputType<VD, FD> extends BaseFormType<Options, VD, FD>
+public abstract class InputType<ND> extends AbstractFormType<Options, ND>
 {
-
     String getValueAttributeName()
     {
         return "value";
@@ -19,19 +18,17 @@ public abstract class InputType<VD, FD> extends BaseFormType<Options, VD, FD>
     abstract String getInputType();
 
     @Override
-    public void buildView(FormView<?, Options, VD, FD> formView)
+    public void buildView(FormView<?, Options, ND> formView)
     {
         super.buildView(formView);
 
         Map<String, String> attributes = formView.getVars().getAttributes();
 
-        attributes.remove("value");
-        attributes.put(getValueAttributeName(), (String) formView.getData());
         attributes.put("type", getInputType());
     }
 
     @Override
-    public void finishView(FormView<?, Options, VD, FD> formView)
+    public void finishView(FormView<?, Options, ND> formView)
     {
         super.finishView(formView);
 

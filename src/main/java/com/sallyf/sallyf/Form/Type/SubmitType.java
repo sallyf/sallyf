@@ -6,17 +6,17 @@ import com.sallyf.sallyf.Form.Options;
 
 import java.util.Map;
 
-public class SubmitType extends InputType<String, String>
+public class SubmitType extends InputType<String>
 {
 
     @Override
-    public void buildForm(Form<?, Options, String, String> form)
+    public void buildForm(Form<?, Options, String> form)
     {
         super.buildForm(form);
     }
 
     @Override
-    public void finishView(FormView<?, Options, String, String> formView)
+    public void finishView(FormView<?, Options, String> formView)
     {
         super.finishView(formView);
 

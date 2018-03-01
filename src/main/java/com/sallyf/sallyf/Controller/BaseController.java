@@ -40,16 +40,16 @@ abstract public class BaseController implements ControllerInterface
         return redirect(getContainer().get(URLGenerator.class).url(actionName, parameters));
     }
 
-    public FormBuilder<FormType, FormType.FormOptions, Object, Object> createFormBuilder(Object data)
+    public FormBuilder<FormType, FormType.FormOptions, Object> createFormBuilder(Object data)
     {
-        FormBuilder<FormType, FormType.FormOptions, Object, Object> builder = new FormBuilder<>(container, "", FormType.class);
+        FormBuilder<FormType, FormType.FormOptions, Object> builder = new FormBuilder<>(container, "", FormType.class);
 
         builder.setData(data);
 
         return builder;
     }
 
-    public FormBuilder<FormType, FormType.FormOptions, Object, Object> createFormBuilder()
+    public FormBuilder<FormType, FormType.FormOptions, Object> createFormBuilder()
     {
         return createFormBuilder(null);
     }

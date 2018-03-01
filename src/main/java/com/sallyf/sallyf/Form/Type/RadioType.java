@@ -1,10 +1,10 @@
 package com.sallyf.sallyf.Form.Type;
 
-public class TextType extends InputType<String>
+public class RadioType extends CheckableType
 {
     @Override
     String getInputType()
     {
-        return "text";
+        return "radio";
     }
 }

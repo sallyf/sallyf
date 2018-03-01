@@ -14,7 +14,7 @@ public class TextareaRenderer extends BaseFormRenderer<TextareaType, Options>
     }
 
     @Override
-    public String render(FormView<TextareaType, Options, ?, ?> formView)
+    public String render(FormView<TextareaType, Options, ?> formView)
     {
         String s = "";
 

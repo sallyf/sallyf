@@ -1,13 +1,11 @@
 package com.sallyf.sallyf.Utils;
 
 import com.sallyf.sallyf.Exception.FrameworkException;
+import org.eclipse.jetty.server.Request;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -46,7 +44,7 @@ public class RequestUtils
                 String key = keyValueMatcher.group(1);
                 String value = keyValueMatcher.group(2);
 
-                Pattern structurePattern = Pattern.compile("^([\\w]+)(.*)$");
+                Pattern structurePattern = Pattern.compile("^([a-zA-Z0-9-_]+)(.*)$");
 
                 Matcher structureMatcher = structurePattern.matcher(key);
 

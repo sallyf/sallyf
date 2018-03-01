@@ -40,7 +40,7 @@ public class FormRequestTest extends BaseFrameworkTest
 
         String v = page2.getBody().getTextContent();
 
-        Assert.assertEquals("{bar=bar 1, submit=Hello !, foo=bar}", v);
+        Assert.assertEquals("{foo=bar, bar=bar 1, submit=Hello !}", v);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class FormRequestTest extends BaseFrameworkTest
 
         String v2 = page2.getWebResponse().getContentAsString();
 
-        Assert.assertEquals("{test=true, submit=submit}", v);
+        Assert.assertEquals("{test=true, submit=Submit}", v);
     }
 
     @Test
@@ -133,6 +133,42 @@ public class FormRequestTest extends BaseFrameworkTest
 
         String v = page2.getBody().getTextContent();
 
-        Assert.assertEquals("{submit=submit, ta=Hello, World}", v);
+        Assert.assertEquals("{ta=Hello, World, submit=submit}", v);
+    }
+
+    @Test
+    public void testChoices() throws Exception
+    {
+        WebClient webClient = new WebClient();
+
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/choices");
+
+        String v1 = page1.getWebResponse().getContentAsString();
+
+        HtmlForm form = page1.getForms().get(0);
+
+        HtmlSelect selectSingle = page1.getHtmlElementById("select-single");
+        selectSingle.setSelectedIndex(1);
+
+        HtmlSelect selectMultiple = page1.getHtmlElementById("select-multiple");
+        selectMultiple.getOption(0).setSelected(true);
+        selectMultiple.getOption(2).setSelected(true);
+
+        HtmlRadioButtonInput radio = page1.getHtmlElementById("radio-two");
+        radio.setChecked(true);
+
+        HtmlCheckBoxInput cbOne = page1.getHtmlElementById("cb-one");
+        cbOne.setChecked(true);
+
+        HtmlCheckBoxInput cbTwo = page1.getHtmlElementById("cb-two");
+        cbTwo.setChecked(true);
+
+        HtmlSubmitInput button = form.getInputByName("submit");
+
+        HtmlPage page2 = button.click();
+
+        String v = page2.getBody().getTextContent();
+
+        Assert.assertEquals("{select-single=two, select-multiple=[one, three], radios=two, checkboxes=[one, two], submit=submit}", v);
     }
 }

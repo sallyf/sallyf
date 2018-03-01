@@ -9,11 +9,8 @@ import com.sallyf.sallyf.Form.Type.FormType;
 import com.sallyf.sallyf.Utils.ClassUtils;
 import com.sallyf.sallyf.Utils.RequestUtils;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.util.IO;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 public class FormManager implements ServiceInterface
 {
@@ -27,6 +24,8 @@ public class FormManager implements ServiceInterface
         addRenderer(TextRenderer.class);
         addRenderer(CheckboxRenderer.class);
         addRenderer(TextareaRenderer.class);
+        addRenderer(ChoiceRenderer.class);
+        addRenderer(RadioRenderer.class);
     }
 
     public String render(FormView formView)
@@ -40,11 +39,13 @@ public class FormManager implements ServiceInterface
         throw new FrameworkException("Unable to render: " + formView.getClass());
     }
 
-    public String renderChildren(FormView<?, ?, ?, ?> formView)
+    public String renderChildren(FormView<?, ?, ?> formView)
     {
         StringBuilder s = new StringBuilder();
 
-        for (FormView childView : formView.getChildren().values()) {
+        Collection<FormView> values = formView.getChildren();
+
+        for (FormView childView : values) {
             s.append(render(childView));
         }
 
@@ -63,38 +64,32 @@ public class FormManager implements ServiceInterface
         renderers.add(renderer);
     }
 
-    public Map<String, Object> handleRequest(Request request, Form<FormType, FormType.FormOptions, Object, Object> form)
+    public Map<String, List<Object>> handleRequest(Request request, Form<FormType, FormType.FormOptions, Object> form)
     {
         if (!form.getOptions().getMethod().equalsIgnoreCase(request.getMethod())) {
             return null;
         }
 
-        try {
-            String s = IO.toString(request.getInputStream());
-            Map<String, Object> data = RequestUtils.parseQuery(s, true);
-            form.setRawData(data, true);
+        form.submit(request);
 
-            validate(form);
+        validate(form);
 
-            return data;
-        } catch (IOException e) {
-            throw new FrameworkException(e);
-        }
+        return (Map<String, List<Object>>) form.resolveData();
     }
 
-    private <FD> void validate(Form<?, ?, ?, FD> form)
+    private <ND> void validate(Form<?, ?, ND> form)
     {
         for (ConstraintInterface constraint : form.getOptions().getConstraints()) {
             ErrorsBagHelper errorsBagHelper = new ErrorsBagHelper(form.getErrorsBag(), form.getFullName());
 
             try {
-                constraint.validate(form.getData(), form, errorsBagHelper);
+                constraint.validate(form.resolveData(), form, errorsBagHelper);
             } catch (UnableToValidateException e) {
-                errorsBagHelper.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", form.getData(), constraint)));
+                errorsBagHelper.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", form.resolveData(), constraint)));
             }
         }
 
-        for (Form child : form.getChildren().values()) {
+        for (Form child : form.getChildren()) {
             validate(child);
         }
     }
