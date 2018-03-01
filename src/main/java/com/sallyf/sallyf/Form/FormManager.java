@@ -63,34 +63,4 @@ public class FormManager implements ServiceInterface
 
         renderers.add(renderer);
     }
-
-    public Map<String, List<Object>> handleRequest(Request request, Form<FormType, FormType.FormOptions, Object> form)
-    {
-        if (!form.getOptions().getMethod().equalsIgnoreCase(request.getMethod())) {
-            return null;
-        }
-
-        form.submit(request);
-
-        validate(form);
-
-        return (Map<String, List<Object>>) form.resolveData();
-    }
-
-    private <ND> void validate(Form<?, ?, ND> form)
-    {
-        for (ConstraintInterface constraint : form.getOptions().getConstraints()) {
-            ErrorsBagHelper errorsBagHelper = new ErrorsBagHelper(form.getErrorsBag(), form.getFullName());
-
-            try {
-                constraint.validate(form.resolveData(), form, errorsBagHelper);
-            } catch (UnableToValidateException e) {
-                errorsBagHelper.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", form.resolveData(), constraint)));
-            }
-        }
-
-        for (Form child : form.getChildren()) {
-            validate(child);
-        }
-    }
 }

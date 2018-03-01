@@ -12,7 +12,6 @@ import com.sallyf.sallyf.Utils.SetUtils;
 import org.eclipse.jetty.server.Request;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 
 public class TestController extends BaseController
@@ -32,12 +31,10 @@ public class TestController extends BaseController
                 })
                 .getForm();
 
-        if (request.getMethod().equalsIgnoreCase("post")) {
-            Map<String, List<Object>> data = formManager.handleRequest(request, form);
+        form.handleRequest(request);
 
-            if (!form.getErrorsBag().hasErrors()) {
-                return data.toString();
-            }
+        if (form.isSubmitted() && form.isValid()) {
+            return form.resolveData().toString();
         }
 
         return formManager.render(form.createView());
@@ -57,12 +54,10 @@ public class TestController extends BaseController
                 })
                 .getForm();
 
-        if (request.getMethod().equalsIgnoreCase("post")) {
-            Map<String, List<Object>> data = formManager.handleRequest(request, form);
+        form.handleRequest(request);
 
-            if (!form.getErrorsBag().hasErrors()) {
-                return data.toString();
-            }
+        if (form.isSubmitted() && form.isValid()) {
+            return form.resolveData().toString();
         }
 
         return formManager.render(form.createView());
@@ -81,12 +76,10 @@ public class TestController extends BaseController
                 })
                 .getForm();
 
-        if (request.getMethod().equalsIgnoreCase("post")) {
-            Map<String, List<Object>> data = formManager.handleRequest(request, form);
+        form.handleRequest(request);
 
-            if (!form.getErrorsBag().hasErrors()) {
-                return data.toString();
-            }
+        if (form.isSubmitted() && form.isValid()) {
+            return form.resolveData().toString();
         }
 
         return formManager.render(form.createView());
@@ -110,12 +103,10 @@ public class TestController extends BaseController
                 .add("submit", SubmitType.class)
                 .getForm();
 
-        if (request.getMethod().equalsIgnoreCase("post")) {
-            Map<String, List<Object>> data = formManager.handleRequest(request, form);
+        form.handleRequest(request);
 
-            if (!form.getErrorsBag().hasErrors()) {
-                return data.toString();
-            }
+        if (form.isSubmitted() && form.isValid()) {
+            return form.resolveData().toString();
         }
 
         return formManager.render(form.createView());
@@ -133,12 +124,10 @@ public class TestController extends BaseController
                 .add("submit", SubmitType.class)
                 .getForm();
 
-        if (request.getMethod().equalsIgnoreCase("post")) {
-            Map<String, List<Object>> data = formManager.handleRequest(request, form);
+        form.handleRequest(request);
 
-            if (!form.getErrorsBag().hasErrors()) {
-                return data.toString();
-            }
+        if (form.isSubmitted() && form.isValid()) {
+            return form.resolveData().toString();
         }
 
         return formManager.render(form.createView());
@@ -189,12 +178,10 @@ public class TestController extends BaseController
                 .add("submit", SubmitType.class)
                 .getForm();
 
-        if (request.getMethod().equalsIgnoreCase("post")) {
-            Map<String, List<Object>> data = formManager.handleRequest(request, form);
+        form.handleRequest(request);
 
-            if (!form.getErrorsBag().hasErrors()) {
-                return data.toString();
-            }
+        if (form.isSubmitted() && form.isValid()) {
+            return form.resolveData().toString();
         }
 
         return formManager.render(form.createView());

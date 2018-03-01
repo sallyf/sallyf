@@ -1,12 +1,11 @@
 package com.sallyf.sallyf.Form;
 
+import com.sallyf.sallyf.Form.Exception.UnableToValidateException;
+import com.sallyf.sallyf.Form.Type.FormType;
 import com.sallyf.sallyf.Utils.MapUtils;
 import org.eclipse.jetty.server.Request;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 {
@@ -23,6 +22,8 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
     private ErrorsBag errorsBag;
 
     private ND data;
+
+    private boolean submitted = false;
 
     public Form(String name, FormBuilder<T, O, ND> formBuilder, Form parentForm, O options)
     {
@@ -93,6 +94,16 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
     public void setName(String name)
     {
         this.name = name;
+    }
+
+    public boolean isSubmitted()
+    {
+        return submitted;
+    }
+
+    public void setSubmitted(boolean submitted)
+    {
+        this.submitted = submitted;
     }
 
     public String getFullName()
@@ -180,7 +191,38 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         setData(normalizedData);
 
+        setSubmitted(true);
+
         getChildren().forEach(childForm -> childForm.submit(request));
+    }
+
+    public void handleRequest(Request request)
+    {
+        Form<?, FormType.FormOptions, ?> root = getRoot();
+        if (!root.getOptions().getMethod().equalsIgnoreCase(request.getMethod())) {
+            return;
+        }
+
+        submit(request);
+
+        validate();
+    }
+
+    private void validate()
+    {
+        for (ConstraintInterface constraint : getOptions().getConstraints()) {
+            ErrorsBagHelper errorsBagHelper = new ErrorsBagHelper(getErrorsBag(), getFullName());
+
+            try {
+                constraint.validate(resolveData(), this, errorsBagHelper);
+            } catch (UnableToValidateException e) {
+                errorsBagHelper.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", resolveData(), constraint)));
+            }
+        }
+
+        for (Form child : getChildren()) {
+            child.validate();
+        }
     }
 
     public void propagateChildData()
@@ -203,5 +245,15 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
     public Object resolveData()
     {
         return getFormType().resolveData(this);
+    }
+
+    public boolean isValid()
+    {
+        return !getErrorsBag().hasErrors();
+    }
+
+    public HashMap<String, Set<ValidationError>> getErrors()
+    {
+        return getErrorsBag().getErrors();
     }
 }
