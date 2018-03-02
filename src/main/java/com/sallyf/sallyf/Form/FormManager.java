@@ -6,7 +6,8 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Form.Renderer.*;
 import com.sallyf.sallyf.Utils.ClassUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class FormManager implements ServiceInterface
 {
@@ -18,6 +19,7 @@ public class FormManager implements ServiceInterface
         addRenderer(FormRenderer.class);
         addRenderer(SubmitRenderer.class);
         addRenderer(TextRenderer.class);
+        addRenderer(PasswordRenderer.class);
         addRenderer(CheckboxRenderer.class);
         addRenderer(TextareaRenderer.class);
         addRenderer(ChoiceRenderer.class);
