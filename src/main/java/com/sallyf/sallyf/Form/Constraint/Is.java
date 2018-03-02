@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Form.Constraint;
 
-import com.sallyf.sallyf.Form.ErrorsBagHelper;
+import com.sallyf.sallyf.Form.ErrorsBag;
 import com.sallyf.sallyf.Form.Form;
 import com.sallyf.sallyf.Form.ValidationError;
 
@@ -23,7 +23,7 @@ public class Is extends AbstractConstraint
     }
 
     @Override
-    public void validate(Object value, Form<?, ?, ?> form, ErrorsBagHelper errorsBag)
+    public void validate(Object value, Form<?, ?, ?> form, ErrorsBag errorsBag)
     {
         if (!predicate.test(value)) {
             errorsBag.addError(new ValidationError(getMessage(value, form)));

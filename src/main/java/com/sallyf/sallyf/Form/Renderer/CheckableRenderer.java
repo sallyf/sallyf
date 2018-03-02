@@ -17,7 +17,7 @@ public abstract class CheckableRenderer<T extends FormTypeInterface<O, ?>, O ext
         }
 
         String s = "<div>";
-
+        s += renderErrors(formView);
         s += "<label>";
         s += renderWidget(formView);
         s += " " + label;

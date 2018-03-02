@@ -6,6 +6,7 @@ import com.sallyf.sallyf.Utils.MapUtils;
 import org.eclipse.jetty.server.Request;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 {
@@ -32,12 +33,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         this.parentForm = parentForm;
         this.options = options;
         this.children = new LinkedHashSet<>();
-
-        if (parentForm == null) {
-            this.errorsBag = new ErrorsBag();
-        } else {
-            this.errorsBag = getRoot().getErrorsBag();
-        }
+        this.errorsBag = new ErrorsBag();
     }
 
     public LinkedHashSet<Form> getChildren()
@@ -211,12 +207,12 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
     private void validate()
     {
         for (ConstraintInterface constraint : getOptions().getConstraints()) {
-            ErrorsBagHelper errorsBagHelper = new ErrorsBagHelper(getErrorsBag(), getFullName());
+            ErrorsBag errorsBag = getErrorsBag();
 
             try {
-                constraint.validate(resolveData(), this, errorsBagHelper);
+                constraint.validate(resolveData(), this, errorsBag);
             } catch (UnableToValidateException e) {
-                errorsBagHelper.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", resolveData(), constraint)));
+                errorsBag.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", resolveData(), constraint)));
             }
         }
 
@@ -249,10 +245,20 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
     public boolean isValid()
     {
-        return !getErrorsBag().hasErrors();
+        Supplier<Boolean> s = () -> {
+            for (Form child : getChildren()) {
+                if (!child.isValid()) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        return !getErrorsBag().hasErrors() && s.get();
     }
 
-    public HashMap<String, Set<ValidationError>> getErrors()
+    public Set<ValidationError> getErrors()
     {
         return getErrorsBag().getErrors();
     }

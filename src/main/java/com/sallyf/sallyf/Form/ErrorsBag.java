@@ -1,30 +1,20 @@
 package com.sallyf.sallyf.Form;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ErrorsBag
 {
-    private HashMap<String, Set<ValidationError>> errors = new HashMap<>();
+    private Set<ValidationError> errors = new HashSet<>();
 
-    public void addError(String path, ValidationError error)
+    public void addError(ValidationError error)
     {
-        if (!errors.containsKey(path)) {
-            errors.put(path, new HashSet<>());
-        }
-
-        errors.get(path).add(error);
+        errors.add(error);
     }
 
-    public HashMap<String, Set<ValidationError>> getErrors()
+    public Set<ValidationError> getErrors()
     {
         return errors;
-    }
-
-    public Set<ValidationError> getError(String path)
-    {
-        return errors.get(path);
     }
 
     public boolean hasErrors()

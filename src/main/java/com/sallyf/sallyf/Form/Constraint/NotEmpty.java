@@ -1,6 +1,6 @@
 package com.sallyf.sallyf.Form.Constraint;
 
-import com.sallyf.sallyf.Form.ErrorsBagHelper;
+import com.sallyf.sallyf.Form.ErrorsBag;
 import com.sallyf.sallyf.Form.Exception.UnableToValidateException;
 import com.sallyf.sallyf.Form.Form;
 import com.sallyf.sallyf.Form.ValidationError;
@@ -18,7 +18,7 @@ public class NotEmpty extends AbstractConstraint
     }
 
     @Override
-    public void validate(Object value, Form<?, ?, ?> form, ErrorsBagHelper errorsBag)
+    public void validate(Object value, Form<?, ?, ?> form, ErrorsBag errorsBag)
     {
         if(value == null) {
             errorsBag.addError(new ValidationError(getMessage(value, form)));

@@ -4,7 +4,6 @@ import com.sallyf.sallyf.Form.*;
 import com.sallyf.sallyf.Utils.HTMLUtils;
 
 import java.util.Map;
-import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
@@ -38,11 +37,11 @@ public abstract class BaseFormRenderer<T extends FormTypeInterface<O, ?>, O exte
     {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<String, Set<ValidationError>> entry : formView.getErrorsBag().getErrors().entrySet()) {
-            Set<ValidationError> errors = entry.getValue();
+        ErrorsBag errorsBag = formView.getErrorsBag();
 
+        if (errorsBag.hasErrors()) {
             sb.append("<ul>");
-            for (ValidationError error : errors) {
+            for (ValidationError error : errorsBag.getErrors()) {
                 sb.append("<li>" + error.getMessage() + "</li>");
             }
             sb.append("</ul>");
