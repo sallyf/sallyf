@@ -16,8 +16,9 @@ public class SubmitRenderer extends InputRenderer<SubmitType, Options>
     @Override
     public String renderRow(FormView<SubmitType, Options, ?> formView)
     {
-        String s = "<div>";
+        String s = "<div class=\"row\">";
 
+        s += renderErrors(formView);
         s += renderWidget(formView);
 
         s += "</div>";

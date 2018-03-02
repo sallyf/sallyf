@@ -9,14 +9,13 @@ public abstract class CheckableRenderer<T extends FormTypeInterface<O, ?>, O ext
     @Override
     public String renderRow(FormView<T, O, ?> formView)
     {
-
         String label = formView.getVars().getLabel();
 
         if (label == null || label.isEmpty()) {
             label = "";
         }
 
-        String s = "<div>";
+        String s = "<div class=\"row\">";
         s += renderErrors(formView);
         s += "<label>";
         s += renderWidget(formView);
