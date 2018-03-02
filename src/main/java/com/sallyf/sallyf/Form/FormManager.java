@@ -59,4 +59,9 @@ public class FormManager implements ServiceInterface
 
         renderers.add(renderer);
     }
+
+    public ArrayList<RendererInterface<?, ?>> getRenderers()
+    {
+        return renderers;
+    }
 }
