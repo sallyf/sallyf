@@ -1,8 +1,7 @@
 package com.sallyf.sallyf.Form.Type;
 
-import com.sallyf.sallyf.Form.Form;
+import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
-import org.eclipse.jetty.server.Request;
 
 public class PasswordType extends TextType
 {
@@ -13,8 +12,12 @@ public class PasswordType extends TextType
     }
 
     @Override
-    public String requestToNorm(Form<?, Options, String> form, Request request)
+    public void finishView(FormView<?, Options, String> formView)
     {
-        return ""; // Prevent sending back password
+        super.finishView(formView);
+
+        if (formView.getForm().isSubmitted()) {
+            formView.getVars().getAttributes().put("value", "");
+        }
     }
 }
