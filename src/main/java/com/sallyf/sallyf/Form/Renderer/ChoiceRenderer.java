@@ -51,11 +51,6 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
 
         String s = "";
 
-        String label = form.getVars().getLabel();
-        if (label != null) {
-            s += "<label>" + label + "</label>";
-        }
-
         s += "<select " + renderAttributes(form) + ">";
 
         for (Object choice : vars.getChoices()) {
