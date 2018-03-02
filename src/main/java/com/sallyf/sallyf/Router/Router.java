@@ -107,9 +107,9 @@ public class Router implements ServiceInterface
 
                 HashMap<String, RouteParameterResolverInterface> resolvers = new HashMap<>();
 
-                for (ParameterResolver a : resolverAnnotations) {
-                    RouteParameterResolverInterface resolver = container.get(a.type());
-                    resolvers.put(a.name(), resolver);
+                for (ParameterResolver r : resolverAnnotations) {
+                    RouteParameterResolverInterface resolver = container.get(r.type());
+                    resolvers.put(r.name(), resolver);
                 }
 
                 String fullName = actionNamePrefix + actionName;
