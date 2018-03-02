@@ -5,6 +5,8 @@ import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Router.ActionParameterResolverInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
+import java.lang.reflect.Parameter;
+
 public class ServiceResolver implements ActionParameterResolverInterface
 {
     private Container container;
@@ -15,10 +17,10 @@ public class ServiceResolver implements ActionParameterResolverInterface
     }
 
     @Override
-    public boolean supports(Class parameterType, RuntimeBag runtimeBag)
+    public boolean supports(Parameter parameter, RuntimeBag runtimeBag)
     {
-        if (ServiceInterface.class.isAssignableFrom(parameterType)) {
-            if (container.has(parameterType)) {
+        if (ServiceInterface.class.isAssignableFrom(parameter.getType())) {
+            if (container.has(parameter.getType())) {
                 return true;
             }
         }
@@ -27,8 +29,8 @@ public class ServiceResolver implements ActionParameterResolverInterface
     }
 
     @Override
-    public Object resolve(Class parameterType, RuntimeBag runtimeBag)
+    public Object resolve(Parameter parameter, RuntimeBag runtimeBag)
     {
-        return container.get(parameterType);
+        return container.get(parameter.getType().asSubclass(ServiceInterface.class));
     }
 }

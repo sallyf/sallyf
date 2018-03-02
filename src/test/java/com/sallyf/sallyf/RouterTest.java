@@ -14,6 +14,7 @@ import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -176,41 +177,5 @@ public class RouterTest
         RouteParameters routeParameters = router.getRouteParameters(new RuntimeBag(request, route));
 
         assertEquals("LOWERCASE", routeParameters.get("name"));
-    }
-
-    @Test
-    public void actionParameterTest() throws Exception
-    {
-        Kernel app = Kernel.newInstance();
-
-        app.boot();
-
-        Router router = app.getContainer().get(Router.class);
-
-        Class[] classes = {
-                EventDispatcher.class
-        };
-
-        Object[] actionParameters = router.resolveActionParameters(classes, null);
-
-        Class[] actualClasses = ClassUtils.getClasses(actionParameters);
-
-        assertArrayEquals(classes, actualClasses);
-    }
-
-    @Test(expected = UnhandledParameterException.class)
-    public void invalidActionParameterTest() throws Exception
-    {
-        Kernel app = Kernel.newInstance();
-
-        app.boot();
-
-        Router router = app.getContainer().get(Router.class);
-
-        Class[] classes = {
-                ArrayList.class
-        };
-
-        router.resolveActionParameters(classes, null);
     }
 }

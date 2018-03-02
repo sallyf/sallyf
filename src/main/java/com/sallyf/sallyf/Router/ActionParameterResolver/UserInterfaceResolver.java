@@ -5,6 +5,8 @@ import com.sallyf.sallyf.Authentication.UserInterface;
 import com.sallyf.sallyf.Router.ActionParameterResolverInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
+import java.lang.reflect.Parameter;
+
 public class UserInterfaceResolver implements ActionParameterResolverInterface
 {
     private AuthenticationManager authenticationManager;
@@ -15,13 +17,13 @@ public class UserInterfaceResolver implements ActionParameterResolverInterface
     }
 
     @Override
-    public boolean supports(Class parameterType, RuntimeBag runtimeBag)
+    public boolean supports(Parameter parameter, RuntimeBag runtimeBag)
     {
-        return UserInterface.class.isAssignableFrom(parameterType);
+        return UserInterface.class.isAssignableFrom(parameter.getType());
     }
 
     @Override
-    public Object resolve(Class parameterType, RuntimeBag runtimeBag)
+    public Object resolve(Parameter parameter, RuntimeBag runtimeBag)
     {
         return authenticationManager.getUser(runtimeBag);
     }

@@ -6,6 +6,8 @@ import com.sallyf.sallyf.Router.RouteParameters;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
+import java.lang.reflect.Parameter;
+
 public class RouteParameterResolver implements ActionParameterResolverInterface
 {
     private Container container;
@@ -16,13 +18,13 @@ public class RouteParameterResolver implements ActionParameterResolverInterface
     }
 
     @Override
-    public boolean supports(Class parameterType, RuntimeBag runtimeBag)
+    public boolean supports(Parameter parameter, RuntimeBag runtimeBag)
     {
-        return parameterType == RouteParameters.class;
+        return parameter.getType() == RouteParameters.class;
     }
 
     @Override
-    public Object resolve(Class parameterType, RuntimeBag runtimeBag)
+    public Object resolve(Parameter parameter, RuntimeBag runtimeBag)
     {
         return container.get(Router.class).getRouteParameters(runtimeBag);
     }

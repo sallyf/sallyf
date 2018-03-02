@@ -20,6 +20,7 @@ import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.server.Request;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +89,7 @@ public class Router implements ServiceInterface
                     annotations = new com.sallyf.sallyf.Annotation.Route[]{controllerAnnotation, routeAnnotation};
                 }
 
-                final Class<?>[] parameterTypes = method.getParameterTypes();
+                final Parameter[] parameterTypes = method.getParameters();
 
                 String actionName = method.getName();
                 if (!routeAnnotation.name().isEmpty()) {
@@ -127,26 +128,26 @@ public class Router implements ServiceInterface
         return controller;
     }
 
-    public Object[] resolveActionParameters(Class<?>[] parameterTypes, RuntimeBag runtimeBag)
+    public Object[] resolveActionParameters(Parameter[] parameters, RuntimeBag runtimeBag)
     {
-        Object[] parameters = new Object[parameterTypes.length];
+        Object[] outParameters = new Object[parameters.length];
         int i = 0;
-        for (Class<?> parameterType : parameterTypes) {
-            parameters[i++] = resolveActionParameter(parameterType, runtimeBag);
+        for (Parameter parameter : parameters) {
+            outParameters[i++] = resolveActionParameter(parameter, runtimeBag);
         }
 
-        return parameters;
+        return outParameters;
     }
 
-    public Object resolveActionParameter(Class parameterType, RuntimeBag runtimeBag)
+    public Object resolveActionParameter(Parameter parameter, RuntimeBag runtimeBag)
     {
         for (ActionParameterResolverInterface resolver : actionParameterResolvers) {
-            if (resolver.supports(parameterType, runtimeBag)) {
-                return resolver.resolve(parameterType, runtimeBag);
+            if (resolver.supports(parameter, runtimeBag)) {
+                return resolver.resolve(parameter, runtimeBag);
             }
         }
 
-        throw new UnhandledParameterException(parameterType);
+        throw new UnhandledParameterException(parameter);
     }
 
     public Route registerRoute(String name, Route route)

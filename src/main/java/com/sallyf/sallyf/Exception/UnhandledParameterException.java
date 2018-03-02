@@ -1,9 +1,11 @@
 package com.sallyf.sallyf.Exception;
 
+import java.lang.reflect.Parameter;
+
 public class UnhandledParameterException extends FrameworkException
 {
-    public UnhandledParameterException(Class<?> parameterType)
+    public UnhandledParameterException(Parameter parameter)
     {
-        super("Unhandled parameter " + parameterType.getCanonicalName());
+        super("Unhandled parameter " + parameter.getType().getCanonicalName());
     }
 }

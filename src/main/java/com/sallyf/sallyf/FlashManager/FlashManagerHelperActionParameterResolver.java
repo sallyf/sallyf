@@ -4,6 +4,8 @@ import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Router.ActionParameterResolverInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
+import java.lang.reflect.Parameter;
+
 public class FlashManagerHelperActionParameterResolver implements ActionParameterResolverInterface<FlashManagerHelper>
 {
     private Container container;
@@ -14,13 +16,13 @@ public class FlashManagerHelperActionParameterResolver implements ActionParamete
     }
 
     @Override
-    public boolean supports(Class parameterType, RuntimeBag runtimeBag)
+    public boolean supports(Parameter parameter, RuntimeBag runtimeBag)
     {
-        return parameterType == FlashManagerHelper.class;
+        return parameter.getType() == FlashManagerHelper.class;
     }
 
     @Override
-    public FlashManagerHelper resolve(Class parameterType, RuntimeBag runtimeBag)
+    public FlashManagerHelper resolve(Parameter parameter, RuntimeBag runtimeBag)
     {
         return new FlashManagerHelper(container.get(FlashManager.class), runtimeBag);
     }

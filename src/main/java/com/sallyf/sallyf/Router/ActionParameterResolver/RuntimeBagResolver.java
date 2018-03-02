@@ -3,16 +3,18 @@ package com.sallyf.sallyf.Router.ActionParameterResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolverInterface;
 import com.sallyf.sallyf.Server.RuntimeBag;
 
+import java.lang.reflect.Parameter;
+
 public class RuntimeBagResolver implements ActionParameterResolverInterface
 {
     @Override
-    public boolean supports(Class parameterType, RuntimeBag runtimeBag)
+    public boolean supports(Parameter parameter, RuntimeBag runtimeBag)
     {
-        return parameterType == RuntimeBag.class;
+        return parameter.getType() == RuntimeBag.class;
     }
 
     @Override
-    public Object resolve(Class parameterType, RuntimeBag runtimeBag)
+    public Object resolve(Parameter parameter, RuntimeBag runtimeBag)
     {
         return runtimeBag;
     }
