@@ -2,7 +2,6 @@ package com.sallyf.sallyf.Form;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
-import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Form.Renderer.*;
 import com.sallyf.sallyf.Utils.ClassUtils;
 
@@ -34,7 +33,7 @@ public class FormManager implements ServiceInterface
             }
         }
 
-        throw new FrameworkException("Unable to render: " + formView.getClass());
+        return renderChildren(formView);
     }
 
     public String renderChildren(FormView<?, ?, ?> formView)
