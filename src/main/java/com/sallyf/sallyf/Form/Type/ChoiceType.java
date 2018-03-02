@@ -138,12 +138,13 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
                     String value = options.getChoiceValueResolver().apply(choice);
 
                     childOptions.put("value", value);
+                    childOptions.setLabel(null);
 
                     childOptions.getAttributes().put("value", value);
 
-                    childBuilder.setData(choice.equals(form.getData()));
-
                     options.getChoiceOptionsConsumer().apply(childOptions);
+
+                    childBuilder.setData(choice.equals(form.getData()));
                 });
             }
         } else {
