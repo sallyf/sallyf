@@ -40,9 +40,9 @@ public abstract class BaseFormRenderer<T extends FormTypeInterface<O, ?>, O exte
         ErrorsBag errorsBag = formView.getErrorsBag();
 
         if (errorsBag.hasErrors()) {
-            sb.append("<ul class\"errors\">");
+            sb.append("<ul class=\"errors\">");
             for (ValidationError error : errorsBag.getErrors()) {
-                sb.append("<li class\"error\">" + error.getMessage() + "</li>");
+                sb.append("<li class=\"error\">" + error.getMessage() + "</li>");
             }
             sb.append("</ul>");
         }
