@@ -1,8 +1,11 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.EventDispatcher.EventType;
+import com.sallyf.sallyf.Router.RouteParameterResolverInterface;
 import com.sallyf.sallyf.Router.URLGenerator;
+import com.sallyf.sallyf.Server.RuntimeBag;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -31,6 +34,14 @@ public class RequestTest extends BaseFrameworkTest
         setUp(TestController.class);
 
         client = new OkHttpClient();
+    }
+
+    @Override
+    public void preBoot() throws Exception
+    {
+        super.preBoot();
+
+        app.getContainer().add(new ServiceDefinition<>(CapitalizerResolver.class));
     }
 
     @Override
@@ -202,5 +213,18 @@ public class RequestTest extends BaseFrameworkTest
         Response response = client.newCall(request).execute();
 
         assertThat("Response Code", response.code(), is(500));
+    }
+
+    @Test
+    public void testParameterResolver() throws Exception
+    {
+        Request request = new Request.Builder()
+                .url(getRootURL() + "/prefixed/resolver/hello")
+                .build();
+
+        Response response = client.newCall(request).execute();
+
+        assertThat("Response Code", response.code(), is(200));
+        assertThat("Content", response.body().string(), is("HELLO"));
     }
 }

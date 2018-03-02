@@ -1,5 +1,6 @@
 package com.sallyf.sallyf;
 
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
 import com.sallyf.sallyf.Router.URLGenerator;
 import org.junit.Before;
@@ -16,6 +17,14 @@ public class URLGeneratorTest extends BaseFrameworkTest
     public void setUp() throws Exception
     {
         setUp(TestController.class);
+    }
+
+    @Override
+    public void preBoot() throws Exception
+    {
+        super.preBoot();
+
+        app.getContainer().add(new ServiceDefinition<>(CapitalizerResolver.class));
     }
 
     @Test

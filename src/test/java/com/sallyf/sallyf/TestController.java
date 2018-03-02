@@ -4,6 +4,7 @@ import com.sallyf.sallyf.Annotation.Requirement;
 import com.sallyf.sallyf.Annotation.Route;
 import com.sallyf.sallyf.Controller.BaseController;
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
+import com.sallyf.sallyf.Router.ParameterResolver;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.RouteParameters;
 
@@ -60,5 +61,12 @@ public class TestController extends BaseController
     public Object toTransform(RouteParameters parameters)
     {
         return "hello, " + parameters.get("name");
+    }
+
+    @Route(path = "/resolver/{text}")
+    @ParameterResolver(name = "text", type = CapitalizerResolver.class)
+    public Object resolver(RouteParameters parameters)
+    {
+        return parameters.get("text");
     }
 }

@@ -2,6 +2,8 @@ package com.sallyf.sallyf.Router;
 
 import com.sallyf.sallyf.Server.Method;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -14,6 +16,8 @@ public class Route implements Cloneable
     private ActionWrapperInterface handler;
 
     private String name;
+
+    private Map<String, RouteParameterResolverInterface> routeParameterResolvers = new HashMap<>();
 
     public Route(Method[] methods, String pathDeclaration, ActionWrapperInterface handler)
     {
@@ -104,5 +108,15 @@ public class Route implements Cloneable
     public int hashCode()
     {
         return Objects.hash(getMethods(), getPath(), getName());
+    }
+
+    public Map<String, RouteParameterResolverInterface> getRouteParameterResolvers()
+    {
+        return routeParameterResolvers;
+    }
+
+    public void setRouteParameterResolvers(Map<String, RouteParameterResolverInterface> routeParameterResolvers)
+    {
+        this.routeParameterResolvers = routeParameterResolvers;
     }
 }

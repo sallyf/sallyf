@@ -1,40 +1,21 @@
 package com.sallyf.sallyf;
 
 import com.sallyf.sallyf.Container.Container;
+import com.sallyf.sallyf.Container.ServiceDefinition;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
 import com.sallyf.sallyf.Exception.FrameworkException;
-import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
-import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.server.Request;
 import org.junit.Test;
 
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 import static org.junit.Assert.*;
-
-class CapitalizerResolver implements RouteParameterResolverInterface<String>
-{
-    @Override
-    public boolean supports(String name, String value, RuntimeBag runtimeBag)
-    {
-        return Objects.equals(name, "name");
-    }
-
-    @Override
-    public String resolve(String name, String value, RuntimeBag runtimeBag)
-    {
-        return value.toUpperCase();
-    }
-}
 
 public class RouterTest
 {
@@ -134,6 +115,8 @@ public class RouterTest
     {
         Kernel app = Kernel.newInstance();
 
+        app.getContainer().add(new ServiceDefinition<>(CapitalizerResolver.class));
+
         app.boot();
 
         Router router = app.getContainer().get(Router.class);
@@ -144,7 +127,7 @@ public class RouterTest
 
         HashMap<String, Route> routes = router.getRoutes();
 
-        assertEquals(7, routes.size());
+        assertEquals(8, routes.size());
 
         Route route = routes.get("test_hello_named");
 
@@ -154,28 +137,5 @@ public class RouterTest
         assertEquals("/prefixed/hello", route.getPath().getDeclaration());
 
         app.stop();
-    }
-
-    @Test
-    public void routeParameterResolverTest() throws Exception
-    {
-        Kernel app = Kernel.newInstance();
-
-        app.boot();
-
-        Router router = app.getContainer().get(Router.class);
-
-        router.addRouteParameterResolver(new CapitalizerResolver());
-
-        Route route = new Route(new Method[]{Method.GET}, "/{name}", (rb) -> null);
-        router.registerRoute("route_1", route);
-
-        Request request = new Request(null, null);
-        request.setPathInfo("/lowercase");
-        request.setMethod(Method.GET.toString());
-
-        RouteParameters routeParameters = router.getRouteParameters(new RuntimeBag(request, route));
-
-        assertEquals("LOWERCASE", routeParameters.get("name"));
     }
 }

@@ -7,7 +7,10 @@ import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Event.RouteParametersEvent;
 import com.sallyf.sallyf.Event.RouteRegisterEvent;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
-import com.sallyf.sallyf.Exception.*;
+import com.sallyf.sallyf.Exception.ControllerInstantiationException;
+import com.sallyf.sallyf.Exception.FrameworkException;
+import com.sallyf.sallyf.Exception.InvalidResponseTypeException;
+import com.sallyf.sallyf.Exception.UnhandledParameterException;
 import com.sallyf.sallyf.KernelEvents;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RequestResolver;
 import com.sallyf.sallyf.Router.ActionParameterResolver.RouteParameterResolver;
@@ -37,8 +40,6 @@ public class Router implements ServiceInterface
     private HashMap<String, Route> routes = new HashMap<>();
 
     private Map<Class, ControllerInterface> controllers = new HashMap<>();
-
-    private ArrayList<RouteParameterResolverInterface> routeParameterResolvers = new ArrayList<>();
 
     private ArrayList<ActionParameterResolverInterface> actionParameterResolvers = new ArrayList<>();
 
@@ -76,6 +77,8 @@ public class Router implements ServiceInterface
             actionNamePrefix = controllerAnnotation.name();
         }
 
+        ParameterResolver[] controllerResolvers = controllerClass.getAnnotationsByType(ParameterResolver.class);
+
         java.lang.reflect.Method[] methods = controllerClass.getMethods();
 
         for (java.lang.reflect.Method method : methods) {
@@ -96,6 +99,19 @@ public class Router implements ServiceInterface
                     actionName = routeAnnotation.name();
                 }
 
+                ParameterResolver[] methodResolvers = method.getAnnotationsByType(ParameterResolver.class);
+
+                ParameterResolver[] resolverAnnotations = Stream.of(controllerResolvers, methodResolvers)
+                        .flatMap(Stream::of)
+                        .toArray(ParameterResolver[]::new);
+
+                HashMap<String, RouteParameterResolverInterface> resolvers = new HashMap<>();
+
+                for (ParameterResolver a : resolverAnnotations) {
+                    RouteParameterResolverInterface resolver = container.get(a.type());
+                    resolvers.put(a.name(), resolver);
+                }
+
                 String fullName = actionNamePrefix + actionName;
                 String fullPath = pathPrefix + routeAnnotation.path();
 
@@ -111,6 +127,8 @@ public class Router implements ServiceInterface
                 };
 
                 Route route = new Route(fullName, routeAnnotation.methods(), fullPath, handler);
+                route.setRouteParameterResolvers(resolvers);
+
                 Path path = route.getPath();
 
                 for (com.sallyf.sallyf.Annotation.Route annotation : annotations) {
@@ -215,10 +233,12 @@ public class Router implements ServiceInterface
     {
         String value = m.group(index);
 
-        for (RouteParameterResolverInterface resolver : routeParameterResolvers) {
-            if (resolver.supports(name, value, runtimeBag)) {
-                return resolver.resolve(name, value, runtimeBag);
-            }
+        Map<String, RouteParameterResolverInterface> routeParameterResolvers = runtimeBag.getRoute().getRouteParameterResolvers();
+
+        if (routeParameterResolvers.containsKey(name)) {
+            RouteParameterResolverInterface resolver = routeParameterResolvers.get(name);
+
+            return resolver.resolve(name, value, runtimeBag);
         }
 
         return value;
@@ -252,16 +272,6 @@ public class Router implements ServiceInterface
     public Map<Class, ControllerInterface> getControllers()
     {
         return controllers;
-    }
-
-    public void addRouteParameterResolver(RouteParameterResolverInterface resolver)
-    {
-        routeParameterResolvers.add(resolver);
-    }
-
-    public ArrayList<RouteParameterResolverInterface> getRouteParameterResolvers()
-    {
-        return routeParameterResolvers;
     }
 
     public void addActionParameterResolver(ActionParameterResolverInterface resolver)
