@@ -45,7 +45,7 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
         }
     }
 
-    private String renderSelect(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
+    public String renderSelect(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
     {
         ChoiceType.ChoiceOptions vars = form.getVars();
 
@@ -72,17 +72,17 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
         return s;
     }
 
-    private String renderRadio(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
+    public String renderRadio(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
     {
         return renderInputs(form);
     }
 
-    private String renderCheckboxes(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
+    public String renderCheckboxes(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
     {
         return renderInputs(form);
     }
 
-    private String renderInputs(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
+    public String renderInputs(FormView<ChoiceType, ChoiceType.ChoiceOptions, ?> form)
     {
         String s = "";
 
