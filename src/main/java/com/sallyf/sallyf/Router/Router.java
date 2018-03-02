@@ -89,7 +89,7 @@ public class Router implements ServiceInterface
                     annotations = new com.sallyf.sallyf.Annotation.Route[]{controllerAnnotation, routeAnnotation};
                 }
 
-                final Parameter[] parameterTypes = method.getParameters();
+                final Parameter[] parameters = method.getParameters();
 
                 String actionName = method.getName();
                 if (!routeAnnotation.name().isEmpty()) {
@@ -100,10 +100,10 @@ public class Router implements ServiceInterface
                 String fullPath = pathPrefix + routeAnnotation.path();
 
                 ActionWrapperInterface handler = (runtimeBag) -> {
-                    Object[] parameters = resolveActionParameters(parameterTypes, runtimeBag);
+                    Object[] resolvedParameters = resolveActionParameters(parameters, runtimeBag);
 
                     try {
-                        return method.invoke(controller, parameters);
+                        return method.invoke(controller, resolvedParameters);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                         return null;
