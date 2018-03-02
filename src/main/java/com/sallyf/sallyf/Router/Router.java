@@ -259,13 +259,28 @@ public class Router implements ServiceInterface
         routeParameterResolvers.add(resolver);
     }
 
+    public ArrayList<RouteParameterResolverInterface> getRouteParameterResolvers()
+    {
+        return routeParameterResolvers;
+    }
+
     public void addActionParameterResolver(ActionParameterResolverInterface resolver)
     {
         actionParameterResolvers.add(resolver);
     }
 
+    public ArrayList<ActionParameterResolverInterface> getActionParameterResolvers()
+    {
+        return actionParameterResolvers;
+    }
+
     public void addResponseTransformer(ResponseTransformerInterface transformer)
     {
         responseTransformers.add(transformer);
+    }
+
+    public ArrayList<ResponseTransformerInterface> getResponseTransformers()
+    {
+        return responseTransformers;
     }
 }
