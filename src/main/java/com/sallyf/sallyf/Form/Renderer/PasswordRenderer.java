@@ -8,6 +8,6 @@ public class PasswordRenderer extends TextRenderer
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof PasswordType;
+        return form.getClass().equals(PasswordType.class);
     }
 }

@@ -17,7 +17,7 @@ public class FormRenderer extends BaseFormRenderer<FormType, FormType.FormOption
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof FormType;
+        return form.getClass().equals(FormType.class);
     }
 
     @Override

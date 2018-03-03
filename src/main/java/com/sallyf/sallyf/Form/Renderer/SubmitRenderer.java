@@ -10,7 +10,7 @@ public class SubmitRenderer extends InputRenderer<SubmitType, Options>
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof SubmitType;
+        return form.getClass().equals(SubmitType.class);
     }
 
     @Override

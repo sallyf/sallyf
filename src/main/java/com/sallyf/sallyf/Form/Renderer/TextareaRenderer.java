@@ -10,7 +10,7 @@ public class TextareaRenderer extends BaseFormRenderer<TextareaType, Options>
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof TextareaType;
+        return form.getClass().equals(TextareaType.class);
     }
 
     @Override

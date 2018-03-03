@@ -25,7 +25,7 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof ChoiceType;
+        return form.getClass().equals(ChoiceType.class);
     }
 
     @Override

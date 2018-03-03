@@ -9,6 +9,6 @@ public class RadioRenderer extends CheckableRenderer<RadioType, Options>
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof RadioType;
+        return form.getClass().equals(RadioType.class);
     }
 }

@@ -11,7 +11,7 @@ public class HiddenRenderer extends TextRenderer
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof HiddenType;
+        return form.getClass().equals(HiddenType.class);
     }
 
     @Override

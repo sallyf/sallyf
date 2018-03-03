@@ -9,6 +9,6 @@ public class TextRenderer extends InputRenderer<TextType, Options>
     @Override
     public boolean supports(FormTypeInterface form)
     {
-        return form instanceof TextType;
+        return form.getClass().equals(TextType.class);
     }
 }
