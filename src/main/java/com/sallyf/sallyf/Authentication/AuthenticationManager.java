@@ -22,25 +22,13 @@ import javax.servlet.http.HttpSession;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 public class AuthenticationManager implements ServiceInterface
 {
-    class RouteSecurities
-    {
-        Security route;
-
-        Security controller;
-
-        public RouteSecurities(Security route, Security controller)
-        {
-            this.route = route;
-            this.controller = controller;
-        }
-    }
-
     private ArrayList<UserDataSourceInterface> dataSources;
 
-    private HashMap<Route, RouteSecurities> securedRoutes = new HashMap<Route, RouteSecurities>();
+    private HashMap<Route, Security[]> securedRoutes = new HashMap<>();
 
     private Container container;
 
@@ -71,10 +59,12 @@ public class AuthenticationManager implements ServiceInterface
         eventDispatcher.register(KernelEvents.ROUTE_REGISTER, (et, routeRegisterEvent) -> {
             Method method = routeRegisterEvent.getMethod();
 
-            Security routeAnnotation = method.getAnnotation(Security.class);
-            Security controllerAnnotation = method.getDeclaringClass().getAnnotation(Security.class);
+            Security[] routeAnnotations = method.getAnnotationsByType(Security.class);
+            Security[] controllerAnnotations = method.getDeclaringClass().getAnnotationsByType(Security.class);
 
-            securedRoutes.put(routeRegisterEvent.getRoute(), new RouteSecurities(routeAnnotation, controllerAnnotation));
+            Security[] annotations = Stream.of(routeAnnotations, controllerAnnotations).flatMap(Stream::of).toArray(Security[]::new);
+
+            securedRoutes.put(routeRegisterEvent.getRoute(), annotations);
         });
 
         eventDispatcher.register(KernelEvents.POST_MATCH_ROUTE, (et1, routeMatchEvent) -> {
@@ -83,9 +73,7 @@ public class AuthenticationManager implements ServiceInterface
             Route route = runtimeBag.getRoute();
 
             if (securedRoutes.containsKey(route)) {
-                RouteSecurities securities = securedRoutes.get(route);
-
-                Security[] annotations = new Security[]{securities.controller, securities.route};
+                Security[] annotations = securedRoutes.get(route);
 
                 for (Security annotation : annotations) {
                     if (annotation == null) {
