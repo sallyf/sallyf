@@ -62,7 +62,7 @@ public class AuthenticationManager implements ServiceInterface
             Security[] routeAnnotations = method.getAnnotationsByType(Security.class);
             Security[] controllerAnnotations = method.getDeclaringClass().getAnnotationsByType(Security.class);
 
-            Security[] annotations = Stream.of(routeAnnotations, controllerAnnotations).flatMap(Stream::of).toArray(Security[]::new);
+            Security[] annotations = Stream.of(controllerAnnotations, routeAnnotations).flatMap(Stream::of).toArray(Security[]::new);
 
             securedRoutes.put(routeRegisterEvent.getRoute(), annotations);
         });
