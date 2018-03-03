@@ -19,6 +19,7 @@ public class FormManager implements ServiceInterface
         addRenderer(SubmitRenderer.class);
         addRenderer(TextRenderer.class);
         addRenderer(PasswordRenderer.class);
+        addRenderer(HiddenRenderer.class);
         addRenderer(CheckboxRenderer.class);
         addRenderer(TextareaRenderer.class);
         addRenderer(ChoiceRenderer.class);
