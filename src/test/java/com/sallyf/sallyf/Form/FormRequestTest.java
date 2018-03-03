@@ -143,11 +143,16 @@ public class FormRequestTest extends BaseFrameworkTest
 
         HtmlPage page1 = webClient.getPage(getRootURL() + "/choices");
 
-        String v1 = page1.getWebResponse().getContentAsString();
-
         HtmlForm form = page1.getForms().get(0);
 
         HtmlSelect selectSingle = page1.getHtmlElementById("select-single");
+
+        HtmlOption selectSingleOption = selectSingle.getOption(1);
+        Assert.assertEquals("Two", selectSingleOption.asText());
+        Assert.assertEquals("TWO", selectSingleOption.getValueAttribute());
+
+        Assert.assertEquals(2, selectSingle.getSelectedIndex());
+
         selectSingle.setSelectedIndex(1);
 
         HtmlSelect selectMultiple = page1.getHtmlElementById("select-multiple");

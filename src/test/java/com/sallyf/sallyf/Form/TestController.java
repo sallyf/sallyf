@@ -137,6 +137,7 @@ public class TestController extends BaseController
     public String choice(Request request, FormManager formManager)
     {
         Map<String, Object> inData = MapUtils.parse("{}");
+        inData.put("select-single", "three");
 
         LinkedHashSet<String> choices = SetUtils.createLinkedHashSet("one", "two", "three");
 
@@ -145,6 +146,18 @@ public class TestController extends BaseController
                     options.setChoices(choices);
                     options.setExpanded(false);
                     options.setMultiple(false);
+
+                    options.setChoiceValueResolver(c -> {
+                        String s = (String) c;
+
+                        return s.toUpperCase();
+                    });
+
+                    options.setChoiceLabelResolver(c -> {
+                        String s = (String) c;
+
+                        return s.substring(0, 1).toUpperCase() + s.substring(1);
+                    });
 
                     options.getAttributes().put("id", "select-single");
                 })
