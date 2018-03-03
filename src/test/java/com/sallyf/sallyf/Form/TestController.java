@@ -25,7 +25,7 @@ public class TestController extends BaseController
                 .add("foo", TextType.class, (options) -> {
                     options.getConstraints().add(new NotEmpty("`The value \"${value}\" is blank`"));
                 })
-                .add("bar", TextType.class, (options) -> {
+                .add("bar", HiddenType.class, (options) -> {
                 })
                 .add("submit", SubmitType.class, (options) -> {
                 })
