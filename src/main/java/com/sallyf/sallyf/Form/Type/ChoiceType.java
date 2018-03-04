@@ -124,6 +124,12 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
 
         ChoiceOptions options = form.getOptions();
 
+        Map<String, Object> valuesChoices = options.getChoices()
+                .stream()
+                .collect(Collectors.toMap(c -> options.getChoiceValueResolver().apply(c), c -> c));
+
+        options.put("values_choices", valuesChoices);
+
         boolean isExpanded = options.isExpanded();
         boolean isMultiple = options.isMultiple();
 
@@ -147,12 +153,6 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
                     childBuilder.setData(choice.equals(form.getData()));
                 });
             }
-        } else {
-            Map<String, Object> valuesChoices = options.getChoices()
-                    .stream()
-                    .collect(Collectors.toMap(c -> options.getChoiceValueResolver().apply(c), c -> c));
-
-            options.put("values_choices", valuesChoices);
         }
     }
 

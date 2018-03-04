@@ -5,13 +5,9 @@ import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
 import com.sallyf.sallyf.Form.Type.ChoiceType;
-import com.sallyf.sallyf.Utils.MapUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.sallyf.sallyf.Utils.MapUtils.entry;
 
 public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.ChoiceOptions>
 {
@@ -56,14 +52,13 @@ public class ChoiceRenderer extends BaseFormRenderer<ChoiceType, ChoiceType.Choi
         s += "<select " + renderAttributes(form) + ">";
 
         for (Object choice : vars.getChoices()) {
-            final String value = vars.getChoiceValueResolver().apply(choice);
-
             Options childOptions = new Options();
 
             vars.getChoiceOptionsConsumer().apply(childOptions);
 
             Map<String, String> entryAttributes = childOptions.getAttributes();
 
+            final String value = vars.getChoiceValueResolver().apply(choice);
             entryAttributes.put("value", value);
 
             if (Objects.equals(form.getData(), choice)) {

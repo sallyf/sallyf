@@ -136,10 +136,10 @@ public class TestController extends BaseController
     @Route(path = "/choices", methods = {Method.GET, Method.POST})
     public String choice(Request request, FormManager formManager)
     {
+        LinkedHashSet<String> choices = SetUtils.createLinkedHashSet("one", "two", "three");
+
         Map<String, Object> inData = MapUtils.parse("{}");
         inData.put("select-single", "three");
-
-        LinkedHashSet<String> choices = SetUtils.createLinkedHashSet("one", "two", "three");
 
         Form<FormType, FormType.FormOptions, Object> form = this.createFormBuilder(inData)
                 .add("select-single", ChoiceType.class, (options) -> {
