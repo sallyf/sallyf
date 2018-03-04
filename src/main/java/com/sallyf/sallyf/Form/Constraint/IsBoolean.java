@@ -12,7 +12,9 @@ public class IsBoolean extends Is
     public IsBoolean(boolean expected, String message)
     {
         super(
-                (value) -> {
+                (form) -> {
+                    Object value = form.resolveData();
+
                     if (value instanceof Boolean) {
                         boolean booleanValue = (Boolean) value;
 

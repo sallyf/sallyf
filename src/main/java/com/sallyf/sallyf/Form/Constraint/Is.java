@@ -8,14 +8,14 @@ import java.util.function.Predicate;
 
 public class Is extends AbstractConstraint
 {
-    private Predicate<Object> predicate;
+    private Predicate<Form<?, ?, ?>> predicate;
 
-    public Is(Predicate<Object> predicate)
+    public Is(Predicate<Form<?, ?, ?>> predicate)
     {
         this(predicate, "`\"${value}\" is not valid`");
     }
 
-    public Is(Predicate<Object> predicate, String message)
+    public Is(Predicate<Form<?, ?, ?>> predicate, String message)
     {
         super(message);
 
@@ -23,10 +23,10 @@ public class Is extends AbstractConstraint
     }
 
     @Override
-    public void validate(Object value, Form<?, ?, ?> form, ErrorsBag errorsBag)
+    public void validate(Form<?, ?, ?> form, ErrorsBag errorsBag)
     {
-        if (!predicate.test(value)) {
-            errorsBag.addError(new ValidationError(getMessage(value, form)));
+        if (!predicate.test(form)) {
+            errorsBag.addError(new ValidationError(getMessage(form.resolveData(), form)));
         }
     }
 }

@@ -210,7 +210,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
             ErrorsBag errorsBag = getErrorsBag();
 
             try {
-                constraint.validate(resolveData(), this, errorsBag);
+                constraint.validate(this, errorsBag);
             } catch (UnableToValidateException e) {
                 errorsBag.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", resolveData(), constraint)));
             }
