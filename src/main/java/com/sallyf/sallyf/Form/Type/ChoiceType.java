@@ -182,27 +182,7 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
                 return null;
             }
         } else {
-            Map<String, Object> valuesChoices = (Map<String, Object>) options.get("values_choices");
-
-            if (isMultiple) {
-                List<String> data = (List<String>) form.getData();
-                return valuesChoices
-                        .entrySet()
-                        .stream()
-                        .filter(e -> data.contains(e.getKey()))
-                        .map(Map.Entry::getValue)
-                        .collect(Collectors.toList());
-            } else {
-                String data = (String) form.getData();
-
-                for (Map.Entry<String, Object> entry : valuesChoices.entrySet()) {
-                    if (entry.getKey().equals(data)) {
-                        return entry.getValue();
-                    }
-                }
-
-                return null;
-            }
+            return form.getData();
         }
     }
 
@@ -211,14 +191,18 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
     {
         ChoiceOptions options = form.getOptions();
 
+        Map<String, Object> valuesChoices = (Map<String, Object>) options.get("values_choices");
+
         boolean isMultiple = options.isMultiple();
 
         if (isMultiple) {
             Map<String, String[]> requestData = request.getParameterMap();
 
-            return Arrays.asList(requestData.getOrDefault(form.getFullName(), new String[0]));
+            List<String> values = Arrays.asList(requestData.getOrDefault(form.getFullName(), new String[0]));
+
+            return values.stream().map(valuesChoices::get).collect(Collectors.toList());
         } else {
-            return super.requestToNorm(form, request);
+            return valuesChoices.get(super.requestToNorm(form, request));
         }
     }
 }
