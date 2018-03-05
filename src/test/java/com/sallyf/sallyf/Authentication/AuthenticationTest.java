@@ -36,8 +36,8 @@ public class AuthenticationTest extends BaseFrameworkTest
     {
         AuthenticationManager authenticationManager = newInstance(new Configuration());
 
+        authenticationManager.authenticate(null, null);
         authenticationManager.authenticate(null, null, null);
-        authenticationManager.authenticate(null, null, null, null);
 
     }
 
@@ -63,7 +63,7 @@ public class AuthenticationTest extends BaseFrameworkTest
 
         AuthenticationManager authenticationManager = newInstance(configuration);
 
+        authenticationManager.authenticate(null, null);
         authenticationManager.authenticate(null, null, null);
-        authenticationManager.authenticate(null, null, null, null);
     }
 }

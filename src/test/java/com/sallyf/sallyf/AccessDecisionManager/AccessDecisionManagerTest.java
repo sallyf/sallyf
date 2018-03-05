@@ -38,11 +38,11 @@ public class AccessDecisionManagerTest extends BaseFrameworkTest
     {
         AccessDecisionManager authenticationManager = newInstance();
 
-        boolean dd = authenticationManager.vote(null, ACCESS, subject);
+        boolean dd = authenticationManager.vote(ACCESS, subject);
 
-        boolean da = authenticationManager.vote(null, ACCESS, subject, DecisionStrategy.AFFIRMATIVE);
-        boolean dc = authenticationManager.vote(null, ACCESS, subject, DecisionStrategy.CONSENSUS);
-        boolean du = authenticationManager.vote(null, ACCESS, subject, DecisionStrategy.UNANIMOUS);
+        boolean da = authenticationManager.vote(ACCESS, subject, DecisionStrategy.AFFIRMATIVE);
+        boolean dc = authenticationManager.vote(ACCESS, subject, DecisionStrategy.CONSENSUS);
+        boolean du = authenticationManager.vote(ACCESS, subject, DecisionStrategy.UNANIMOUS);
 
         assertEquals("Default", eda, dd);
         assertEquals("Affirmative", eda, da);

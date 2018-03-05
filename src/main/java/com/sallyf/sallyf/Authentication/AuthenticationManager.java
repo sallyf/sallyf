@@ -98,12 +98,12 @@ public class AuthenticationManager implements ServiceInterface
         });
     }
 
-    public UserInterface authenticate(Request request, String username, String password)
+    public UserInterface authenticate(String username, String password)
     {
-        return authenticate(request, username, password, null);
+        return authenticate(username, password, null);
     }
 
-    public UserInterface authenticate(Request request, String username, String password, Class<? extends UserDataSourceInterface> dataSourceClass)
+    public UserInterface authenticate(String username, String password, Class<? extends UserDataSourceInterface> dataSourceClass)
     {
         if (dataSources.size() == 0) {
             throw new AuthenticationException("No datasource provided");
@@ -123,7 +123,8 @@ public class AuthenticationManager implements ServiceInterface
 
         UserInterface user = dataSource.getUser(username, password);
 
-        request.getSession(true).setAttribute("user", user);
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
+        runtimeBag.getRequest().getSession(true).setAttribute("user", user);
 
         return user;
     }

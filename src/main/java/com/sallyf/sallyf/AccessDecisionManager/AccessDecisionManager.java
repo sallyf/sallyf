@@ -4,7 +4,6 @@ import com.sallyf.sallyf.AccessDecisionManager.Voter.VoterInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.ExpressionLanguage.ExpressionLanguage;
-import com.sallyf.sallyf.Server.RuntimeBag;
 
 import java.util.ArrayList;
 
@@ -26,26 +25,26 @@ public class AccessDecisionManager implements ServiceInterface
     public void initialize(Container container)
     {
         expressionLanguage.addFunction("is_granted", request -> {
-            request.arguments(2, 4);
+            request.arguments(1, 3);
+
+            if (request.getArgs().length == 1) {
+                return vote(request.get(0), null);
+            }
 
             if (request.getArgs().length == 2) {
-                return vote(request.get(0), request.get(1), null);
+                return vote(request.get(0), request.get(1));
             }
 
-            if (request.getArgs().length == 3) {
-                return vote(request.get(0), request.get(1), request.get(2));
-            }
-
-            return vote(request.get(0), request.get(1), request.get(2), request.get(3));
+            return vote(request.get(0), request.get(1), request.get(2));
         });
     }
 
-    public <O> boolean vote(RuntimeBag runtimeBag, String attribute, O subject)
+    public <O> boolean vote(String attribute, O subject)
     {
-        return vote(runtimeBag, attribute, subject, DecisionStrategy.AFFIRMATIVE);
+        return vote(attribute, subject, DecisionStrategy.AFFIRMATIVE);
     }
 
-    public <O> boolean vote(RuntimeBag runtimeBag, String attribute, O subject, DecisionStrategy strategy)
+    public <O> boolean vote(String attribute, O subject, DecisionStrategy strategy)
     {
         ArrayList<Boolean> decisions = new ArrayList<>();
 
