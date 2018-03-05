@@ -52,6 +52,8 @@ public class FrameworkHandler extends AbstractHandler
 
         try {
             RuntimeBag runtimeBag = new RuntimeBag();
+            ThreadAttributes.set("_runtime_bag", runtimeBag);
+
             Object handlerResponse;
 
             try {
@@ -69,7 +71,7 @@ public class FrameworkHandler extends AbstractHandler
 
                 eventDispatcher.dispatch(KernelEvents.POST_MATCH_ROUTE, new RouteMatchEvent(runtimeBag));
 
-                handlerResponse = route.getHandler().apply(runtimeBag);
+                handlerResponse = route.getHandler().apply();
 
                 eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
             } catch (HttpException httpException) {
@@ -78,7 +80,7 @@ public class FrameworkHandler extends AbstractHandler
                 eventDispatcher.dispatch(KernelEvents.PRE_TRANSFORM_RESPONSE, new TransformResponseEvent(runtimeBag, handlerResponse));
             }
 
-            com.sallyf.sallyf.Router.Response response = router.transformResponse(runtimeBag, handlerResponse);
+            com.sallyf.sallyf.Router.Response response = router.transformResponse(handlerResponse);
 
             eventDispatcher.dispatch(KernelEvents.PRE_SEND_RESPONSE, new ResponseEvent(runtimeBag, response));
 

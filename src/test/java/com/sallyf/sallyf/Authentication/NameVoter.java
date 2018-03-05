@@ -1,7 +1,6 @@
 package com.sallyf.sallyf.Authentication;
 
 import com.sallyf.sallyf.AccessDecisionManager.Voter.VoterInterface;
-import com.sallyf.sallyf.Server.RuntimeBag;
 
 import java.util.Arrays;
 
@@ -10,7 +9,7 @@ public class NameVoter implements VoterInterface<String>
     public static final String ACCESS = "access";
 
     @Override
-    public boolean supports(String attribute, Object subject, RuntimeBag runtimeBag)
+    public boolean supports(String attribute, Object subject)
     {
         if (!Arrays.asList(new String[]{ACCESS}).contains(attribute)) {
             return false;
@@ -24,7 +23,7 @@ public class NameVoter implements VoterInterface<String>
     }
 
     @Override
-    public boolean vote(String attribute, String subject, RuntimeBag runtimeBag)
+    public boolean vote(String attribute, String subject)
     {
         subject = subject.toLowerCase();
 

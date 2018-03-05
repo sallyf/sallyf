@@ -2,6 +2,8 @@ package com.sallyf.sallyf.Form;
 
 import com.sallyf.sallyf.Form.Exception.UnableToValidateException;
 import com.sallyf.sallyf.Form.Type.FormType;
+import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Server.RuntimeBagContext;
 import com.sallyf.sallyf.Utils.MapUtils;
 import org.eclipse.jetty.server.Request;
 
@@ -192,8 +194,12 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         getChildren().forEach(childForm -> childForm.submit(request));
     }
 
-    public void handleRequest(Request request)
+    public void handleRequest()
     {
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
+
+        Request request = runtimeBag.getRequest();
+
         Form<?, FormType.FormOptions, ?> root = getRoot();
         if (!root.getOptions().getMethod().equalsIgnoreCase(request.getMethod())) {
             return;

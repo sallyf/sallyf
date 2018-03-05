@@ -31,7 +31,7 @@ public class TestController extends BaseController
                 })
                 .getForm();
 
-        form.handleRequest(request);
+        form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
             return form.resolveData().toString();
@@ -54,7 +54,7 @@ public class TestController extends BaseController
                 })
                 .getForm();
 
-        form.handleRequest(request);
+        form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
             return form.resolveData().toString();
@@ -76,7 +76,7 @@ public class TestController extends BaseController
                 })
                 .getForm();
 
-        form.handleRequest(request);
+        form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
             return form.resolveData().toString();
@@ -103,7 +103,7 @@ public class TestController extends BaseController
                 .add("submit", SubmitType.class)
                 .getForm();
 
-        form.handleRequest(request);
+        form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
             return form.resolveData().toString();
@@ -124,7 +124,7 @@ public class TestController extends BaseController
                 .add("submit", SubmitType.class)
                 .getForm();
 
-        form.handleRequest(request);
+        form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
             return form.resolveData().toString();
@@ -191,7 +191,7 @@ public class TestController extends BaseController
                 .add("submit", SubmitType.class)
                 .getForm();
 
-        form.handleRequest(request);
+        form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
             return form.resolveData().toString();

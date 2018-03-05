@@ -8,6 +8,7 @@ import com.sallyf.sallyf.Router.RedirectResponse;
 import com.sallyf.sallyf.Router.Response;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Server.RuntimeBagContext;
 import com.sallyf.sallyf.Server.RuntimeStorage;
 
 import javax.servlet.http.HttpSession;
@@ -40,43 +41,40 @@ public class FlashManager implements ServiceInterface
         router.addActionParameterResolver(new FlashManagerHelperActionParameterResolver(container));
 
         eventDispatcher.register(KernelEvents.POST_MATCH_ROUTE, (eventType, routeMatchEvent) -> {
-            RuntimeBag runtimeBag = routeMatchEvent.getRuntimeBag();
-
-            hydrateCurrent(runtimeBag); // Move Session flashes to RuntimeStorage
+            hydrateCurrent(); // Move Session flashes to RuntimeStorage
         });
 
         eventDispatcher.register(KernelEvents.PRE_SEND_RESPONSE, (eventType, responseEvent) -> {
-            RuntimeBag runtimeBag = responseEvent.getRuntimeBag();
             Response response = responseEvent.getResponse();
 
-            persistNext(runtimeBag); // Persist next flashes to Session
+            persistNext(); // Persist next flashes to Session
 
-            if (isForwarding(runtimeBag) || response instanceof RedirectResponse) {
-                forwardCurrent(runtimeBag); // Forward current flashes to Session (next runtime)
+            if (isForwarding() || response instanceof RedirectResponse) {
+                forwardCurrent(); // Forward current flashes to Session (next runtime)
             }
         });
     }
 
-    public boolean isForwarding(RuntimeBag runtimeBag)
+    public boolean isForwarding()
     {
-        Boolean v = (Boolean) getSession(runtimeBag).getAttribute(FORWARD_FLAG);
+        Boolean v = (Boolean) getSession().getAttribute(FORWARD_FLAG);
 
         return null == v ? false : v;
     }
 
-    public void setForward(RuntimeBag runtimeBag, boolean value)
+    public void setForward(boolean value)
     {
-        getSession(runtimeBag).setAttribute(FORWARD_FLAG, value);
+        getSession().setAttribute(FORWARD_FLAG, value);
     }
 
-    public void addFlash(RuntimeBag runtimeBag, FlashEntry<?> entry)
+    public void addFlash(FlashEntry<?> entry)
     {
-        getNextFlashes(runtimeBag).add(entry);
+        getNextFlashes().add(entry);
     }
 
-    public Set<FlashEntry<?>> getSessionFlashes(RuntimeBag runtimeBag)
+    public Set<FlashEntry<?>> getSessionFlashes()
     {
-        HttpSession session = getSession(runtimeBag);
+        HttpSession session = getSession();
 
         Set<FlashEntry<?>> flashes = (Set<FlashEntry<?>>) session.getAttribute(SESSION_FLASHES_KEY);
 
@@ -88,18 +86,20 @@ public class FlashManager implements ServiceInterface
         return flashes;
     }
 
-    public Set<FlashEntry<?>> getCurrentFlashes(RuntimeBag runtimeBag)
+    public Set<FlashEntry<?>> getCurrentFlashes()
     {
-        return getRuntimeStorageFlashes(runtimeBag, CURRENT_FLASHES_KEY);
+        return getRuntimeStorageFlashes(CURRENT_FLASHES_KEY);
     }
 
-    public Set<FlashEntry<?>> getNextFlashes(RuntimeBag runtimeBag)
+    public Set<FlashEntry<?>> getNextFlashes()
     {
-        return getRuntimeStorageFlashes(runtimeBag, NEXT_FLASHES_KEY);
+        return getRuntimeStorageFlashes(NEXT_FLASHES_KEY);
     }
 
-    private Set<FlashEntry<?>> getRuntimeStorageFlashes(RuntimeBag runtimeBag, Object key)
+    private Set<FlashEntry<?>> getRuntimeStorageFlashes(Object key)
     {
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
+
         RuntimeStorage storage = runtimeBag.getStorage();
 
         Set<FlashEntry<?>> flashes = storage.get(key);
@@ -112,38 +112,40 @@ public class FlashManager implements ServiceInterface
         return flashes;
     }
 
-    private void persistNext(RuntimeBag runtimeBag)
+    private void persistNext()
     {
-        Set<FlashEntry<?>> sessionFlashes = getSessionFlashes(runtimeBag);
-        Set<FlashEntry<?>> nextFlashes = getNextFlashes(runtimeBag);
+        Set<FlashEntry<?>> sessionFlashes = getSessionFlashes();
+        Set<FlashEntry<?>> nextFlashes = getNextFlashes();
 
         sessionFlashes.addAll(nextFlashes);
 
         nextFlashes.clear();
     }
 
-    private void forwardCurrent(RuntimeBag runtimeBag)
+    private void forwardCurrent()
     {
-        Set<FlashEntry<?>> sessionFlashes = getSessionFlashes(runtimeBag);
-        Set<FlashEntry<?>> currentFlashes = getCurrentFlashes(runtimeBag);
+        Set<FlashEntry<?>> sessionFlashes = getSessionFlashes();
+        Set<FlashEntry<?>> currentFlashes = getCurrentFlashes();
 
         sessionFlashes.addAll(currentFlashes);
 
         currentFlashes.clear();
     }
 
-    private void hydrateCurrent(RuntimeBag runtimeBag)
+    private void hydrateCurrent()
     {
-        Set<FlashEntry<?>> sessionFlashes = getSessionFlashes(runtimeBag);
-        Set<FlashEntry<?>> currentFlashes = getCurrentFlashes(runtimeBag);
+        Set<FlashEntry<?>> sessionFlashes = getSessionFlashes();
+        Set<FlashEntry<?>> currentFlashes = getCurrentFlashes();
 
         currentFlashes.addAll(sessionFlashes);
 
         sessionFlashes.clear();
     }
 
-    private HttpSession getSession(RuntimeBag runtimeBag)
+    private HttpSession getSession()
     {
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
+
         return runtimeBag.getRequest().getSession(true);
     }
 }

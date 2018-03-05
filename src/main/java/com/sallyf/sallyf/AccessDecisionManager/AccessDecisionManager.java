@@ -50,8 +50,8 @@ public class AccessDecisionManager implements ServiceInterface
         ArrayList<Boolean> decisions = new ArrayList<>();
 
         for (VoterInterface<O> voter : container.<VoterInterface<O>>getByTag(TAG_VOTER)) {
-            if (voter.supports(attribute, subject, runtimeBag)) {
-                boolean d = voter.vote(attribute, subject, runtimeBag);
+            if (voter.supports(attribute, subject)) {
+                boolean d = voter.vote(attribute, subject);
 
                 decisions.add(d);
             }

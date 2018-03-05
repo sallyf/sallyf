@@ -5,9 +5,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MapUtils
 {
@@ -46,19 +43,14 @@ public class MapUtils
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
-    public static <M extends Map<K, V>, K, V> Collector<Map.Entry<K, V>, ?, M> entriesToMap(Class<M> mapClass)
-    {
-        return Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (oldValue, newValue) -> oldValue,
-                () -> ClassUtils.newInstance(mapClass)
-        );
-    }
-
     public static <M extends Map<K, V>, K, V> M createMap(Class<M> mapClass, Map.Entry<K, V>... entries)
     {
-        return Stream.of(entries).collect(entriesToMap(mapClass));
+        M map = ClassUtils.newInstance(mapClass);
+        for (Map.Entry<K, V> entry : entries) {
+            map.put(entry.getKey(), entry.getValue());
+        }
+
+        return map;
     }
 
     @SafeVarargs
