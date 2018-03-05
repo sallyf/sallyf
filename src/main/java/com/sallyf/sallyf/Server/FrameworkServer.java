@@ -16,6 +16,8 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 
 public class FrameworkServer extends Server implements ServiceInterface
@@ -64,25 +66,41 @@ public class FrameworkServer extends Server implements ServiceInterface
 
     public String getRootURL()
     {
+        return getRootURL(null);
+    }
+
+    public String getRootURL(RuntimeBag runtimeBag)
+    {
         ServerConnector connector = (ServerConnector) getConnectors()[0];
 
-        String hostname = "";
+        String host = "localhost";
+        String protocol = "http";
+        int port = connector.getPort();
+
+        if (connector.getName() != null && !connector.getName().isEmpty()) {
+            host = connector.getName();
+        }
 
         try {
             InetAddress addr = InetAddress.getLocalHost();
-            hostname = addr.getHostName();
+            if (!addr.getHostName().isEmpty()) {
+                host = addr.getHostName();
+            }
         } catch (UnknownHostException ignored) {
         }
 
-        if (hostname.isEmpty()) {
-            hostname = connector.getName();
+        if (runtimeBag != null) {
+            try {
+                URL url = new URL(runtimeBag.getRequest().getRequestURL().toString());
+
+                host = url.getHost();
+                port = url.getPort();
+                protocol = url.getProtocol();
+            } catch (MalformedURLException ignored) {
+            }
         }
 
-        if (hostname.isEmpty()) {
-            hostname = "localhost";
-        }
-
-        return "http://" + hostname + ":" + connector.getPort();
+        return protocol + "://" + host + ":" + port;
     }
 
     public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()

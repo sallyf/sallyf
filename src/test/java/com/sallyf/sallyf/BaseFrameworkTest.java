@@ -5,6 +5,7 @@ import com.sallyf.sallyf.Controller.ControllerInterface;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.Configuration;
 import com.sallyf.sallyf.Server.FrameworkServer;
+import com.sallyf.sallyf.Server.RuntimeBagContext;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -56,7 +57,7 @@ public abstract class BaseFrameworkTest
 
     protected String getRootURL()
     {
-        return app.getContainer().get(FrameworkServer.class).getRootURL();
+        return app.getContainer().get(FrameworkServer.class).getRootURL(RuntimeBagContext.get());
     }
 
     @Before

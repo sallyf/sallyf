@@ -6,6 +6,7 @@ import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.UnableToGenerateURLException;
 import com.sallyf.sallyf.Router.JTwigFunctions.PathFunction;
 import com.sallyf.sallyf.Server.FrameworkServer;
+import com.sallyf.sallyf.Server.RuntimeBagContext;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class URLGenerator implements ServiceInterface
 
     public String url(String actionName, HashMap<String, String> parameters)
     {
-        return server.getRootURL() + path(actionName, parameters);
+        return server.getRootURL(RuntimeBagContext.get()) + path(actionName, parameters);
     }
 
     public String url(String actionName)
