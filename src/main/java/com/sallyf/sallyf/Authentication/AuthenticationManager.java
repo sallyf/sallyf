@@ -16,6 +16,7 @@ import com.sallyf.sallyf.Router.ActionParameterResolver.UserInterfaceResolver;
 import com.sallyf.sallyf.Router.Route;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Server.RuntimeBagContext;
 import org.eclipse.jetty.server.Request;
 
 import javax.servlet.http.HttpSession;
@@ -80,12 +81,12 @@ public class AuthenticationManager implements ServiceInterface
                         continue;
                     }
 
-                    boolean decision = this.expressionLanguage.evaluate(annotation.value(), runtimeBag);
+                    boolean decision = this.expressionLanguage.evaluate(annotation.value());
 
                     if (!decision) {
-                        route.setHandler(rb -> {
+                        route.setHandler(() -> {
                             try {
-                                return annotation.handler().newInstance().apply(container, rb);
+                                return annotation.handler().newInstance().apply(container);
                             } catch (InstantiationException | IllegalAccessException e) {
                                 throw new FrameworkException(e);
                             }
@@ -143,8 +144,10 @@ public class AuthenticationManager implements ServiceInterface
         throw new AuthenticationException("No datasource found for class: " + dataSourceClass);
     }
 
-    public UserInterface getUser(RuntimeBag runtimeBag)
+    public UserInterface getUser()
     {
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
+
         Request request = runtimeBag.getRequest();
 
         HttpSession session = request.getSession();

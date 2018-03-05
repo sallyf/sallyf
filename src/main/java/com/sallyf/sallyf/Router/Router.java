@@ -19,6 +19,7 @@ import com.sallyf.sallyf.Router.ActionParameterResolver.ServiceResolver;
 import com.sallyf.sallyf.Router.ResponseTransformer.HttpExceptionTransformer;
 import com.sallyf.sallyf.Router.ResponseTransformer.PrimitiveTransformer;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Server.RuntimeBagContext;
 import com.sallyf.sallyf.Utils.ClassUtils;
 import org.eclipse.jetty.server.Request;
 
@@ -115,8 +116,8 @@ public class Router implements ServiceInterface
                 String fullName = actionNamePrefix + actionName;
                 String fullPath = pathPrefix + routeAnnotation.path();
 
-                ActionWrapperInterface handler = (runtimeBag) -> {
-                    Object[] resolvedParameters = resolveActionParameters(parameters, runtimeBag);
+                ActionWrapperInterface handler = () -> {
+                    Object[] resolvedParameters = resolveActionParameters(parameters);
 
                     try {
                         return method.invoke(controller, resolvedParameters);
@@ -146,22 +147,22 @@ public class Router implements ServiceInterface
         return controller;
     }
 
-    public Object[] resolveActionParameters(Parameter[] parameters, RuntimeBag runtimeBag)
+    public Object[] resolveActionParameters(Parameter[] parameters)
     {
         Object[] outParameters = new Object[parameters.length];
         int i = 0;
         for (Parameter parameter : parameters) {
-            outParameters[i++] = resolveActionParameter(parameter, runtimeBag);
+            outParameters[i++] = resolveActionParameter(parameter);
         }
 
         return outParameters;
     }
 
-    public Object resolveActionParameter(Parameter parameter, RuntimeBag runtimeBag)
+    public Object resolveActionParameter(Parameter parameter)
     {
         for (ActionParameterResolverInterface resolver : actionParameterResolvers) {
-            if (resolver.supports(parameter, runtimeBag)) {
-                return resolver.resolve(parameter, runtimeBag);
+            if (resolver.supports(parameter)) {
+                return resolver.resolve(parameter);
             }
         }
 
@@ -210,8 +211,10 @@ public class Router implements ServiceInterface
         return null;
     }
 
-    public RouteParameters getRouteParameters(RuntimeBag runtimeBag)
+    public RouteParameters getRouteParameters()
     {
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
+
         Pattern r = Pattern.compile(runtimeBag.getRoute().getPath().getPattern());
 
         Matcher m = r.matcher(runtimeBag.getRequest().getPathInfo());
@@ -220,7 +223,7 @@ public class Router implements ServiceInterface
 
         if (m.matches()) {
             runtimeBag.getRoute().getPath().getParameters().forEach((index, name) -> {
-                parameterValues.put(name, resolveRouteParameter(m, index, name, runtimeBag));
+                parameterValues.put(name, resolveRouteParameter(m, index, name));
             });
         }
 
@@ -229,8 +232,10 @@ public class Router implements ServiceInterface
         return parameterValues;
     }
 
-    public Object resolveRouteParameter(Matcher m, Integer index, String name, RuntimeBag runtimeBag)
+    public Object resolveRouteParameter(Matcher m, Integer index, String name)
     {
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
+
         String value = m.group(index);
 
         Map<String, RouteParameterResolverInterface> routeParameterResolvers = runtimeBag.getRoute().getRouteParameterResolvers();
@@ -238,20 +243,20 @@ public class Router implements ServiceInterface
         if (routeParameterResolvers.containsKey(name)) {
             RouteParameterResolverInterface resolver = routeParameterResolvers.get(name);
 
-            return resolver.resolve(name, value, runtimeBag);
+            return resolver.resolve(name, value);
         }
 
         return value;
     }
 
-    public Response transformResponse(RuntimeBag runtimeBag, Object response)
+    public Response transformResponse(Object response)
     {
         while (true) {
             boolean transformed = false;
             for (ResponseTransformerInterface transformer : responseTransformers) {
-                if (transformer.supports(runtimeBag, response)) {
+                if (transformer.supports(response)) {
                     try {
-                        response = transformer.transform(runtimeBag, response);
+                        response = transformer.transform(response);
                     } catch (Exception e) {
                         throw new FrameworkException(e);
                     }

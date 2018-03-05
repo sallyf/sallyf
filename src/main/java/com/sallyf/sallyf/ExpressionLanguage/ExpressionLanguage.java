@@ -5,6 +5,7 @@ import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Router.Router;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Server.RuntimeBagContext;
 import com.sallyf.sallyf.Utils.MapUtils;
 
 import java.util.HashMap;
@@ -51,12 +52,13 @@ public class ExpressionLanguage extends com.raphaelvigee.el.ExpressionLanguage i
         });
     }
 
-    public <R> R evaluate(String expression, RuntimeBag runtimeBag)
+    public <R> R evaluate(String expression)
     {
+        RuntimeBag runtimeBag = RuntimeBagContext.get();
         Map<String, Object> env = MapUtils.createHashMap(entry("runtimeBag", runtimeBag), entry("$", runtimeBag));
 
         if (runtimeBag != null) {
-            env.putAll(router.getRouteParameters(runtimeBag));
+            env.putAll(router.getRouteParameters());
         }
 
         return this.evaluate(expression, env);

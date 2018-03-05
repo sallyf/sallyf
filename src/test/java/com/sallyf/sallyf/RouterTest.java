@@ -7,6 +7,7 @@ import com.sallyf.sallyf.Exception.FrameworkException;
 import com.sallyf.sallyf.Router.*;
 import com.sallyf.sallyf.Server.Method;
 import com.sallyf.sallyf.Server.RuntimeBag;
+import com.sallyf.sallyf.Server.ThreadAttributes;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.http.MetaData;
@@ -20,7 +21,7 @@ import static org.junit.Assert.*;
 public class RouterTest
 {
     @Test
-    public void regexComputationTest() throws FrameworkException
+    public void regexComputationTest() throws FrameworkException, InterruptedException
     {
         Kernel app = Kernel.newInstance();
 
@@ -28,7 +29,7 @@ public class RouterTest
 
         Router router = app.getContainer().get(Router.class);
 
-        Route route = new Route(new Method[]{Method.GET}, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
+        Route route = new Route(new Method[]{Method.GET}, "/hello/{foo}/{bar}/{dat_test}", () -> null);
         Path path = route.getPath();
         path.getRequirements().put("foo", "(YOLO)");
 
@@ -45,7 +46,13 @@ public class RouterTest
         expectedParameters.put("bar", "hé");
         expectedParameters.put("dat_test", "dat_var");
 
-        assertEquals(expectedParameters, router.getRouteParameters(new RuntimeBag(request, route)));
+        Thread thread = new Thread(() -> {
+            ThreadAttributes.set("_runtime_bag", new RuntimeBag(request, route));
+            assertEquals(expectedParameters, router.getRouteParameters());
+        });
+
+        thread.start();
+        thread.join();
 
         app.stop();
     }
@@ -53,10 +60,10 @@ public class RouterTest
     @Test
     public void routeMatcherTest() throws Exception
     {
-        Route route1 = new Route(new Method[]{Method.GET}, "/hello/{foo}/{bar}/{dat_test}", (rb) -> null);
-        Route route2 = new Route(new Method[]{Method.GET}, "/qwertyuiop", (rb) -> null);
-        Route route3 = new Route(new Method[]{Method.POST}, "/qwertyuiop", (rb) -> null);
-        Route route4 = new Route(new Method[]{Method.GET}, "/", (rb) -> null);
+        Route route1 = new Route(new Method[]{Method.GET}, "/hello/{foo}/{bar}/{dat_test}", () -> null);
+        Route route2 = new Route(new Method[]{Method.GET}, "/qwertyuiop", () -> null);
+        Route route3 = new Route(new Method[]{Method.POST}, "/qwertyuiop", () -> null);
+        Route route4 = new Route(new Method[]{Method.GET}, "/", () -> null);
 
         Container container = new Container();
 
@@ -100,8 +107,8 @@ public class RouterTest
     @Test
     public void routeDuplicateTest() throws Exception
     {
-        Route route1 = new Route(new Method[]{Method.GET}, "/abc", (rb) -> null);
-        Route route2 = new Route(new Method[]{Method.POST}, "/abc", (rb) -> null);
+        Route route1 = new Route(new Method[]{Method.GET}, "/abc", () -> null);
+        Route route2 = new Route(new Method[]{Method.POST}, "/abc", () -> null);
 
         Container container = new Container();
 
@@ -131,7 +138,7 @@ public class RouterTest
 
         Route route = routes.get("test_hello_named");
 
-        Response response = (Response) route.getHandler().apply(null);
+        Response response = (Response) route.getHandler().apply();
 
         assertEquals("hello", response.getContent());
         assertEquals("/prefixed/hello", route.getPath().getDeclaration());
