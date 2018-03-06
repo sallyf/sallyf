@@ -1,5 +1,6 @@
 package com.sallyf.sallyf.JTwig;
 
+import com.sallyf.sallyf.Container.ConfigurationInterface;
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceInterface;
 import com.sallyf.sallyf.EventDispatcher.EventDispatcher;
@@ -17,7 +18,7 @@ public class JTwig implements ServiceInterface
 
     private EnvironmentConfiguration configuration;
 
-    public JTwig(Container container, EventDispatcher eventDispatcher, Router router)
+    public JTwig(Container container, EventDispatcher eventDispatcher, Router router, JTwigConfiguration jTwigConfiguration)
     {
         this.router = router;
 
@@ -26,6 +27,8 @@ public class JTwig implements ServiceInterface
 
             ArrayList<JTwigServiceFunction> functions = container.getByTag("jtwig.function");
             functions.forEach(f -> builder.functions().add(f));
+
+            jTwigConfiguration.configure(builder);
 
             this.configuration = builder.build();
         });
@@ -44,5 +47,10 @@ public class JTwig implements ServiceInterface
         }
 
         return configuration;
+    }
+
+    public static Class<? extends ConfigurationInterface> getDefaultConfigurationClass()
+    {
+        return JTwigConfiguration.class;
     }
 }
