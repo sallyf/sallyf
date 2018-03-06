@@ -166,13 +166,13 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
 
         if (isExpanded) {
             if (isMultiple) {
-                return form.getChild()
+                return form.getChildren()
                         .stream()
                         .filter(child -> Boolean.valueOf(String.valueOf(child.resolveData())))
                         .map(child -> child.getOptions().get("choice"))
                         .collect(Collectors.toList());
             } else {
-                for (Form child : form.getChild()) {
+                for (Form child : form.getChildren()) {
                     Object choice = child.getOptions().get("choice");
                     if (Boolean.valueOf(String.valueOf(child.resolveData()))) {
                         return choice;

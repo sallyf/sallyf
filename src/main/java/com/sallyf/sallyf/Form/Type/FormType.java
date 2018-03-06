@@ -59,7 +59,7 @@ public class FormType extends AbstractFormType<FormType.FormOptions, Object>
     {
         Map<String, Object> out = new LinkedHashMap<>();
 
-        for (Form child : form.getChild()) {
+        for (Form child : form.getChildren()) {
             out.put(child.getName(), child.resolveData());
         }
 

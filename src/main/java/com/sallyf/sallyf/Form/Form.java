@@ -38,7 +38,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         this.errorsBag = new ErrorsBag();
     }
 
-    public LinkedHashSet<Form> getChild()
+    public LinkedHashSet<Form> getChildren()
     {
         return children;
     }
@@ -176,7 +176,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         LinkedHashSet<FormView> childrenFormViews = new LinkedHashSet<>();
 
-        getChild().forEach(childForm -> childrenFormViews.add(childForm.createView(formView)));
+        getChildren().forEach(childForm -> childrenFormViews.add(childForm.createView(formView)));
 
         formView.setChildren(childrenFormViews);
 
@@ -191,7 +191,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         setSubmitted(true);
 
-        getChild().forEach(childForm -> childForm.submit(request));
+        getChildren().forEach(childForm -> childForm.submit(request));
     }
 
     public void handleRequest()
@@ -222,7 +222,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
             }
         }
 
-        for (Form child : getChild()) {
+        for (Form child : getChildren()) {
             child.validate();
         }
     }
@@ -252,7 +252,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
     public boolean isValid()
     {
         Supplier<Boolean> s = () -> {
-            for (Form child : getChild()) {
+            for (Form child : getChildren()) {
                 if (!child.isValid()) {
                     return false;
                 }
