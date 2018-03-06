@@ -31,12 +31,22 @@ public class FormRenderer extends BaseFormRenderer<FormType, FormType.FormOption
     {
         String s = "";
 
-        s += "<form " + renderAttributes(formView) + ">";
+        s += renderFormStart(formView);
         s += renderErrors(formView);
         s += manager.renderChildren(formView);
-        s += "</form>";
+        s += renderFormEnd(formView);
 
         return s;
+    }
+
+    public String renderFormStart(FormView<FormType, FormType.FormOptions, ?> formView)
+    {
+        return "<form " + renderAttributes(formView) + ">";
+    }
+
+    public String renderFormEnd(FormView<FormType, FormType.FormOptions, ?> formView)
+    {
+        return "</form>";
     }
 
     @Override

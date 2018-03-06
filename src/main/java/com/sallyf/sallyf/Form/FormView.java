@@ -46,6 +46,17 @@ public class FormView<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         return children;
     }
 
+    public FormView getChild(String name)
+    {
+        for (FormView child : children) {
+            if (child.getName().equals(name)) {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
     public void setChildren(LinkedHashSet<FormView> children)
     {
         this.children = children;
@@ -90,7 +101,7 @@ public class FormView<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         StringBuilder sb = new StringBuilder();
         for (String name : names) {
-            if(name != null) {
+            if (name != null) {
                 if (sb.toString().isEmpty()) {
                     sb.append(name);
                 } else {

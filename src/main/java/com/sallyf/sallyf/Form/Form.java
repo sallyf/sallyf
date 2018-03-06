@@ -38,12 +38,12 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         this.errorsBag = new ErrorsBag();
     }
 
-    public LinkedHashSet<Form> getChildren()
+    public LinkedHashSet<Form> getChild()
     {
         return children;
     }
 
-    public Form getChildren(String name)
+    public Form getChild(String name)
     {
         for (Form child : children) {
             if (child.getName().equals(name)) {
@@ -176,7 +176,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         LinkedHashSet<FormView> childrenFormViews = new LinkedHashSet<>();
 
-        getChildren().forEach(childForm -> childrenFormViews.add(childForm.createView(formView)));
+        getChild().forEach(childForm -> childrenFormViews.add(childForm.createView(formView)));
 
         formView.setChildren(childrenFormViews);
 
@@ -191,7 +191,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         setSubmitted(true);
 
-        getChildren().forEach(childForm -> childForm.submit(request));
+        getChild().forEach(childForm -> childForm.submit(request));
     }
 
     public void handleRequest()
@@ -222,7 +222,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
             }
         }
 
-        for (Form child : getChildren()) {
+        for (Form child : getChild()) {
             child.validate();
         }
     }
@@ -233,7 +233,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
             Map<String, Object> mapData = (Map<String, Object>) data;
 
             mapData.keySet().forEach(name -> {
-                Form<?, ?, Object> child = getChildren(name);
+                Form<?, ?, Object> child = getChild(name);
 
                 if (child != null) {
                     child.setData(mapData.get(name));
@@ -252,7 +252,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
     public boolean isValid()
     {
         Supplier<Boolean> s = () -> {
-            for (Form child : getChildren()) {
+            for (Form child : getChild()) {
                 if (!child.isValid()) {
                     return false;
                 }
