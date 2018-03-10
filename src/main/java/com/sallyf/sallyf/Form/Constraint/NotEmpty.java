@@ -20,7 +20,7 @@ public class NotEmpty extends AbstractConstraint
     @Override
     public void validate(Form<?, ?, ?> form, ErrorsBag errorsBag)
     {
-        Object value = form.resolveData();
+        Object value = form.getModelData();
 
         if(value == null) {
             errorsBag.addError(new ValidationError(getMessage(value, form)));

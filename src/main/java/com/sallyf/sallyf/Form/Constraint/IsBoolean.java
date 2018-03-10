@@ -13,7 +13,7 @@ public class IsBoolean extends Is
     {
         super(
                 (form) -> {
-                    Object value = form.resolveData();
+                    Object value = form.getModelData();
 
                     if (value instanceof Boolean) {
                         boolean booleanValue = (Boolean) value;

@@ -26,7 +26,7 @@ public class Is extends AbstractConstraint
     public void validate(Form<?, ?, ?> form, ErrorsBag errorsBag)
     {
         if (!predicate.test(form)) {
-            errorsBag.addError(new ValidationError(getMessage(form.resolveData(), form)));
+            errorsBag.addError(new ValidationError(getMessage(form.getModelData(), form)));
         }
     }
 }

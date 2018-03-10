@@ -7,8 +7,10 @@ import com.sallyf.sallyf.Server.RuntimeBagContext;
 import com.sallyf.sallyf.Utils.MapUtils;
 import org.eclipse.jetty.server.Request;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 {
@@ -24,7 +26,9 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
     private ErrorsBag errorsBag;
 
-    private ND data;
+    private ND normData;
+
+    private Object modelData;
 
     private boolean submitted = false;
 
@@ -52,6 +56,14 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         }
 
         return null;
+    }
+
+    public Set<Form> getMappedChildren()
+    {
+        return getChildren()
+                .stream()
+                .filter(child -> child.getOptions().isMapped())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public void setChildren(LinkedHashSet<Form> children)
@@ -106,28 +118,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
     public String getFullName()
     {
-        List<String> names = new ArrayList<>();
-
-        Form current = this;
-
-        while (null != current) {
-            names.add(0, current.getName());
-
-            current = current.getParent();
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (String name : names) {
-            if (name != null) {
-                if (sb.toString().isEmpty()) {
-                    sb.append(name);
-                } else {
-                    sb.append(String.format("[%s]", name));
-                }
-            }
-        }
-
-        return sb.toString();
+        return getBuilder().getFullName();
     }
 
     public T getFormType()
@@ -135,9 +126,9 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         return getBuilder().getFormType();
     }
 
-    public ND getData()
+    public ND getNormData()
     {
-        return data;
+        return normData;
     }
 
     public Form getRoot()
@@ -155,9 +146,9 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
         }
     }
 
-    public void setData(ND data)
+    public void setNormData(ND normData)
     {
-        this.data = data;
+        this.normData = normData;
     }
 
     private <PT extends FormTypeInterface<PO, PD>, PO extends Options, PD> FormView<T, O, ND> createView(FormView<PT, PO, PD> parentView)
@@ -168,7 +159,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         FormView<T, O, ND> formView = new FormView<>(getName(), this, parentView, resolvedVars);
 
-        formView.setData(getData());
+        formView.setData(getNormData());
 
         getFormType().buildView(formView);
 
@@ -185,13 +176,13 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
     public void submit(Request request)
     {
-        ND normalizedData = getFormType().requestToNorm(this, request);
-
-        setData(normalizedData);
-
-        setSubmitted(true);
+        setNormData(getFormType().requestToNorm(this, request));
 
         getChildren().forEach(childForm -> childForm.submit(request));
+
+        setModelData(getFormType().normToModel(this, getFormType().resolveData(this)));
+
+        setSubmitted(true);
     }
 
     public void handleRequest()
@@ -218,35 +209,13 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
             try {
                 constraint.validate(this, errorsBag);
             } catch (UnableToValidateException e) {
-                errorsBag.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", resolveData(), constraint)));
+                errorsBag.addError(new ValidationError(String.format("Unable to validate %s for constraint %s", getModelData(), constraint)));
             }
         }
 
         for (Form child : getChildren()) {
             child.validate();
         }
-    }
-
-    public void propagateChildData()
-    {
-        if (data instanceof Map) {
-            Map<String, Object> mapData = (Map<String, Object>) data;
-
-            mapData.keySet().forEach(name -> {
-                Form<?, ?, Object> child = getChild(name);
-
-                if (child != null) {
-                    child.setData(mapData.get(name));
-
-                    child.propagateChildData();
-                }
-            });
-        }
-    }
-
-    public Object resolveData()
-    {
-        return getFormType().resolveData(this);
     }
 
     public boolean isValid()
@@ -267,5 +236,15 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
     public Set<ValidationError> getErrors()
     {
         return getErrorsBag().getErrors();
+    }
+
+    public Object getModelData()
+    {
+        return modelData;
+    }
+
+    public void setModelData(Object modelData)
+    {
+        this.modelData = modelData;
     }
 }

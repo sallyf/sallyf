@@ -13,8 +13,11 @@ public class Options extends HashMap<String, Object>
 
     public static final String LABEL_KEY = "label";
 
+    public static final String MAPPED_KEY = "mapped";
+
     public Options()
     {
+        super();
         initialize();
     }
 
@@ -26,7 +29,8 @@ public class Options extends HashMap<String, Object>
 
     public void initialize()
     {
-        put(ATTRIBUTES_KEY, new HashMap<String, Object>());
+        setAttributes(new HashMap<>());
+        setMapped(true);
         put(CONSTRAINTS_KEY, new ArrayList<ConstraintInterface>());
     }
 
@@ -48,6 +52,16 @@ public class Options extends HashMap<String, Object>
     public void setLabel(String label)
     {
         put(LABEL_KEY, label);
+    }
+
+    public void setMapped(boolean mapped)
+    {
+        put(MAPPED_KEY, mapped);
+    }
+
+    public boolean isMapped()
+    {
+        return (Boolean) get(MAPPED_KEY);
     }
 
     public List<ConstraintInterface> getConstraints()

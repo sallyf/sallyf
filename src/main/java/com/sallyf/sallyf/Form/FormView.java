@@ -1,8 +1,6 @@
 package com.sallyf.sallyf.Form;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 public class FormView<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 {
@@ -89,27 +87,6 @@ public class FormView<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
     public String getFullName()
     {
-        List<String> names = new ArrayList<>();
-
-        FormView current = this;
-
-        while (null != current) {
-            names.add(0, current.getName());
-
-            current = current.getParent();
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (String name : names) {
-            if (name != null) {
-                if (sb.toString().isEmpty()) {
-                    sb.append(name);
-                } else {
-                    sb.append(String.format("[%s]", name));
-                }
-            }
-        }
-
-        return sb.toString();
+        return getForm().getFullName();
     }
 }

@@ -34,7 +34,7 @@ public class TestController extends BaseController
         form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
-            return form.resolveData().toString();
+            return form.getModelData().toString();
         }
 
         return formManager.render(form.createView());
@@ -57,7 +57,7 @@ public class TestController extends BaseController
         form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
-            return form.resolveData().toString();
+            return form.getModelData().toString();
         }
 
         return formManager.render(form.createView());
@@ -79,7 +79,7 @@ public class TestController extends BaseController
         form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
-            return form.resolveData().toString();
+            return form.getModelData().toString();
         }
 
         return formManager.render(form.createView());
@@ -106,7 +106,7 @@ public class TestController extends BaseController
         form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
-            return form.resolveData().toString();
+            return form.getModelData().toString();
         }
 
         return formManager.render(form.createView());
@@ -127,7 +127,7 @@ public class TestController extends BaseController
         form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
-            return form.resolveData().toString();
+            return form.getModelData().toString();
         }
 
         return formManager.render(form.createView());
@@ -194,7 +194,7 @@ public class TestController extends BaseController
         form.handleRequest();
 
         if (form.isSubmitted() && form.isValid()) {
-            return form.resolveData().toString();
+            return form.getModelData().toString();
         }
 
         return formManager.render(form.createView());
