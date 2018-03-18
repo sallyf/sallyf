@@ -199,4 +199,26 @@ public class TestController extends BaseController
 
         return formManager.render(form.createView());
     }
+
+    @Route(path = "/object-model", methods = {Method.GET, Method.POST})
+    public Object objectModel(Request request, FormManager formManager)
+    {
+        User user = new User();
+        user.setName("foo");
+
+        Form<FormType, FormType.FormOptions, Object> form = this.createFormBuilder(user)
+                .add("name", TextType.class)
+                .add("submit", SubmitType.class, (options) -> {
+                    options.setMapped(false);
+                })
+                .getForm();
+
+        form.handleRequest();
+
+        if (form.isSubmitted() && form.isValid()) {
+            return form.getModelData().toString();
+        }
+
+        return formManager.render(form.createView());
+    }
 }

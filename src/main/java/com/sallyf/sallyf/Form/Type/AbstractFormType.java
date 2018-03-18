@@ -53,9 +53,11 @@ public abstract class AbstractFormType<O extends Options, ND> implements FormTyp
             ((Map<String, ?>) normData).forEach((name, value) -> {
                 Form child = form.getChild(name);
 
-                Object childData = child.getFormType().normToModel(child, PropertyAccessor.get(form.getModelData(), name));
+                if(child.getOptions().isMapped()) {
+                    Object childData = child.getFormType().normToModel(child, PropertyAccessor.get(form.getModelData(), name));
 
-                PropertyAccessor.set(form.getModelData(), child.getName(), childData);
+                    PropertyAccessor.set(form.getModelData(), child.getName(), childData);
+                }
             });
         }
 
@@ -72,7 +74,7 @@ public abstract class AbstractFormType<O extends Options, ND> implements FormTyp
     @Override
     public <T extends FormTypeInterface<O, ND>> Object resolveData(Form<T, O, ND> form)
     {
-        return form.getNormData();
+        return form.getModelData();
     }
 
     public <T extends FormTypeInterface<?, ?>> Object childrenDataResolver(Form<T, ?, ?> form)

@@ -184,7 +184,7 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
                 return null;
             }
         } else {
-            return form.getNormData();
+            return form.getModelData();
         }
     }
 

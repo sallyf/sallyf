@@ -180,7 +180,7 @@ public class Form<T extends FormTypeInterface<O, ND>, O extends Options, ND>
 
         getChildren().forEach(childForm -> childForm.submit(request));
 
-        setModelData(getFormType().normToModel(this, getFormType().resolveData(this)));
+        setModelData(getFormType().normToModel(this, getNormData()));
 
         setSubmitted(true);
     }

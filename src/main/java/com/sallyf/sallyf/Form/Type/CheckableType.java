@@ -48,6 +48,6 @@ public abstract class CheckableType extends InputType<Boolean>
     @Override
     public <T extends FormTypeInterface<Options, Boolean>> Object resolveData(Form<T, Options, Boolean> form)
     {
-        return form.getNormData();
+        return form.getModelData();
     }
 }
