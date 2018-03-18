@@ -5,9 +5,6 @@ import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 public class FormType extends AbstractFormType<FormType.FormOptions, Object>
 {
     public class FormOptions extends Options
@@ -57,12 +54,6 @@ public class FormType extends AbstractFormType<FormType.FormOptions, Object>
     @Override
     public <T extends FormTypeInterface<FormOptions, Object>> Object resolveData(Form<T, FormOptions, Object> form)
     {
-        Map<String, Object> out = new LinkedHashMap<>();
-
-        for (Form child : form.getChildren()) {
-            out.put(child.getName(), child.resolveData());
-        }
-
-        return out;
+        return childrenDataResolver(form);
     }
 }

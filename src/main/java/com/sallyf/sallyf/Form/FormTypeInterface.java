@@ -11,6 +11,10 @@ public interface FormTypeInterface<O extends Options, ND>
 
     ND requestToNorm(Form<?, O, ND> form, Request request);
 
+    ND modelToNorm(Form<?, O, ND> form, Object object);
+
+    Object normToModel(Form<?, O, ND> form, Object object);
+
     default void buildView(FormView<?, O, ND> formView)
     {
 
@@ -30,6 +34,7 @@ public interface FormTypeInterface<O extends Options, ND>
     {
 
     }
+
 
     <T extends FormTypeInterface<O, ND>> Object resolveData(Form<T, O, ND> form);
 }

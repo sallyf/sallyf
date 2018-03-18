@@ -176,4 +176,25 @@ public class FormRequestTest extends BaseFrameworkTest
 
         Assert.assertEquals("{select-single=two, select-multiple=[one, three], radios=two, checkboxes=[one, two], submit=submit}", v);
     }
+
+    @Test
+    public void testObjectModel() throws Exception
+    {
+        WebClient webClient = new WebClient();
+
+        HtmlPage page1 = webClient.getPage(getRootURL() + "/object-model");
+
+        HtmlForm form = page1.getForms().get(0);
+
+        HtmlTextInput textField = form.getInputByName("name");
+        textField.setValueAttribute("bar");
+
+        HtmlSubmitInput button = form.getInputByName("submit");
+
+        HtmlPage page2 = button.click();
+
+        String v = page2.getBody().getTextContent();
+
+        Assert.assertEquals("{foo=bar, bar=bar 1, submit=Hello !}", v);
+    }
 }

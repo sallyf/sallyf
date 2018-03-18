@@ -4,8 +4,10 @@ import com.sallyf.sallyf.Form.Form;
 import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
+import org.eclipse.jetty.server.Request;
 
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class CheckableType extends InputType<Boolean>
 {
@@ -20,8 +22,8 @@ public abstract class CheckableType extends InputType<Boolean>
     {
         super.buildForm(form);
 
-        if (form.getData() == null) {
-            form.setData(false);
+        if (form.getNormData() == null) {
+            form.setNormData(false);
         }
     }
 
@@ -38,8 +40,14 @@ public abstract class CheckableType extends InputType<Boolean>
     }
 
     @Override
+    public Boolean requestToNorm(Form<?, Options, Boolean> form, Request request)
+    {
+        return super.requestToNorm(form, request) != null;
+    }
+
+    @Override
     public <T extends FormTypeInterface<Options, Boolean>> Object resolveData(Form<T, Options, Boolean> form)
     {
-        return super.resolveData(form) != null;
+        return form.getModelData();
     }
 }

@@ -25,7 +25,7 @@ public class FormBuilder<T extends FormTypeInterface<O, ND>, O extends Options, 
 
     private O options;
 
-    private ND data;
+    private Object data;
 
     public FormBuilder(Container container, String name, Class<T> formTypeClass, FormBuilder parent)
     {
@@ -84,7 +84,7 @@ public class FormBuilder<T extends FormTypeInterface<O, ND>, O extends Options, 
         return children;
     }
 
-    public FormBuilder getChildren(String name)
+    public FormBuilder getChild(String name)
     {
         for (FormBuilder child : children) {
             if (child.getName().equals(name)) {
@@ -148,35 +148,51 @@ public class FormBuilder<T extends FormTypeInterface<O, ND>, O extends Options, 
 
     private <PT extends FormTypeInterface<PO, PD>, PO extends Options, PD> Form<T, O, ND> getForm(Form<PT, PO, PD> parentForm)
     {
+        propagateChildData();
+
         O resolvedOptions = getFormType().createOptions();
 
         MapUtils.deepMerge(resolvedOptions, getOptions());
 
-//        getFormType().configureOptions(this, resolvedOptions);
-
         Form<T, O, ND> form = new Form<>(getName(), this, parentForm, resolvedOptions);
 
-        form.setData(getData());
+        form.setModelData(getData());
+        form.setNormData(getFormType().modelToNorm(form, getData()));
 
         getFormType().buildForm(form);
 
-        LinkedHashSet<Form> childrenForms = new LinkedHashSet<>();
-
-        getChildren().forEach(childrenFormBuilder -> childrenForms.add(childrenFormBuilder.getForm(form)));
-
-        form.setChildren(childrenForms);
-
-        form.propagateChildData();
+        LinkedHashSet<Form> children = new LinkedHashSet<>();
+        getChildren().forEach(childBuilder -> {
+            children.add(childBuilder.getForm(form));
+        });
+        form.setChildren(children);
 
         return form;
     }
 
-    public void setData(ND data)
+    public void propagateChildData()
+    {
+        if (getData() instanceof Map) {
+            Map<String, Object> mapData = (Map<String, Object>) getData();
+
+            mapData.keySet().forEach(name -> {
+                FormBuilder child = getChild(name);
+
+                if (child != null) {
+                    child.setData(mapData.get(name));
+
+                    child.propagateChildData();
+                }
+            });
+        }
+    }
+
+    public void setData(Object data)
     {
         this.data = data;
     }
 
-    public ND getData()
+    public Object getData()
     {
         return data;
     }

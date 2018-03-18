@@ -3,7 +3,9 @@ package com.sallyf.sallyf.Form.Type;
 import com.sallyf.sallyf.Form.*;
 import org.eclipse.jetty.server.Request;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -150,7 +152,7 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
 
                     options.getChoiceOptionsConsumer().apply(childOptions);
 
-                    childBuilder.setData(choice.equals(form.getData()));
+                    childBuilder.setData(choice.equals(form.getNormData()));
                 });
             }
         }
@@ -168,13 +170,13 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
             if (isMultiple) {
                 return form.getChildren()
                         .stream()
-                        .filter(child -> Boolean.valueOf(String.valueOf(child.resolveData())))
+                        .filter(child -> Boolean.valueOf(String.valueOf(child.getModelData())))
                         .map(child -> child.getOptions().get("choice"))
                         .collect(Collectors.toList());
             } else {
                 for (Form child : form.getChildren()) {
                     Object choice = child.getOptions().get("choice");
-                    if (Boolean.valueOf(String.valueOf(child.resolveData()))) {
+                    if (Boolean.valueOf(String.valueOf(child.getModelData()))) {
                         return choice;
                     }
                 }
@@ -182,7 +184,7 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
                 return null;
             }
         } else {
-            return form.getData();
+            return form.getModelData();
         }
     }
 
@@ -196,11 +198,7 @@ public class ChoiceType extends AbstractFormType<ChoiceType.ChoiceOptions, Objec
         boolean isMultiple = options.isMultiple();
 
         if (isMultiple) {
-            Map<String, String[]> requestData = request.getParameterMap();
-
-            List<String> values = Arrays.asList(requestData.getOrDefault(form.getFullName(), new String[0]));
-
-            return values.stream().map(valuesChoices::get).collect(Collectors.toList());
+            return getRequestFieldData(form, request).stream().map(valuesChoices::get).collect(Collectors.toList());
         } else {
             return valuesChoices.get(super.requestToNorm(form, request));
         }

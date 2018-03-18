@@ -30,6 +30,8 @@ public class FrameworkServer extends Server implements ServiceInterface
     {
         super(configuration.getPort());
 
+        setStopTimeout(Long.MAX_VALUE);
+
         this.container = container;
 
         // Specify the Session ID Manager
