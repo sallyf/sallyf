@@ -37,7 +37,7 @@ public class FormTest
 
         Form form = builder
                 .add("foo", TextType.class, (options) -> {
-
+                    options.setDisabled(true);
                 })
                 .add("pass", PasswordType.class, (options) -> {
 
@@ -49,7 +49,7 @@ public class FormTest
 
         String formView = formManager.render(form.createView());
 
-        String expected = "<form method=\"post\"><div class=\"row\"><label>foo</label><input name=\"foo\" type=\"text\" value=\"\"></div><div class=\"row\"><label>pass</label><input name=\"pass\" type=\"password\" value=\"\"></div><div class=\"row\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></div></form>";
+        String expected = "<form method=\"post\"><div class=\"row\"><label>foo</label><input name=\"foo\" disabled=\"disabled\" type=\"text\" value=\"\"></div><div class=\"row\"><label>pass</label><input name=\"pass\" type=\"password\" value=\"\"></div><div class=\"row\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></div></form>";
 
         assertEquals(expected, formView);
     }

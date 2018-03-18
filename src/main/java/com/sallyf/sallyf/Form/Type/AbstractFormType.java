@@ -15,7 +15,13 @@ public abstract class AbstractFormType<O extends Options, ND> implements FormTyp
     @Override
     public void buildView(FormView<?, O, ND> formView)
     {
-        formView.getVars().getAttributes().put("name", formView.getForm().getFullName());
+        O vars = formView.getVars();
+        Map<String, String> attributes = vars.getAttributes();
+        attributes.put("name", formView.getForm().getFullName());
+
+        if (vars.isDisabled()) {
+            attributes.put("disabled", "disabled");
+        }
     }
 
     @Override

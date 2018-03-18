@@ -13,6 +13,8 @@ public class Options extends HashMap<String, Object>
 
     public static final String LABEL_KEY = "label";
 
+    public static final String DISABLED = "disabled";
+
     public Options()
     {
         initialize();
@@ -28,6 +30,7 @@ public class Options extends HashMap<String, Object>
     {
         put(ATTRIBUTES_KEY, new HashMap<String, Object>());
         put(CONSTRAINTS_KEY, new ArrayList<ConstraintInterface>());
+        setDisabled(false);
     }
 
     public Map<String, String> getAttributes()
@@ -53,5 +56,15 @@ public class Options extends HashMap<String, Object>
     public List<ConstraintInterface> getConstraints()
     {
         return (List<ConstraintInterface>) get(CONSTRAINTS_KEY);
+    }
+
+    public boolean isDisabled()
+    {
+        return (boolean) get(DISABLED);
+    }
+
+    public void setDisabled(boolean disabled)
+    {
+        put(DISABLED, disabled);
     }
 }
