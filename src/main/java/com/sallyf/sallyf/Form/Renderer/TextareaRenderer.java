@@ -19,7 +19,10 @@ public class TextareaRenderer extends BaseFormRenderer<TextareaType, Options>
         String s = "";
 
         s += "<textarea " + renderAttributes(formView) + ">";
-        s += formView.getData();
+        Object data = formView.getData();
+        if (data != null) {
+            s += data;
+        }
         s += "</textarea>";
 
         return s;

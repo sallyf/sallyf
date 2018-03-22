@@ -2,10 +2,7 @@ package com.sallyf.sallyf.Form;
 
 import com.sallyf.sallyf.Container.Container;
 import com.sallyf.sallyf.Container.ServiceDefinition;
-import com.sallyf.sallyf.Form.Type.FormType;
-import com.sallyf.sallyf.Form.Type.PasswordType;
-import com.sallyf.sallyf.Form.Type.SubmitType;
-import com.sallyf.sallyf.Form.Type.TextType;
+import com.sallyf.sallyf.Form.Type.*;
 import com.sallyf.sallyf.Utils.MapUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +39,9 @@ public class FormTest
                 .add("pass", PasswordType.class, (options) -> {
 
                 })
+                .add("textarea", TextareaType.class, (options) -> {
+
+                })
                 .add("submit", SubmitType.class, (options) -> {
 
                 })
@@ -49,7 +49,7 @@ public class FormTest
 
         String formView = formManager.render(form.createView());
 
-        String expected = "<form method=\"post\"><div class=\"row\"><label>foo</label><input name=\"foo\" disabled=\"disabled\" type=\"text\" value=\"\"></div><div class=\"row\"><label>pass</label><input name=\"pass\" type=\"password\" value=\"\"></div><div class=\"row\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></div></form>";
+        String expected = "<form method=\"post\"><div class=\"row\"><label>foo</label><input name=\"foo\" disabled=\"disabled\" type=\"text\" value=\"\"></div><div class=\"row\"><label>pass</label><input name=\"pass\" type=\"password\" value=\"\"></div><div class=\"row\"><label>textarea</label><textarea name=\"textarea\"></textarea></div><div class=\"row\"><input name=\"submit\" type=\"submit\" value=\"Hello !\"></div></form>";
 
         assertEquals(expected, formView);
     }

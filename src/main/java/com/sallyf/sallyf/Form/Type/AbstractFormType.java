@@ -4,7 +4,6 @@ import com.sallyf.sallyf.Form.Form;
 import com.sallyf.sallyf.Form.FormTypeInterface;
 import com.sallyf.sallyf.Form.FormView;
 import com.sallyf.sallyf.Form.Options;
-import com.sallyf.sallyf.Utils.DataUtils;
 import org.eclipse.jetty.server.Request;
 
 import java.util.Arrays;
@@ -18,7 +17,7 @@ public abstract class AbstractFormType<O extends Options, ND> implements FormTyp
     {
         O vars = formView.getVars();
         Map<String, String> attributes = vars.getAttributes();
-        attributes.put("name", DataUtils.fallback(formView.getForm().getFullName(), ""));
+        attributes.put("name", formView.getForm().getFullName());
 
         if (vars.isDisabled()) {
             attributes.put("disabled", "disabled");
