@@ -13,6 +13,7 @@ import com.sallyf.sallyf.Server.RuntimeStorage;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class FlashManager implements ServiceInterface
@@ -105,7 +106,7 @@ public class FlashManager implements ServiceInterface
         Set<FlashEntry<?>> flashes = storage.get(key);
 
         if (null == flashes) {
-            flashes = new HashSet<>();
+            flashes = new LinkedHashSet<>();
             storage.put(key, flashes);
         }
 
