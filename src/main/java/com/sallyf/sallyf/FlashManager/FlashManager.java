@@ -80,7 +80,7 @@ public class FlashManager implements ServiceInterface
         Set<FlashEntry<?>> flashes = (Set<FlashEntry<?>>) session.getAttribute(SESSION_FLASHES_KEY);
 
         if (null == flashes) {
-            flashes = new HashSet<>();
+            flashes = new LinkedHashSet<>();
             session.setAttribute(SESSION_FLASHES_KEY, flashes);
         }
 
